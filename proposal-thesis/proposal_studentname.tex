@@ -2,10 +2,10 @@
 % !TeX TS-program = xelatex
 % !TeX TXS-program:bibliography = txs:///biber
 % English Proposal:
-\documentclass{rwureport}
+%\documentclass{rwureport}
 
 % Deutsches Proposal:
-%\documentclass[ngerman]{rwureport}
+\documentclass[ngerman]{rwureport}
 
 \usepackage{hyperref}
 \usepackage[style=ieee,hyperref,natbib,backend=biber]{biblatex}
@@ -33,15 +33,15 @@
 % Front- and backmatter
 % 
 % Title of the proposal
-\title{\IfLanguageName{ngerman}{Titel der Arbeit}{Title of the Thesis}}
+\title{\IfLanguageName{ngerman}{Evaluation von Prompt-Engineering-Techniken für LLM-as-a-Judge-Systeme: Second-Level Judging und Dynamic Prompting}{Title of the Thesis}}
 % Bachelor or Master?
 \subtitle{\IfLanguageName{ngerman}{%
-        (Bachelor-/Masterarbeits-)%
+        Semesterprojekt-%
         }{%
         Bachelor/Master Thesis }Proposal%
     }
 % First and last name
-\author{\iflanguage{ngerman}{Vorname Nachname}{Firstname Lastname}}
+\author{\iflanguage{ngerman}{Esmo, Tatiana Malkina}{Firstname Lastname}}
 \date{\today}
 
 \bibliography{references}
@@ -59,11 +59,16 @@
     {Thesis Area}}
 \label{sub:introduction}
 \iflanguage{ngerman}
-{\hint{(diese Seite)}{
-    Vom allgemeinen Forschungsgebiet (z.B. Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments) in dem die Arbeit eingeordnet ist, einleiten. Charakteristika und Anwendungsgebiete des Forschungsgebiets aufzeigen und, wo sinnvoll, einführende Literatur zitieren. 
+{\hint{}{
+    Große Sprachmodelle (Large Language Models, LLMs) haben sich in den letzten Jahren zu einer zentralen Technologie der künstlichen Intelligenz entwickelt. Mit ihrer zunehmenden Verbreitung wächst auch der Bedarf an zuverlässigen Bewertungsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig, jedoch zeit- und kostenintensiv sind \cite{gu2026survey}.
     
-    Darauf aufbauend das spezielle Themengebiet der Arbeit (z.B. Kommunikationsprotokolle, Sicherheit, Privacy, Missbrauchserkennung) in das Forschungsgebiet einordnen und offene Fragestellungen daraus aufzeigen. 
-    Hier sollen auch mögliche Anforderungen und Ziele für das Ergebnis der eigenen Arbeit diskutiert werden (z.B. notwendige Effizienz)
+    Ein bedeutender Forschungsbereich ist daher \textbf{LLM-as-a-Judge}, bei dem Sprachmodelle automatisch die Antworten anderer Modelle bewerten oder Systeme miteinander vergleichen. Solche Ansätze werden zunehmend für Benchmarking, Qualitätskontrolle und automatisierte Modellvergleiche genutzt. Die Qualität dieser Bewertungen hängt jedoch nicht nur vom eingesetzten Modell, sondern auch stark vom Prompt-Design ab \cite{zheng2023judging,biskupski2026evaluating}.
+    
+    Ein aktueller Ansatz ist das \textbf{Second-Level Judging}, bei dem ein zweites Judge-Modell die Entscheidung und Begründung eines ersten Judges überprüft, um Fehler zu erkennen und die Zuverlässigkeit zu erhöhen. Erste Arbeiten berichten Verbesserungen durch diesen zweistufigen Prozess, insbesondere bei der Reduktion fehlerhafter Urteile \cite{russinovich2025crescendo}. Neuere Studien zeigen jedoch widersprüchliche Ergebnisse und kommen zu dem Schluss, dass Second-Level Judges die Gesamtleistung in vielen Fällen sogar verschlechtern können \cite{biskupski2026evaluating}.
+    
+    Gleichzeitig zeigt Forschung in anderen Bereichen, etwa bei der automatisierten Codefehlererkennung, dass \textbf{Dynamic Prompting} die Leistung von Sprachmodellen deutlich verbessern kann \cite{huynh2025dynamic}. Ob sich dieser Ansatz auf LLM-as-a-Judge-Systeme übertragen lässt, wurde bislang kaum untersucht.
+    
+    Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}. Darüber hinaus soll untersucht werden, welche Sprachmodelle sich unter Qualitäts-, Robustheits- und Effizienzgesichtspunkten besonders für den Einsatz als Judge eignen.
 }}
 {\hint{(this page)}{
     Start with a general description of the research field (for example, Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments), discussing characteristics and applications, including some introductory literature as appropriate.
