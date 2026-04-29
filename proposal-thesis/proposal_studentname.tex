@@ -85,7 +85,18 @@
 \label{sub:motivation}
 
 \iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Basierend auf \autoref{sub:introduction} beschreiben was die Beschäftigung mit dem Thema praktisch oder akademisch relevant macht. Die Argumentation führt dann zur konkreten Fragestellung der Arbeit, die in \autoref{sec:problem_statement} vorgestellt wird.}}
+{\hint{}{
+		Mit dem wachsenden Einsatz großer Sprachmodelle in produktiven Anwendungen steigt die Bedeutung zuverlässiger Evaluationsverfahren deutlich. Unzuverlässige Bewertungen können zu Fehlentscheidungen bei der Modellauswahl, Qualitätsverlusten sowie unnötigem Ressourcenverbrauch führen. Für reale Einsatzszenarien werden daher Verfahren benötigt, die verlässliche Ergebnisse bei vertretbarem Aufwand liefern.
+		
+		Vor diesem Hintergrund gewinnen \textbf{LLM-as-a-Judge}-Systeme in Forschung und Praxis zunehmend an Bedeutung. Sie ermöglichen skalierbare Bewertungen in Bereichen wie Benchmarking, Qualitätskontrolle und automatisierten Modellvergleichen. Für ihren produktiven Einsatz ist jedoch entscheidend, dass ihre Urteile konsistent, nachvollziehbar und robust sind.
+		
+		Aktuelle Studien zeigen, dass die Qualität automatischer Bewertungen stark von Faktoren wie Prompt-Formulierung, Modellwahl und Aufgabenart abhängt. Dadurch besteht weiterhin Unsicherheit darüber, unter welchen Bedingungen solche Systeme menschliche Evaluation sinnvoll ergänzen oder ersetzen können \cite{zheng2023judging,biskupski2026evaluating}.
+		
+		Besondere wissenschaftliche Relevanz ergibt sich aus offenen Widersprüchen in der aktuellen Forschung. So erscheint es naheliegend, dass ein zusätzlicher zweiter Judge im Rahmen des \textbf{Second-Level Judging} die Bewertungsqualität verbessert. Erste Untersuchungen zeigen jedoch, dass diese erwartete Verbesserung empirisch nicht konsistent bestätigt werden konnte\cite{biskupski2026evaluating}. Die Ursachen dieser widersprüchlichen Ergebnisse sind bislang nicht ausreichend geklärt.
+		
+		Gleichzeitig deuten Ergebnisse aus anderen Anwendungsbereichen darauf hin, dass adaptive Prompting-Strategien die Leistungsfähigkeit komplexer Systeme steigern können\cite{huynh2025dynamic}. Ob sich dieser Effekt auch auf automatisierte Bewertungsverfahren übertragen lässt, ist bislang weitgehend offen. Darüber hinaus stellt sich aus praktischer Sicht die Frage, ob durch geeignetes Prompting auch kleinere und kostengünstigere Modelle vergleichbare Leistungen erzielen können.
+		
+		Daraus ergibt sich die Motivation dieser Arbeit: Durch einen systematischen Vergleich verschiedener Modelle und Prompting-Strategien, insbesondere \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}, sollen fundierte Aussagen über Qualität, Effizienz und Einsatzpotenziale moderner LLM-basierter Bewertungssysteme ermöglicht werden.}}
 {\hint{(half a page)}{Based on \autoref{sub:introduction}, describe what makes the topic worthwhile from a practical or academic point of view. The reasoning leads to the concrete problem statement in \autoref{sec:problem_statement}.}}
 
 \dots
