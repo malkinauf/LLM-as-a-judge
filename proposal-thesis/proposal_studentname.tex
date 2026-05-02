@@ -111,9 +111,11 @@
 \iflanguage{ngerman}
 {\hint{}{
    Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet. Es wurde gezeigt, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Modelle automatisch zu bewerten und dabei eine hohe Übereinstimmung mit menschlichen Urteilen zu erreichen \cite{zheng2023judging}. Aufbauend auf diesen Ergebnissen wurden Ansätze entwickelt, die durch strukturierte Prompt-Strategien eine bessere Ausrichtung an menschlichen Bewertungen anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion beschrieben \cite{gu2026survey}:
+  
    \begin{equation}
    	\mathrm{Score} = f(\mathrm{model}, \mathrm{prompt}, \mathrm{task}, \mathrm{context})
    \end{equation}
+   
    Die Bewertungsqualität hängt dabei wesentlich vom Modell, dem Prompt, der Aufgabe und dem Kontext ab und ist entsprechend sensitiv gegenüber Änderungen dieser Faktoren.
    
    Parallel dazu werden Methoden untersucht, die die Qualität von Modellantworten durch stärker strukturierte Generationsprozesse verbessern.Da die Qualität der generierten Antworten eine zentrale Grundlage für deren Bewertung darstellt, können solche Ansätze indirekt auch die Leistungsfähigkeit von LLM-basierten Evaluatoren beeinflussen. Ein prominentes Beispiel ist Dynamic Prompting, bei dem zunächst eine Zwischenanalyse erzeugt und anschließend als zusätzlicher Kontext in den Prompt integriert wird. Empirische Ergebnisse zeigen, dass diese Methode die Qualität von Modellantworten signifikant verbessern kann. Ihr Einfluss auf Aufgaben der automatischen Bewertung (LLM-as-a-Judge) ist bislang nur begrenzt untersucht worden \cite{huynh2025dynamic}.
@@ -147,9 +149,19 @@
 \label{sub:focus}
 
 \iflanguage{ngerman}
-{\hint{(0,75 Seiten)}{Auf Basis der Motivation (\autoref{sec:motivation}) und der existierenden Forschung (\ref{sec:state_of_the_art}) soll die Problemstellung der eigenen Arbeit in Prosa beschrieben werden. Dazu sollen die Artefakte, die entstehen sollen (z.B. Konzept, Implementierung, Literaturstudie) sowie die Evaluations-Methodologie beschrieben werden (z.B. formale Analyse, Simulation, Benutzerstudie).
-\subsection{Beitrag der Arbeit}
+{\hint{}{
 
+Im Rahmen dieser Arbeit wird die Zuverlässigkeit automatisierter Bewertungsverfahren auf Basis des Ansatzes \textit{LLM-as-a-Judge} untersucht, mit besonderem Fokus auf mehrstufige Strategien. Bestehende Studien zeigen hierbei widersprüchliche Ergebnisse: Während mehrstufige Verfahren wie \textit{Dynamic Prompting} die Qualität von Analyseaufgaben (z.,B. Codeanalyse und Schwachstellenerkennung) verbessern können, führen ähnliche Ansätze im Kontext der Bewertung nicht immer zu den erwarteten Verbesserungen.
+
+Insbesondere zeigt der Ansatz des \textit{Second-Level Judging}, der eine zusätzliche Überprüfung initialer Bewertungen vorsieht, trotz seiner konzeptionellen Einfachheit häufig instabile oder verschlechterte Ergebnisse. Im Gegensatz dazu erreichen komplexere Methoden wie \textit{Meta-Judging} oftmals eine höhere Übereinstimmung der Bewertungen. Dieses Spannungsfeld stellt ein bislang nicht ausreichend erklärtes Problem in der Literatur dar.
+
+Ziel dieser Arbeit ist die systematische Untersuchung dieser Widersprüche sowie die Identifikation von Bedingungen, unter denen mehrstufige Ansätze die Zuverlässigkeit der Bewertung verbessern oder verschlechtern.
+
+Zur Umsetzung wird eine experimentelle Pipeline für binäre Klassifikationsaufgaben entwickelt, die den Vergleich verschiedener Konfigurationen des Bewertungsprozesses ermöglicht. Dabei werden insbesondere der Einfluss von \textit{Second-Level Judging} sowie verschiedener Prompting-Strategien, einschließlich \textit{Dynamic Prompting}, auf die Stabilität und Konsistenz der Bewertungen analysiert. Zusätzlich erfolgt ein Vergleich von Modellen unterschiedlicher Leistungsfähigkeit, um den Zusammenhang zwischen Bewertungsqualität und Rechenaufwand zu untersuchen.
+
+Als Datengrundlage dienen etablierte Benchmarks, ergänzt durch einen begrenzten Satz eigener Beispiele. Zur Evaluation werden Klassifikationsmetriken (Precision, Recall, F1-Score), die Übereinstimmungsmetrik (Cohen’s Kappa) sowie Stabilitätsmaße auf Basis der Variabilität über mehrere Durchläufe eingesetzt.
+
+Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten Unterschiede besser zu verstehen und fundierte Empfehlungen für den Einsatz mehrstufiger Bewertungsansätze abzuleiten.
 
 }}
 {\hint{(0.75 pages)}{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}}
@@ -162,17 +174,28 @@
 \label{sub:questions}
 
 \iflanguage{ngerman}
-{\hint{(0,25 Seiten)}{Forschungsfragen beschreiben die gesamte Problemstellung in einer oder wenigen Hauptfragen sowie weiteren Teilfragen und werden zusammen mit dem Betreuer erarbeitet. Forschungsfragen sind als W-Fragen (Wie, Warum, Was, Weshalb, \dots) formuliert und lassen sich in Typen unterteilen.\footnote{\url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es}}
-        %
-        \begin{description}
-            \item[Erklärung:] Warum ist etwas so wie es ist?
-            \item[Beschreibung:] Wie sieht der jeweilige Sachverhalt aus?
-            \item[Prognose:] Wie wird sich etwas entwickeln?
-            \item[Bewertung:] Wie ist das Beschriebene/Erklärte zu bewerten?
-            \item[Gestaltung:] Was muss getan werden, um ein Ziel zu erreichen?
-        \end{description}
-        
-        Die Fragen sollen so formuliert sein, dass sie im Rahmen der Arbeit beantwortet werden können und die gesamte Problemstellung umfassen.
+{\hint{}{\section{Forschungsfragen}
+		
+		\textbf{Hauptfrage:}
+	
+	Wie beeinflussen mehrstufige Bewertungsansätze wie Second-Level Judging und Dynamic Prompting die Qualität, Stabilität und Effizienz von LLM-basierten Bewertungssystemen im Vergleich zu einem einstufigen Baseline-Ansatz?
+	
+	\vspace{0.5em}
+	
+	\textbf{Teilfragen}
+	
+	\begin{enumerate}
+		\item Wie verhält sich \textit{Second-Level Judging} im Vergleich zu \textit{Dynamic Prompting} sowie zu einem einstufigen Baseline-Ansatz (\textit{Single-Prompt Baseline}) unter vergleichbaren Bedingungen hinsichtlich der Stabilität und Konsistenz der Bewertungsergebnisse?
+		
+		\item In welchem Ausmaß führen mehrstufige Ansätze (insbesondere \textit{Second-Level Judging} und \textit{Dynamic Prompting}) zu einer Verbesserung der Bewertungsqualität im Vergleich zum Baseline-Ansatz?
+		
+		\item Welchen Einfluss haben unterschiedliche Datensätze und Modelltypen auf die Bewertungsqualität von \textit{Second-Level Judging}, \textit{Dynamic Prompting} und dem Baseline-Ansatz?
+		
+		\item Inwiefern beeinflussen Variationen in der Prompt-Formulierung die Bewertungsergebnisse von \textit{Second-Level Judging}?
+		
+		\item Unter welchen Konfigurationen von Modellen, Prompts und mehrstufigen Bewertungsprozessen ergeben sich Verbesserungen oder Verschlechterungen sowohl der Bewertungsergebnisse als auch der Effizienz (insbesondere Kosten und Laufzeit)?
+	\end{enumerate}
+		
     }
 }
 {\hint{(0.25 pages)}{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
@@ -187,29 +210,6 @@
         These questions should be written such that they can be answered within the thesis, and they should fully cover the research problem.
     }
 }
-
-\begin{samepage}
-    \noindent
-    \iflanguage{ngerman}{
-        \textbf{Hauptfrage \dots}
-        %
-        \begin{enumerate}
-            \item Teilfrage
-            \item Teilfrage
-            \item \dots
-        \end{enumerate}
-    }{
-        \textbf{Main question \dots}
-        %
-        \begin{enumerate}
-            \item Partial question
-            \item Partial question
-            \item \dots
-        \end{enumerate}
-    }
-\end{samepage}
-
-
 
 \section{\iflanguage{ngerman}
     {Vorgehensweise}
