@@ -102,7 +102,6 @@
 
 \dots
 
-
 \newpage
 \section{\iflanguage{ngerman}
     {Verwandte Forschung}
@@ -110,13 +109,20 @@
 \label{sec:state_of_the_art}
 
 \iflanguage{ngerman}
-{\hint{(1 Seite)}{
-    Die Idee, Sprachmodelle als Bewertungsinstanz einzusetzen, entstand als Reaktion auf die Grenzen traditioneller automatischer Metriken zur Textqualitätsbewertung. Forschende begannen, leistungsstarke LLMs zur Bewertung von Zusammenfassungen, Faktentreue (factuality), Kohärenz und weiteren Eigenschaften generierter Inhalte einzusetzen \parencite{fu2023gptscore,liu2023geval,min2023factscore}.
-
-    Ziel soll sein, zu zeigen, dass das Problem 
-    (1) allgemein erkannt (es gibt Arbeiten zu ähnlichen Themen),
-    (2) noch nicht gelöst (es gibt keine Arbeit, die genau die selbe Fragestellung bearbeitet),
-    und (3) voraussichtlich lösbar ist (es gibt Lösungen für Teilprobleme, anwendbare Werkzeuge oder Methoden).
+{\hint{}{
+   Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet. Es wurde gezeigt, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Modelle automatisch zu bewerten und dabei eine hohe Übereinstimmung mit menschlichen Urteilen zu erreichen \cite{zheng2023judging}. Aufbauend auf diesen Ergebnissen wurden Ansätze entwickelt, die durch strukturierte Prompt-Strategien eine bessere Ausrichtung an menschlichen Bewertungen anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion beschrieben \cite{gu2026survey}:
+   \begin{equation}
+   	\mathrm{Score} = f(\mathrm{model}, \mathrm{prompt}, \mathrm{task}, \mathrm{context})
+   \end{equation}
+   Die Bewertungsqualität hängt dabei wesentlich vom Modell, dem Prompt, der Aufgabe und dem Kontext ab und ist entsprechend sensitiv gegenüber Änderungen dieser Faktoren.
+   
+   Parallel dazu werden Methoden untersucht, die die Qualität von Modellantworten durch stärker strukturierte Generationsprozesse verbessern.Da die Qualität der generierten Antworten eine zentrale Grundlage für deren Bewertung darstellt, können solche Ansätze indirekt auch die Leistungsfähigkeit von LLM-basierten Evaluatoren beeinflussen. Ein prominentes Beispiel ist Dynamic Prompting, bei dem zunächst eine Zwischenanalyse erzeugt und anschließend als zusätzlicher Kontext in den Prompt integriert wird. Empirische Ergebnisse zeigen, dass diese Methode die Qualität von Modellantworten signifikant verbessern kann. Ihr Einfluss auf Aufgaben der automatischen Bewertung (LLM-as-a-Judge) ist bislang nur begrenzt untersucht worden \cite{huynh2025dynamic}.
+   
+   Daneben existieren mehrstufige Bewertungsverfahren wie Second-Level Judging, bei dem eine erste Bewertung erneut analysiert und gegebenenfalls korrigiert wird. Ziel ist eine höhere Zuverlässigkeit der Bewertung. Empirische Studien zeigen jedoch, dass solche Verfahren keine konsistente Verbesserung garantieren und in bestimmten Modell-Prompt-Konfigurationen sogar zu schlechteren Ergebnissen führen können \cite{biskupski2026evaluating}.
+   
+   Neuere Arbeiten erweitern diese Idee zum Meta-Judging, bei dem Modelle nicht nur Antworten, sondern auch bereits erzeugte Bewertungen analysieren und somit als „Richter der Richter“ fungieren. Diese Ansätze zielen darauf ab, die Konsistenz und Zuverlässigkeit automatisierter Bewertungssysteme zu erhöhen, und zeigen in einzelnen Konfigurationen Leistungsgewinne. Bestehende Studien konzentrieren sich jedoch häufig auf komplexe Setups wie Multi-Agenten-Systeme oder präferenzbasiertes Training, während einfachere, praktisch relevante Varianten wie Second-Level Judging bislang weniger systematisch untersucht wurden \cite{silva2026metajudge}.
+   
+   Insgesamt lässt sich feststellen, dass verschiedene Formen zusätzlicher Analyse – sowohl innerhalb des Reasoning-Prozesses als auch in Form separater Bewertungsschritte – potenziell die Qualität von Entscheidungen beeinflussen, ihr Effekt jedoch nicht eindeutig verstanden ist. Insbesondere bleibt offen, inwieweit die konkrete Ausgestaltung eines solchen „zweiten Levels“ die Zuverlässigkeit von LLM-basierten Evaluatoren bestimmt und unter welchen Bedingungen solche Ansätze tatsächlich zu einer Verbesserung führen. Dies macht eine systematische Untersuchung unterschiedlicher Realisierungen zusätzlicher Analyseebenen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Bewertungsverfahren wie Second-Level Judging – zu einer relevanten Forschungsaufgabe.
 }}
 {\hint{(1 page)}{
     Provide relevant literature~\cite{Test} on the specific topic. The literature selection is discussed beforehand with the supervisor and does not have to cover the topic completely. The literature presented should highlight problems with (or even the lack of) existing solutions for the topic of the thesis, especially those that led to the motivation for the thesis in \autoref{sub:motivation}.
@@ -141,7 +147,11 @@
 \label{sub:focus}
 
 \iflanguage{ngerman}
-{\hint{(0,75 Seiten)}{Auf Basis der Motivation (\autoref{sec:motivation}) und der existierenden Forschung (\ref{sec:state_of_the_art}) soll die Problemstellung der eigenen Arbeit in Prosa beschrieben werden. Dazu sollen die Artefakte, die entstehen sollen (z.B. Konzept, Implementierung, Literaturstudie) sowie die Evaluations-Methodologie beschrieben werden (z.B. formale Analyse, Simulation, Benutzerstudie).}}
+{\hint{(0,75 Seiten)}{Auf Basis der Motivation (\autoref{sec:motivation}) und der existierenden Forschung (\ref{sec:state_of_the_art}) soll die Problemstellung der eigenen Arbeit in Prosa beschrieben werden. Dazu sollen die Artefakte, die entstehen sollen (z.B. Konzept, Implementierung, Literaturstudie) sowie die Evaluations-Methodologie beschrieben werden (z.B. formale Analyse, Simulation, Benutzerstudie).
+\subsection{Beitrag der Arbeit}
+
+
+}}
 {\hint{(0.75 pages)}{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}}
 
 \dots
