@@ -60,13 +60,13 @@
 \label{sub:introduction}
 \iflanguage{ngerman}
 {\hint{}{
-    Große Sprachmodelle (Large Language Models, LLMs) haben sich in den letzten Jahren zu einer zentralen Technologie der künstlichen Intelligenz entwickelt. Mit ihrer zunehmenden Verbreitung wächst auch der Bedarf an zuverlässigen Bewertungsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig, jedoch zeit- und kostenintensiv sind \cite{gu2026survey}.
+  	Large Language Models (LLMs) haben sich zu einer zentralen Technologie entwickelt. Dadurch steigt der Bedarf an skalierbaren Evaluationsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig, jedoch mit erheblichem Zeit- und Kostenaufwand verbunden sind \cite{gu2026survey}.
     
     Ein bedeutender Forschungsbereich ist daher \textbf{LLM-as-a-Judge}, bei dem Sprachmodelle automatisch die Antworten anderer Modelle bewerten oder Systeme miteinander vergleichen. Solche Ansätze werden zunehmend für Benchmarking, Qualitätskontrolle und automatisierte Modellvergleiche genutzt. Die Qualität dieser Bewertungen hängt jedoch nicht nur vom eingesetzten Modell, sondern auch stark vom Prompt-Design ab \cite{zheng2023judging,biskupski2026evaluating}.
     
     Ein aktueller Ansatz ist das \textbf{Second-Level Judging}, bei dem ein zweites Judge-Modell die Entscheidung und Begründung eines ersten Judges überprüft, um Fehler zu erkennen und die Zuverlässigkeit zu erhöhen. Erste Arbeiten berichten Verbesserungen durch diesen zweistufigen Prozess, insbesondere bei der Reduktion fehlerhafter Urteile \cite{russinovich2025crescendo}. Neuere Studien zeigen jedoch widersprüchliche Ergebnisse und kommen zu dem Schluss, dass Second-Level Judges die Gesamtleistung in vielen Fällen sogar verschlechtern können \cite{biskupski2026evaluating}.
     
-    Gleichzeitig zeigt Forschung in anderen Bereichen, etwa bei der automatisierten Codefehlererkennung, dass \textbf{Dynamic Prompting} die Leistung von Sprachmodellen deutlich verbessern kann \cite{huynh2025dynamic}. Ob sich dieser Ansatz auf LLM-as-a-Judge-Systeme übertragen lässt, wurde bislang kaum untersucht.
+    Parallel dazu zeigt Studien in anderen Bereichen, etwa bei der automatisierten Codefehlererkennung, dass \textbf{Dynamic Prompting} die Leistung von Sprachmodellen deutlich verbessern kann \cite{huynh2025dynamic}. Ob sich dieser Ansatz auf LLM-as-a-Judge-Systeme übertragen lässt, wurde bislang kaum untersucht.
     
     Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}. Darüber hinaus soll untersucht werden, welche Sprachmodelle sich unter Qualitäts-, Robustheits- und Effizienzgesichtspunkten besonders für den Einsatz als Judge eignen.
 }}
@@ -124,7 +124,7 @@
    
    Neuere Arbeiten erweitern diese Idee zum Meta-Judging, bei dem Modelle nicht nur Antworten, sondern auch bereits erzeugte Bewertungen analysieren und somit als „Richter der Richter“ fungieren. Diese Ansätze zielen darauf ab, die Konsistenz und Zuverlässigkeit automatisierter Bewertungssysteme zu erhöhen, und zeigen in einzelnen Konfigurationen Leistungsgewinne. Bestehende Studien konzentrieren sich jedoch häufig auf komplexe Setups wie Multi-Agenten-Systeme oder präferenzbasiertes Training, während einfachere, praktisch relevante Varianten wie Second-Level Judging bislang weniger systematisch untersucht wurden \cite{silva2026metajudge}.
    
-   Insgesamt lässt sich feststellen, dass verschiedene Formen zusätzlicher Analyse – sowohl innerhalb des Reasoning-Prozesses als auch in Form separater Bewertungsschritte – potenziell die Qualität von Entscheidungen beeinflussen, ihr Effekt jedoch nicht eindeutig verstanden ist. Insbesondere bleibt offen, inwieweit die konkrete Ausgestaltung eines solchen „zweiten Levels“ die Zuverlässigkeit von LLM-basierten Evaluatoren bestimmt und unter welchen Bedingungen solche Ansätze tatsächlich zu einer Verbesserung führen. Dies macht eine systematische Untersuchung unterschiedlicher Realisierungen zusätzlicher Analyseebenen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Bewertungsverfahren wie Second-Level Judging – zu einer relevanten Forschungsaufgabe.
+  nsgesamt zeigt sich, dass zusätzliche Analyseebenen – sowohl im Reasoning-Prozess als auch durch separate Bewertungsschritte – die Entscheidungsqualität beeinflussen können, ihr Effekt jedoch noch nicht eindeutig verstanden ist. Insbesondere bleibt unklar, unter welchen Bedingungen Second-Level-Ansätze die Zuverlässigkeit von LLM-basierten Evaluatoren tatsächlich verbessern. Dies macht eine systematische Untersuchung unterschiedlicher Realisierungen zusätzlicher Analyseebenen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Bewertungsverfahren wie Second-Level Judging – zu einer relevanten Forschungsaufgabe.
 }}
 {\hint{(1 page)}{
     Provide relevant literature~\cite{Test} on the specific topic. The literature selection is discussed beforehand with the supervisor and does not have to cover the topic completely. The literature presented should highlight problems with (or even the lack of) existing solutions for the topic of the thesis, especially those that led to the motivation for the thesis in \autoref{sub:motivation}.
@@ -174,8 +174,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten U
 \label{sub:questions}
 
 \iflanguage{ngerman}
-{\hint{}{\section{Forschungsfragen}
-		
+{\hint{}{	Zur Beantwortung dieses Ziels ergibt sich die folgende
 		\textbf{Hauptfrage:}
 	
 	Wie beeinflussen mehrstufige Bewertungsansätze wie Second-Level Judging und Dynamic Prompting die Qualität, Stabilität und Effizienz von LLM-basierten Bewertungssystemen im Vergleich zu einem einstufigen Baseline-Ansatz?
@@ -194,8 +193,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten U
 		\item Inwiefern beeinflussen Variationen in der Prompt-Formulierung die Bewertungsergebnisse von \textit{Second-Level Judging}?
 		
 		\item Unter welchen Konfigurationen von Modellen, Prompts und mehrstufigen Bewertungsprozessen ergeben sich Verbesserungen oder Verschlechterungen sowohl der Bewertungsergebnisse als auch der Effizienz (insbesondere Kosten und Laufzeit)?
-	\end{enumerate}
-		
+	\end{enumerate}	
     }
 }
 {\hint{(0.25 pages)}{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
@@ -217,7 +215,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten U
 \label{sec:approach}
 
 \iflanguage{ngerman}
-{\hint{}{\section{Vorgehensweise}
+{\hint{}{
 		
 		Im Rahmen dieser Arbeit wird zunächst eine Literaturrecherche zu bestehenden Ansätzen im Bereich \textit{LLM-as-a-Judge} durchgeführt. Dabei werden insbesondere Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting betrachtet. Ziel ist es, ein grundlegendes Verständnis dieser Methoden zu gewinnen und geeignete Benchmarks auszuwählen.
 		
@@ -227,9 +225,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten U
 		
 		Für die Experimente werden mehrere Sprachmodelle verwendet, darunter frei verfügbare Modelle sowie eine leistungsstärkere Referenz. So kann analysiert werden, welchen Einfluss die Wahl des Modells auf die Ergebnisse hat.
 		
-		Die Bewertung erfolgt anhand verschiedener Metriken. Dazu zählen Accuracy und F1-Score zur Messung der Qualität sowie einfache Kennzahlen zur Stabilität, wie die Abweichung zwischen mehreren Durchläufen. Zusätzlich werden Effizienz (z.\,B. Laufzeit und Anzahl der Aufrufe) sowie der Tokenverbrauch und die daraus entstehenden Kosten betrachtet.
-		
-		Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Ablauf automatisiert. Dabei werden alle wichtigen Informationen wie Prompts, Antworten und Einstellungen gespeichert, sodass die Experimente nachvollzogen und wiederholt werden können.}}
+		Die Bewertung erfolgt anhand verschiedener Metriken. Dazu zählen Accuracy und F1-Score zur Messung der Qualität sowie einfache Kennzahlen zur Stabilität, wie die Abweichung zwischen mehreren Durchläufen. Zusätzlich werden Effizienz (z.\,B. Laufzeit und Anzahl der Aufrufe) sowie der Tokenverbrauch und die daraus entstehenden Kosten betrachtet. Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Ablauf automatisiert. Dabei werden alle wichtigen Informationen wie Prompts, Antworten und Einstellungen gespeichert, sodass die Experimente nachvollzogen und wiederholt werden können.}}
 
 \dots
 
@@ -262,134 +258,152 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten U
 \label{sub:resources}
 
 \iflanguage{ngerman}
-{\hint{(beliebig lang)}{Falls zutreffend, eine Liste von benötigter Hardware, Lizenzen oder anderen besonderen Ressourcen.\\\phantom{.}}}
+{\hint{}{
+		
+		\begin{itemize}
+			\item \textbf{Laptop:} Durchführung der Experimente sowie Datenverarbeitung und Auswertung.
+			
+			\item \textbf{Python und Bibliotheken:} Implementierung der Experimente, Verarbeitung der Daten und Analyse der Ergebnisse.
+			
+			\item \textbf{Zugriff auf Large Language Models (APIs):} Nutzung leistungsstarker Sprachmodelle für die Durchführung der Evaluation; teilweise kostenpflichtig.
+			
+			\item \textbf{Öffentliche Datensätze:} Grundlage für die Durchführung der Benchmark-Experimente.
+			
+			\item \textbf{Eigener Benchmark:} Ergänzende Datensätze zur Untersuchung spezifischer Fragestellungen.
+			
+			\item \textbf{Budget für API-Nutzung:} Abdeckung der Kosten für kostenpflichtige Modellzugriffe.
+		\end{itemize}\\\phantom{.}}}
 {\hint{(arbitrary length)}{If applicable, a list of required hardware, licenses or other resources.}}
 
-\begin{description}
-    \item[\iflanguage{ngerman}{Ressource}{Resource}] \iflanguage{ngerman}{Beschreibung}{Description} \dots
-    \item[\iflanguage{ngerman}{Ressource}{Resource}] \iflanguage{ngerman}{Beschreibung}{Description} \dots
-\end{description}
-
 \clearpage
-\subsection{\iflanguage{ngerman}
-    {Zeitplanung}
-    {Work Packages}}
+\subsection{Zeitplanung}
 \label{sub:wp}
 
-\iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Einteilung der Arbeitspakete. Für die ersten Monate der Arbeit sollten diese auf Wochenebene sein. Der Plan darf gegen Ende grober sein und während der Laufzeit der Arbeit gegebenenfalls angepasst werden. Es sollte jedoch erkennbar sein, dass notwendige Schritte zur Fertigstellung identifiziert und sinnvoll eingeplant wurden. Die Zeitplanung soll konsistent sein mit den Forschungsfragen (\ref{sub:questions}) sowie möglicher Einarbeitungszeit (\ref{sub:background}) und möglichen Wartezeiten auf Ressourcen (\ref{sub:resources}). Zur Darstellung kann beispielsweise ein Gantt Diagramm, wie im folgenden Beispiel, verwendet werden.\\\phantom{.}}}
-{\hint{(0.5 pages)}{General description of the work. For the first months of the thesis, the plan should be on a weekly bases. Later workpackages can be more coarse. The plan may be adapted during the course of the thesis, if required. However, the initial plan must include necessary steps for the completion of the thesis. The time plan should be consistent with the research questions (\ref{sub:questions}) and the necessary background (\ref{sub:background}) and potential wait time for resources (\ref{sub:resources}). The plan may be included as a gantt chart (see following example), or in any other desired form.}}
-
 {
-\definecolor{barblue}{named}{rwu-akzent}
-\definecolor{groupblue}{named}{rwu}
-\definecolor{linkred}{named}{rwu-rot}
-
-\sffamily
-\begin{ganttchart}[
-    canvas/.append style={fill=none, draw=black!5, line width=.75pt},
-    hgrid style/.style={draw=black!5, line width=.75pt},
-    vgrid={*1{draw=black!5, line width=.75pt}},
-    y unit chart=0.6cm,
-    title/.style={draw=none, fill=none},
-    title label font=\bfseries\footnotesize,
-    title label node/.append style={below=7pt},
-    include title in canvas=false,
-    bar label font=\mdseries\scriptsize\color{black!70},
-    bar label node/.append style={left=.6cm},
-    bar/.append style={draw=none, fill=barblue},
-    group/.append style={fill=groupblue},
-    group left shift=0,
-    group right shift=0,
-    group height=.5,
-    group peaks tip position=0,
-    group label node/.append style={left=.2cm},
-    milestone label font=\itshape\scriptsize\color{black!70},
-    milestone label node/.append style={left=.2cm},
-    link/.style={-latex, line width=1.5pt, linkred},
-    link label font=\scriptsize\bfseries,
-    link label node/.append style={below left=-2pt and 0pt}
-    ]{1}{25}
-    \gantttitle[
-    title label node/.append style={below left=7pt and -3pt}
-    ]{weeks:\quad1}{1}
-    \gantttitlelist{2,...,25}{1} \\
-    
-    \ganttgroup[name=tools]{Find usable tools}{1}{3} \\
-    \ganttbar[name=tool-a]{Testing tool A}{1}{1} \\
-    \ganttbar[name=tool-b]{Testing tool B}{2}{2} \\
-    \ganttbar[name=tool-compare]{Tool comparison}{3}{3} \\[grid]
-    
-    \ganttgroup[name=impl]{Implementation}{5}{13} \\
-    \ganttbar[name=impl-a]{Model Behavior}{5}{6} \\
-    \ganttbar[name=impl-b]{Implementing Algorithm}{8}{10} \\
-    \ganttbar[name=impl-c]{Functional Tests}{10}{11} \\
-    \ganttbar[name=impl-d]{Testing Tool A}{12}{12} \\
-    \ganttbar[name=impl-e]{Testing Tool B}{13}{13} \\
-
-    \ganttgroup[name=eval]{Evaluation}{15}{22} \\
-    \ganttbar[name=eval-a]{Define Eval. Strategy}{15}{15} \\
-    \ganttbar[name=eval-b]{Generate Test Cases}{16}{19} \\
-    \ganttbar[name=eval-c]{Prepare Simulation}{19}{19} \\
-    \ganttbar[name=eval-d]{Run Simulations}{20}{22} \\
-    \ganttbar[name=eval-e]{Collect Results}{22}{22} \\
-    
-    \ganttgroup[name=thesis]{Written Thesis}{4}{25} \\
-    \ganttbar[name=thesis-related]{Related Work}{4}{4} \\
-    \ganttbar[name=thesis-method]{Method}{7}{7} \\
-    \ganttbar[name=thesis-impl]{Implementation}{14}{14} \\
-    \ganttmilestone[name=draft]{Draft to supervisor}{14} \\
-    \ganttbar[name=thesis-eval]{Eval}{22}{22} \\
-    \ganttbar[name=thesis-fb]{Intro/Conclusion}{23}{23} \\
-    \ganttbar[name=thesis-rest]{Other Chapters}{24}{24} \\
-    \ganttbar[name=thesis-qual]{Proof Reading}{25}{25} \\
-    \ganttmilestone[name=submit]{Submit thesis}{25 } \\
-    
-    \ganttlink{tool-compare}{thesis-related}
-    \ganttlink{impl-a}{thesis-method}
-    \ganttlink{impl}{thesis-impl}
-    \ganttlink{thesis-impl}{draft}
-    \ganttlink{eval-e}{thesis-eval}
-    \ganttlink{thesis-eval}{thesis-fb}
-    \ganttlink{thesis-fb}{thesis-rest}
-    \ganttlink{thesis-rest}{thesis-qual}
-    \ganttlink{thesis-qual}{submit}
-\end{ganttchart}
+	\definecolor{barblue}{named}{rwu-akzent}
+	\definecolor{groupblue}{named}{rwu}
+	\definecolor{linkred}{named}{rwu-rot}
+	
+	\sffamily
+	
+	\begin{ganttchart}[
+		canvas/.append style={fill=none, draw=black!5, line width=.75pt},
+		hgrid style/.style={draw=black!5, line width=.75pt},
+		vgrid={*1{draw=black!5, line width=.75pt}},
+		y unit chart=0.6cm,
+		title/.style={draw=none, fill=none},
+		title label font=\bfseries\footnotesize,
+		title label node/.append style={below=7pt},
+		include title in canvas=false,
+		bar label font=\mdseries\scriptsize\color{black!70},
+		bar label node/.append style={left=.6cm},
+		bar/.append style={draw=none, fill=barblue},
+		group/.append style={fill=groupblue},
+		group left shift=0,
+		group right shift=0,
+		group height=.5,
+		group peaks tip position=0,
+		group label node/.append style={left=.2cm},
+		milestone label font=\itshape\scriptsize\color{black!70},
+		milestone label node/.append style={left=.2cm},
+		link/.style={-latex, line width=1.5pt, linkred},
+		link label font=\scriptsize\bfseries,
+		link label node/.append style={below left=-2pt and 0pt}
+		]{1}{25}
+		
+		\gantttitle[
+		title label node/.append style={below left=7pt and -3pt}
+		]{Wochen:\quad1}{1}
+		\gantttitlelist{2,...,25}{1} \\
+		
+		% Vorbereitung
+		\ganttgroup[name=prep]{Vorbereitung}{1}{4} \\
+		\ganttbar[name=lit]{Literaturrecherche}{1}{2} \\
+		\ganttbar[name=bench]{Benchmark- und Datensatzauswahl}{2}{3} \\
+		\ganttbar[name=model]{Modellauswahl}{3}{3} \\
+		
+		% Implementierung
+		\ganttgroup[name=impl]{Implementierung}{5}{13} \\
+		\ganttbar[name=evaldesign]{Evaluationsdesign}{5}{5} \\
+		\ganttbar[name=baseline]{Baseline (Single-Prompt)}{7}{8} \\
+		\ganttbar[name=second]{Second-Level Judging}{9}{10} \\
+		\ganttbar[name=dynamic]{Dynamic Prompting}{11}{13} \\
+		\ganttbar[name=pipeline]{Experiment-Pipeline}{8}{13} \\
+		\ganttbar[name=tests]{Tests und Debugging}{8}{13} \\
+		
+		% Evaluation
+		\ganttgroup[name=eval]{Evaluation}{15}{22} \\
+		\ganttbar[name=eval-a]{Evaluationssetup finalisieren}{15}{15} \\
+		\ganttbar[name=eval-b]{Daten und Prompts vorbereiten}{16}{17} \\
+		\ganttbar[name=eval-c]{Experimente durchführen}{18}{20} \\
+		\ganttbar[name=eval-d]{Ergebnisse sammeln}{18}{20} \\
+		\ganttbar[name=eval-e]{Ergebnisse analysieren}{21}{22} \\
+		
+		% Schreiben
+		\ganttgroup[name=thesis]{Schriftliche Ausarbeitung}{3}{25} \\
+		\ganttbar[name=thesis-related]{Verwandte Arbeiten}{4}{4} \\
+		\ganttbar[name=thesis-method]{Methodik}{6}{6} \\
+		\ganttbar[name=thesis-impl]{Implementierung}{14}{14} \\
+		\ganttmilestone[name=draft]{Entwurf an Betreuer}{14} \\
+		\ganttbar[name=thesis-eval]{Evaluation}{23}{23} \\
+		\ganttbar[name=thesis-fb]{Einleitung/Fazit}{24}{24} \\
+		\ganttbar[name=thesis-qual]{Korrekturlesen}{25}{25} \\
+		\ganttmilestone[name=submit]{Abgabe}{25} \\
+		
+		% Verbindungen
+		\ganttlink{evaldesign}{thesis-related}
+		\ganttlink{baseline}{thesis-method}
+		\ganttlink{impl}{thesis-impl}
+		\ganttlink{thesis-impl}{draft}
+		\ganttlink{eval-e}{thesis-eval}
+		\ganttlink{thesis-eval}{thesis-fb}
+		\ganttlink{thesis-fb}{thesis-qual}
+		\ganttlink{thesis-qual}{submit}
+		
+	\end{ganttchart}
 }
-
-
-
+\newpage
 \subsection{\iflanguage{ngerman}
     {Risiken und Ausweichplan}
     {Contingency Plan}}
 \label{sub:contingency}
 
 \iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Mögliche Risiken (z.B. nicht verfügbare Ressourcen, kein effizienter Algorithmus existent) die bereits vor Beginn der Arbeit abgeschätzt werden können sowie Ausweichstrategien.}}
+{\hint{}{
+		
+		\begin{itemize}
+			
+			\item \textbf{Nicht verfügbare oder eingeschränkt nutzbare Ressourcen (LLM-APIs)}\\
+			Risiko: Budgetüberschreitungen, Rate Limits oder eingeschränkter Zugriff auf Modelle.\\
+			Ausweichplan: Nutzung kostengünstiger oder frei verfügbarer Modelle, Reduktion der Stichprobengröße sowie Caching von Ergebnissen.
+			
+			\item \textbf{Instabilität und geringe Reproduzierbarkeit von LLM-Ergebnissen}\\
+			Risiko: Hohe Varianz durch nicht-deterministisches Verhalten der Modelle.\\
+			Ausweichplan: Durchführung mehrerer Durchläufe, Fixierung von Parametern (z.\,B. Temperature) sowie Einsatz geeigneter Stabilitätsmetriken.
+			
+			\item \textbf{Keine signifikanten Verbesserungen durch mehrstufige Ansätze}\\
+			Risiko: Second-Level Judging und Dynamic Prompting liefern keine besseren Ergebnisse als die Baseline.\\
+			Ausweichplan: Analyse der Einflussfaktoren, Erweiterung der Evaluation um zusätzliche Metriken (z.\,B. Effizienz und Kosten) sowie qualitative Fallanalysen.
+			
+			\item \textbf{Verschlechterung der Ergebnisse durch Second-Level Judging}\\
+			Risiko: Zusätzliche Bewertungsschritte können zu inkonsistenten oder schlechteren Resultaten führen.\\
+			Ausweichplan: Anpassung der Prompt-Strategien, Vergleich mit einfacheren Methoden sowie Analyse der Ursachen für Verschlechterungen.
+			
+			\item \textbf{Hoher Implementierungsaufwand der Experiment-Pipeline}\\
+			Risiko: Verzögerungen durch technische Komplexität.\\
+			Ausweichplan: Iterative Entwicklung, modularer Aufbau sowie Nutzung bestehender Frameworks.
+			
+			\item \textbf{Ungeeignete oder nicht ausreichende Datensätze}\\
+			Risiko: Benchmarks decken die Forschungsfragen nicht ausreichend ab.\\
+			Ausweichplan: Kombination mehrerer Datensätze sowie Ergänzung durch einen eigenen Benchmark.
+			
+			\item \textbf{Kein klar überlegener Prompting-Ansatz identifizierbar}\\
+			Risiko: Es lässt sich kein eindeutig bester Ansatz bestimmen.\\
+			Ausweichplan: Analyse von Trade-offs (Qualität, Kosten, Stabilität) sowie Ableitung praxisnaher Empfehlungen.
+			
+\end{itemize}}}
 {\hint{(0.5 pages)}{Possible risks (e.g., unavailable resources, no sufficiently efficient algorithm exists) that can already be estimated before starting the thesis, as well as possible contingency plans.}}
-
-\begin{enumerate}
-    
-    \iflanguage{ngerman}{
-        \item Risiko \dots 
-        
-        Ausweichplan \dots
-        
-        \item Risiko \dots 
-        
-        Ausweichplan \dots
-    }{
-        \item Risk \dots
-
-        Contingency \dots
-        
-        \item Risk \dots
-        
-        Contingency \dots
-    }
-    
-\end{enumerate}
-
+\newpage
 \nocite{*}
 \printbibliography
 
