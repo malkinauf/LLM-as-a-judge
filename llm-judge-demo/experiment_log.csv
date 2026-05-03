@@ -1,0 +1,3 @@
+model,pront,dataset,total_samples,valid_samples,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,promt
+llama3:latest,basic _truthful_qa,truthful_qa_binary_40,40,35,0.125,0.0,0.875,0.6571428571428571,0.6190476190476191,0.7647058823529411,0.6842105263157895,
+llama3:latest,,truthful_qa_binary_40,40,24,0.4,0.0,0.6,0.6666666666666666,0.6363636363636364,0.6363636363636364,0.6363636363636364,basic _truthful_qa
