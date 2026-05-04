@@ -2,10 +2,10 @@
 % !TeX TS-program = xelatex
 % !TeX TXS-program:bibliography = txs:///biber
 % English Proposal:
-\documentclass{rwureport}
+%\documentclass{rwureport}
 
 % Deutsches Proposal:
-%\documentclass[ngerman]{rwureport}
+\documentclass[ngerman]{rwureport}
 
 \usepackage{hyperref}
 \usepackage[style=ieee,hyperref,natbib,backend=biber]{biblatex}
@@ -33,15 +33,15 @@
 % Front- and backmatter
 % 
 % Title of the proposal
-\title{\IfLanguageName{ngerman}{Titel der Arbeit}{Title of the Thesis}}
+\title{\IfLanguageName{ngerman}{Evaluation von Prompt-Engineering-Techniken für LLM-as-a-Judge-Systeme: Second-Level Judging und Dynamic Prompting}{Title of the Thesis}}
 % Bachelor or Master?
 \subtitle{\IfLanguageName{ngerman}{%
-        (Bachelor-/Masterarbeits-)%
+        Semesterprojekt-%
         }{%
         Bachelor/Master Thesis }Proposal%
     }
 % First and last name
-\author{\iflanguage{ngerman}{Vorname Nachname}{Firstname Lastname}}
+\author{\iflanguage{ngerman}{Esmo, Tatiana Malkina}{Firstname Lastname}}
 \date{\today}
 
 \bibliography{references}
@@ -59,11 +59,16 @@
     {Thesis Area}}
 \label{sub:introduction}
 \iflanguage{ngerman}
-{\hint{(diese Seite)}{
-    Vom allgemeinen Forschungsgebiet (z.B. Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments) in dem die Arbeit eingeordnet ist, einleiten. Charakteristika und Anwendungsgebiete des Forschungsgebiets aufzeigen und, wo sinnvoll, einführende Literatur zitieren. 
+{\hint{}{
+  	Large Language Models (LLMs) haben sich zu einer zentralen Technologie entwickelt. Dadurch steigt der Bedarf an skalierbaren Evaluationsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig, jedoch mit erheblichem Zeit- und Kostenaufwand verbunden sind \cite{gu2026survey}.
     
-    Darauf aufbauend das spezielle Themengebiet der Arbeit (z.B. Kommunikationsprotokolle, Sicherheit, Privacy, Missbrauchserkennung) in das Forschungsgebiet einordnen und offene Fragestellungen daraus aufzeigen. 
-    Hier sollen auch mögliche Anforderungen und Ziele für das Ergebnis der eigenen Arbeit diskutiert werden (z.B. notwendige Effizienz)
+    Ein bedeutender Forschungsbereich ist daher \textbf{LLM-as-a-Judge}, bei dem Sprachmodelle automatisch die Antworten anderer Modelle bewerten oder Systeme miteinander vergleichen. Solche Ansätze werden zunehmend für Benchmarking, Qualitätskontrolle und automatisierte Modellvergleiche genutzt. Die Qualität dieser Bewertungen hängt jedoch nicht nur vom eingesetzten Modell, sondern auch stark vom Prompt-Design ab \cite{zheng2023judging,biskupski2026evaluating}.
+    
+    Ein aktueller Ansatz ist das \textbf{Second-Level Judging}, bei dem ein zweites Judge-Modell die Entscheidung und Begründung eines ersten Judges überprüft, um Fehler zu erkennen und die Zuverlässigkeit zu erhöhen. Erste Arbeiten berichten Verbesserungen durch diesen zweistufigen Prozess, insbesondere bei der Reduktion fehlerhafter Urteile \cite{russinovich2025crescendo}. Neuere Studien zeigen jedoch widersprüchliche Ergebnisse und kommen zu dem Schluss, dass Second-Level Judges die Gesamtleistung in vielen Fällen sogar verschlechtern können \cite{biskupski2026evaluating}.
+    
+    Parallel dazu zeigt Studien in anderen Bereichen, etwa bei der automatisierten Codefehlererkennung, dass \textbf{Dynamic Prompting} die Leistung von Sprachmodellen deutlich verbessern kann \cite{huynh2025dynamic}. Ob sich dieser Ansatz auf LLM-as-a-Judge-Systeme übertragen lässt, wurde bislang kaum untersucht.
+    
+    Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}. Darüber hinaus soll untersucht werden, welche Sprachmodelle sich unter Qualitäts-, Robustheits- und Effizienzgesichtspunkten besonders für den Einsatz als Judge eignen.
 }}
 {\hint{(this page)}{
     Start with a general description of the research field (for example, Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments), discussing characteristics and applications, including some introductory literature as appropriate.
@@ -80,11 +85,22 @@
 \label{sub:motivation}
 
 \iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Basierend auf \autoref{sub:introduction} beschreiben was die Beschäftigung mit dem Thema praktisch oder akademisch relevant macht. Die Argumentation führt dann zur konkreten Fragestellung der Arbeit, die in \autoref{sec:problem_statement} vorgestellt wird.}}
+{\hint{}{
+		Mit der zunehmenden Integration großer Sprachmodelle (LLMs) in produktive Systeme wird die zuverlässige Bewertung ihrer Ausgaben zu einer zentralen Herausforderung. Fehlbewertungen wirken sich dabei nicht nur auf Kosten und Ressourceneinsatz aus, sondern können direkt die Qualität realer Anwendungen beeinträchtigen, etwa durch falsche oder irreführende Antworten. Trotz der Vielzahl bestehender Ansätze bleibt die Entwicklung von Evaluationsverfahren, die gleichzeitig skalierbar, reproduzierbar und robust gegenüber variierenden Bedingungen sind, eine offene Herausforderung.
+		
+		Vor diesem Hintergrund hat sich das Paradigma \textbf{LLM-as-a-Judge} als vielversprechender Ansatz etabliert, bei dem Sprachmodelle selbst zur automatisierten Bewertung von Modellantworten eingesetzt werden. Dieser Ansatz ermöglicht eine effiziente Skalierung von Evaluationsprozessen, wirft jedoch zugleich Fragen hinsichtlich der Zuverlässigkeit der erzeugten Bewertungen auf. Aktuelle Studien zeigen, dass die Ergebnisse stark von Faktoren wie Prompt-Formulierung, Modellwahl und Aufgabenstruktur abhängen, was zu einer hohen Variabilität führt und die praktische Einsetzbarkeit einschränkt \cite{zheng2023judging, biskupski2026evaluating}
+		
+		Ein naheliegender Ansatz zur Verbesserung der Bewertungsqualität ist \textbf{Second-Level Judging}, bei dem eine initiale Bewertung durch einen zusätzlichen Bewertungsschritt überprüft wird. Es wird angenommen, dass dieser zusätzliche Analyseschritt die Zuverlässigkeit der Ergebnisse erhöhen kann.
+		
+		Ähnliche Prinzipien finden sich in Ansätzen zur Selbstreflexion und iterativen Bewertung, die in anderen Kontexten eine Verbesserung der Qualität von Modellantworten zeigen konnten \cite{madaan2023selfrefine, shinn2023reflexion}. Allerdings zeigen empirische Ergebnisse im Bereich der automatisierten Evaluation, dass diese Effekte nicht konsistent auftreten \cite{biskupski2026evaluating}, was die Notwendigkeit einer weiterführenden systematischen Analyse unterstreicht.
+		
+		Parallel dazu spielt \textbf{Prompt Engineering} eine zentrale Rolle, da es das Verhalten von Sprachmodellen maßgeblich beeinflusst. Insbesondere adaptive Ansätze wie \textbf{Dynamic Prompting} haben in verschiedenen Anwendungen gezeigt, dass sie die Leistungsfähigkeit von Modellen verbessern können. Ob sich diese Effekte auch auf die Zuverlässigkeit von LLM-basierten Evaluationsverfahren übertragen lassen, ist bislang unklar. Darüber hinaus stellt sich die Frage, ob durch gezielte Prompting-Strategien auch kleinere und kostengünstigere Modelle eine vergleichbare Bewertungsqualität erreichen können.
+		
+		Vor diesem Hintergrund verfolgt dieses Projekt das Ziel, die Qualität, Stabilität und Effizienz von LLM-basierten Bewertungssystemen systematisch zu untersuchen. Im Fokus steht dabei insbesondere die Analyse von Second-Level Judging und Dynamic Prompting sowie deren Wechselwirkungen mit unterschiedlichen Modelltypen. Ziel ist es, ein besseres Verständnis der Einflussfaktoren auf die Zuverlässigkeit automatisierter Evaluation zu entwickeln und damit eine fundierte Grundlage für deren praktischen Einsatz zu schaffen.
+		}}
 {\hint{(half a page)}{Based on \autoref{sub:introduction}, describe what makes the topic worthwhile from a practical or academic point of view. The reasoning leads to the concrete problem statement in \autoref{sec:problem_statement}.}}
 
 \dots
-
 
 \newpage
 \section{\iflanguage{ngerman}
@@ -93,14 +109,22 @@
 \label{sec:state_of_the_art}
 
 \iflanguage{ngerman}
-{\hint{(1 Seite)}{
-    Einschlägige Literatur~\cite{Test} zum speziellen Thema vorstellen. Die Literaturauswahl erfolgt in Absprache mit dem Betreuer und muss nicht vollständig das Thema abdecken. Vorgestellte Literatur sollte Probleme (oder das Fehlen) von existierenden Lösungen für das Thema der Arbeit aufzeigen, insbesondere die, die zur Motivation der Arbeit in \autoref{sub:motivation} geführt haben.
-    Zudem existierende Lösungen für Teilprobleme oder als Werkzeug oder Methode möglicherweise anwendbare Vorarbeiten zusammentragen.
-
-    Ziel soll sein, zu zeigen, dass das Problem 
-    (1) allgemein erkannt (es gibt Arbeiten zu ähnlichen Themen),
-    (2) noch nicht gelöst (es gibt keine Arbeit, die genau die selbe Fragestellung bearbeitet),
-    und (3) voraussichtlich lösbar ist (es gibt Lösungen für Teilprobleme, anwendbare Werkzeuge oder Methoden).
+{\hint{}{
+   Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet. Es wurde gezeigt, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Modelle automatisch zu bewerten und dabei eine hohe Übereinstimmung mit menschlichen Urteilen zu erreichen \cite{zheng2023judging}. Aufbauend auf diesen Ergebnissen wurden Ansätze entwickelt, die durch strukturierte Prompt-Strategien eine bessere Ausrichtung an menschlichen Bewertungen anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion beschrieben \cite{gu2026survey}:
+  
+   \begin{equation}
+   	\mathrm{Score} = f(\mathrm{model}, \mathrm{prompt}, \mathrm{task}, \mathrm{context})
+   \end{equation}
+   
+   Die Bewertungsqualität hängt dabei wesentlich vom Modell, dem Prompt, der Aufgabe und dem Kontext ab und ist entsprechend sensitiv gegenüber Änderungen dieser Faktoren.
+   
+   Parallel dazu werden Methoden untersucht, die die Qualität von Modellantworten durch stärker strukturierte Generationsprozesse verbessern.Da die Qualität der generierten Antworten eine zentrale Grundlage für deren Bewertung darstellt, können solche Ansätze indirekt auch die Leistungsfähigkeit von LLM-basierten Evaluatoren beeinflussen. Ein prominentes Beispiel ist Dynamic Prompting, bei dem zunächst eine Zwischenanalyse erzeugt und anschließend als zusätzlicher Kontext in den Prompt integriert wird. Empirische Ergebnisse zeigen, dass diese Methode die Qualität von Modellantworten signifikant verbessern kann. Ihr Einfluss auf Aufgaben der automatischen Bewertung (LLM-as-a-Judge) ist bislang nur begrenzt untersucht worden \cite{huynh2025dynamic}.
+   
+   Daneben existieren mehrstufige Bewertungsverfahren wie Second-Level Judging, bei dem eine erste Bewertung erneut analysiert und gegebenenfalls korrigiert wird. Ziel ist eine höhere Zuverlässigkeit der Bewertung. Empirische Studien zeigen jedoch, dass solche Verfahren keine konsistente Verbesserung garantieren und in bestimmten Modell-Prompt-Konfigurationen sogar zu schlechteren Ergebnissen führen können \cite{biskupski2026evaluating}.
+   
+   Neuere Arbeiten erweitern diese Idee zum Meta-Judging, bei dem Modelle nicht nur Antworten, sondern auch bereits erzeugte Bewertungen analysieren und somit als „Richter der Richter“ fungieren. Diese Ansätze zielen darauf ab, die Konsistenz und Zuverlässigkeit automatisierter Bewertungssysteme zu erhöhen, und zeigen in einzelnen Konfigurationen Leistungsgewinne. Bestehende Studien konzentrieren sich jedoch häufig auf komplexe Setups wie Multi-Agenten-Systeme oder präferenzbasiertes Training, während einfachere, praktisch relevante Varianten wie Second-Level Judging bislang weniger systematisch untersucht wurden \cite{silva2026metajudge}.
+   
+  nsgesamt zeigt sich, dass zusätzliche Analyseebenen – sowohl im Reasoning-Prozess als auch durch separate Bewertungsschritte – die Entscheidungsqualität beeinflussen können, ihr Effekt jedoch noch nicht eindeutig verstanden ist. Insbesondere bleibt unklar, unter welchen Bedingungen Second-Level-Ansätze die Zuverlässigkeit von LLM-basierten Evaluatoren tatsächlich verbessern. Dies macht eine systematische Untersuchung unterschiedlicher Realisierungen zusätzlicher Analyseebenen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Bewertungsverfahren wie Second-Level Judging – zu einer relevanten Forschungsaufgabe.
 }}
 {\hint{(1 page)}{
     Provide relevant literature~\cite{Test} on the specific topic. The literature selection is discussed beforehand with the supervisor and does not have to cover the topic completely. The literature presented should highlight problems with (or even the lack of) existing solutions for the topic of the thesis, especially those that led to the motivation for the thesis in \autoref{sub:motivation}.
@@ -125,7 +149,21 @@
 \label{sub:focus}
 
 \iflanguage{ngerman}
-{\hint{(0,75 Seiten)}{Auf Basis der Motivation (\autoref{sec:motivation}) und der existierenden Forschung (\ref{sec:state_of_the_art}) soll die Problemstellung der eigenen Arbeit in Prosa beschrieben werden. Dazu sollen die Artefakte, die entstehen sollen (z.B. Konzept, Implementierung, Literaturstudie) sowie die Evaluations-Methodologie beschrieben werden (z.B. formale Analyse, Simulation, Benutzerstudie).}}
+{\hint{}{
+
+Im Rahmen dieser Arbeit wird die Zuverlässigkeit automatisierter Bewertungsverfahren auf Basis des Ansatzes \textit{LLM-as-a-Judge} untersucht, mit besonderem Fokus auf mehrstufige Strategien. Bestehende Studien zeigen hierbei widersprüchliche Ergebnisse: Während mehrstufige Verfahren wie \textit{Dynamic Prompting} die Qualität von Analyseaufgaben (z.,B. Codeanalyse und Schwachstellenerkennung) verbessern können, führen ähnliche Ansätze im Kontext der Bewertung nicht immer zu den erwarteten Verbesserungen.
+
+Insbesondere zeigt der Ansatz des \textit{Second-Level Judging}, der eine zusätzliche Überprüfung initialer Bewertungen vorsieht, trotz seiner konzeptionellen Einfachheit häufig instabile oder verschlechterte Ergebnisse. Im Gegensatz dazu erreichen komplexere Methoden wie \textit{Meta-Judging} oftmals eine höhere Übereinstimmung der Bewertungen. Dieses Spannungsfeld stellt ein bislang nicht ausreichend erklärtes Problem in der Literatur dar.
+
+Ziel dieser Arbeit ist die systematische Untersuchung dieser Widersprüche sowie die Identifikation von Bedingungen, unter denen mehrstufige Ansätze die Zuverlässigkeit der Bewertung verbessern oder verschlechtern.
+
+Zur Umsetzung wird eine experimentelle Pipeline für binäre Klassifikationsaufgaben entwickelt, die den Vergleich verschiedener Konfigurationen des Bewertungsprozesses ermöglicht. Dabei werden insbesondere der Einfluss von \textit{Second-Level Judging} sowie verschiedener Prompting-Strategien, einschließlich \textit{Dynamic Prompting}, auf die Stabilität und Konsistenz der Bewertungen analysiert. Zusätzlich erfolgt ein Vergleich von Modellen unterschiedlicher Leistungsfähigkeit, um den Zusammenhang zwischen Bewertungsqualität und Rechenaufwand zu untersuchen.
+
+Als Datengrundlage dienen etablierte Benchmarks, ergänzt durch einen begrenzten Satz eigener Beispiele. Zur Evaluation werden Klassifikationsmetriken (Precision, Recall, F1-Score), die Übereinstimmungsmetrik (Cohen’s Kappa) sowie Stabilitätsmaße auf Basis der Variabilität über mehrere Durchläufe eingesetzt.
+
+Die Ergebnisse der Arbeit sollen dazu beitragen, die Ursachen der beobachteten Unterschiede besser zu verstehen und fundierte Empfehlungen für den Einsatz mehrstufiger Bewertungsansätze abzuleiten.
+
+}}
 {\hint{(0.75 pages)}{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}}
 
 \dots
@@ -136,17 +174,26 @@
 \label{sub:questions}
 
 \iflanguage{ngerman}
-{\hint{(0,25 Seiten)}{Forschungsfragen beschreiben die gesamte Problemstellung in einer oder wenigen Hauptfragen sowie weiteren Teilfragen und werden zusammen mit dem Betreuer erarbeitet. Forschungsfragen sind als W-Fragen (Wie, Warum, Was, Weshalb, \dots) formuliert und lassen sich in Typen unterteilen.\footnote{\url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es}}
-        %
-        \begin{description}
-            \item[Erklärung:] Warum ist etwas so wie es ist?
-            \item[Beschreibung:] Wie sieht der jeweilige Sachverhalt aus?
-            \item[Prognose:] Wie wird sich etwas entwickeln?
-            \item[Bewertung:] Wie ist das Beschriebene/Erklärte zu bewerten?
-            \item[Gestaltung:] Was muss getan werden, um ein Ziel zu erreichen?
-        \end{description}
-        
-        Die Fragen sollen so formuliert sein, dass sie im Rahmen der Arbeit beantwortet werden können und die gesamte Problemstellung umfassen.
+{\hint{}{	Zur Beantwortung dieses Ziels ergibt sich die folgende
+		\textbf{Hauptfrage:}
+	
+	Wie beeinflussen mehrstufige Bewertungsansätze wie Second-Level Judging und Dynamic Prompting die Qualität, Stabilität und Effizienz von LLM-basierten Bewertungssystemen im Vergleich zu einem einstufigen Baseline-Ansatz?
+	
+	\vspace{0.5em}
+	
+	\textbf{Teilfragen}
+	
+	\begin{enumerate}
+		\item Wie verhält sich \textit{Second-Level Judging} im Vergleich zu \textit{Dynamic Prompting} sowie zu einem einstufigen Baseline-Ansatz (\textit{Single-Prompt Baseline}) unter vergleichbaren Bedingungen hinsichtlich der Stabilität und Konsistenz der Bewertungsergebnisse?
+		
+		\item In welchem Ausmaß führen mehrstufige Ansätze (insbesondere \textit{Second-Level Judging} und \textit{Dynamic Prompting}) zu einer Verbesserung der Bewertungsqualität im Vergleich zum Baseline-Ansatz?
+		
+		\item Welchen Einfluss haben unterschiedliche Datensätze und Modelltypen auf die Bewertungsqualität von \textit{Second-Level Judging}, \textit{Dynamic Prompting} und dem Baseline-Ansatz?
+		
+		\item Inwiefern beeinflussen Variationen in der Prompt-Formulierung die Bewertungsergebnisse von \textit{Second-Level Judging}?
+		
+		\item Unter welchen Konfigurationen von Modellen, Prompts und mehrstufigen Bewertungsprozessen ergeben sich Verbesserungen oder Verschlechterungen sowohl der Bewertungsergebnisse als auch der Effizienz (insbesondere Kosten und Laufzeit)?
+	\end{enumerate}	
     }
 }
 {\hint{(0.25 pages)}{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
@@ -162,37 +209,23 @@
     }
 }
 
-\begin{samepage}
-    \noindent
-    \iflanguage{ngerman}{
-        \textbf{Hauptfrage \dots}
-        %
-        \begin{enumerate}
-            \item Teilfrage
-            \item Teilfrage
-            \item \dots
-        \end{enumerate}
-    }{
-        \textbf{Main question \dots}
-        %
-        \begin{enumerate}
-            \item Partial question
-            \item Partial question
-            \item \dots
-        \end{enumerate}
-    }
-\end{samepage}
-
-
-
 \section{\iflanguage{ngerman}
     {Vorgehensweise}
     {Approach}}
 \label{sec:approach}
 
 \iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Erste Ideen für die eigene Arbeit und erste Ansätze, um die Forschungsfragen zu beantworten. Ideen können Zeiger auf vielversprechende Literatur sein (muss nicht komplett gelesen sein) sowie eine Skizze wie man die Literatur anwenden möchte. Der Ansatz muss nicht konkret sein, sondern ist gedacht als Ausblick welche Ansätze man in den ersten Wochen nach der Anmeldung verfolgt.\\\phantom{.}}}
-{\hint{(0.5 pages)}{Describe the initial ideas for the thesis and the first steps to answer the research questions. Ideas can be pointers towards promising ideas in the literature (not necessarily read completely) or some sketch of how ideas from the literature may be developed. It does not need to be a concrete idea, but should indicate what will be done in the first weeks after the proposal is done.}}
+{\hint{}{
+		
+		Im Rahmen dieser Arbeit wird zunächst eine Literaturrecherche zu bestehenden Ansätzen im Bereich \textit{LLM-as-a-Judge} durchgeführt. Dabei werden insbesondere Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting betrachtet. Ziel ist es, ein grundlegendes Verständnis dieser Methoden zu gewinnen und geeignete Benchmarks auszuwählen.
+		
+		Anschließend werden passende Benchmarks definiert, wobei der Fokus auf sicherheitsrelevanten binären Klassifikationsaufgaben liegt. Dazu gehören beispielsweise die Unterscheidung zwischen sicheren und unsicheren Antworten sowie zwischen korrekten und inkorrekten Inhalten. Zusätzlich können auch manipulierte Eingaben, wie etwa Prompt Injection, berücksichtigt werden. Neben bestehenden Datensätzen wird auch ein eigener Benchmark erstellt.
+		
+		Darauf aufbauend wird ein experimentelles Vergleichsdesign umgesetzt, in dem die verschiedenen Ansätze miteinander verglichen werden. Alle Methoden werden unter gleichen Bedingungen auf denselben Daten getestet. Außerdem werden verschiedene Prompt-Varianten sowie mehrere Durchläufe genutzt, um die Stabilität der Ergebnisse zu untersuchen.
+		
+		Für die Experimente werden mehrere Sprachmodelle verwendet, darunter frei verfügbare Modelle sowie eine leistungsstärkere Referenz. So kann analysiert werden, welchen Einfluss die Wahl des Modells auf die Ergebnisse hat.
+		
+		Die Bewertung erfolgt anhand verschiedener Metriken. Dazu zählen Accuracy und F1-Score zur Messung der Qualität sowie einfache Kennzahlen zur Stabilität, wie die Abweichung zwischen mehreren Durchläufen. Zusätzlich werden Effizienz (z.\,B. Laufzeit und Anzahl der Aufrufe) sowie der Tokenverbrauch und die daraus entstehenden Kosten betrachtet. Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Ablauf automatisiert. Dabei werden alle wichtigen Informationen wie Prompts, Antworten und Einstellungen gespeichert, sodass die Experimente nachvollzogen und wiederholt werden können.}}
 
 \dots
 
@@ -207,8 +240,15 @@
 \label{sub:background}
 
 \iflanguage{ngerman}
-{\hint{(0,25 Seiten)}{Relevantes Vorwissen zu Methodiken und Hilfsmitteln (z.B. Simulationsumgebung, passende formale Modelle, Algorithmen) aus gehörten Vorlesungen, Seminaren und Nebenjobs. Notwendige Fähigkeiten, die während der Arbeit erlernt werden sollen.}}
-{\hint{(0.25 pages)}{Relevant background on methodologies and tools (e.g., Simulator, appropriate models, algorithms) from lectures, seminars and jobs. Also write down the necessary skills that need to be learned during the thesis.}}
+{\hint{}{
+		
+		Im Rahmen des Studiums wurden grundlegende Kenntnisse in der Programmierung mit Python erworben, die insbesondere für die Umsetzung der experimentellen Auswertung genutzt werden. Darüber hinaus bestehen erste Erfahrungen im Bereich Machine Learning, die im Rahmen von Lehrveranstaltungen und Praktika, insbesondere im Bereich Deep Learning, gesammelt wurden.
+		
+		Diese Vorkenntnisse umfassen grundlegende Konzepte wie das Training und die Evaluation von Modellen sowie den Umgang mit Datensätzen. Zudem wurden erste Erfahrungen im Umgang mit Schnittstellen (APIs) im Rahmen von Programmieraufgaben, unter anderem in Java, gesammelt.
+		
+		Für die vorliegende Arbeit sind insbesondere die Fähigkeiten zur Datenverarbeitung, zur Implementierung von Experimenten sowie zur strukturierten Auswertung von Ergebnissen relevant. Diese werden im Rahmen der Arbeit weiter angewendet und vertieft.
+		
+		Zusätzlich werden im Verlauf der Arbeit neue Kenntnisse erworben, insbesondere im Bereich der Bewertung von Large Language Models, fortgeschrittener Prompting-Strategien (z. B. Second-Level Judging und Dynamic Prompting) sowie der systematischen Durchführung und Analyse von Benchmark-Experimenten. Auch Aspekte wie die Automatisierung von Experimenten und die Analyse von Kosten und Effizienz werden dabei eine wichtige Rolle spielen.}}
 
 \dots
 
@@ -218,134 +258,152 @@
 \label{sub:resources}
 
 \iflanguage{ngerman}
-{\hint{(beliebig lang)}{Falls zutreffend, eine Liste von benötigter Hardware, Lizenzen oder anderen besonderen Ressourcen.\\\phantom{.}}}
+{\hint{}{
+		
+		\begin{itemize}
+			\item \textbf{Laptop:} Durchführung der Experimente sowie Datenverarbeitung und Auswertung.
+			
+			\item \textbf{Python und Bibliotheken:} Implementierung der Experimente, Verarbeitung der Daten und Analyse der Ergebnisse.
+			
+			\item \textbf{Zugriff auf Large Language Models (APIs):} Nutzung leistungsstarker Sprachmodelle für die Durchführung der Evaluation; teilweise kostenpflichtig.
+			
+			\item \textbf{Öffentliche Datensätze:} Grundlage für die Durchführung der Benchmark-Experimente.
+			
+			\item \textbf{Eigener Benchmark:} Ergänzende Datensätze zur Untersuchung spezifischer Fragestellungen.
+			
+			\item \textbf{Budget für API-Nutzung:} Abdeckung der Kosten für kostenpflichtige Modellzugriffe.
+		\end{itemize}}}
 {\hint{(arbitrary length)}{If applicable, a list of required hardware, licenses or other resources.}}
 
-\begin{description}
-    \item[\iflanguage{ngerman}{Ressource}{Resource}] \iflanguage{ngerman}{Beschreibung}{Description} \dots
-    \item[\iflanguage{ngerman}{Ressource}{Resource}] \iflanguage{ngerman}{Beschreibung}{Description} \dots
-\end{description}
-
 \clearpage
-\subsection{\iflanguage{ngerman}
-    {Zeitplanung}
-    {Work Packages}}
+\subsection{Zeitplanung}
 \label{sub:wp}
 
-\iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Einteilung der Arbeitspakete. Für die ersten Monate der Arbeit sollten diese auf Wochenebene sein. Der Plan darf gegen Ende grober sein und während der Laufzeit der Arbeit gegebenenfalls angepasst werden. Es sollte jedoch erkennbar sein, dass notwendige Schritte zur Fertigstellung identifiziert und sinnvoll eingeplant wurden. Die Zeitplanung soll konsistent sein mit den Forschungsfragen (\ref{sub:questions}) sowie möglicher Einarbeitungszeit (\ref{sub:background}) und möglichen Wartezeiten auf Ressourcen (\ref{sub:resources}). Zur Darstellung kann beispielsweise ein Gantt Diagramm, wie im folgenden Beispiel, verwendet werden.\\\phantom{.}}}
-{\hint{(0.5 pages)}{General description of the work. For the first months of the thesis, the plan should be on a weekly bases. Later workpackages can be more coarse. The plan may be adapted during the course of the thesis, if required. However, the initial plan must include necessary steps for the completion of the thesis. The time plan should be consistent with the research questions (\ref{sub:questions}) and the necessary background (\ref{sub:background}) and potential wait time for resources (\ref{sub:resources}). The plan may be included as a gantt chart (see following example), or in any other desired form.}}
-
 {
-\definecolor{barblue}{named}{rwu-akzent}
-\definecolor{groupblue}{named}{rwu}
-\definecolor{linkred}{named}{rwu-rot}
-
-\sffamily
-\begin{ganttchart}[
-    canvas/.append style={fill=none, draw=black!5, line width=.75pt},
-    hgrid style/.style={draw=black!5, line width=.75pt},
-    vgrid={*1{draw=black!5, line width=.75pt}},
-    y unit chart=0.6cm,
-    title/.style={draw=none, fill=none},
-    title label font=\bfseries\footnotesize,
-    title label node/.append style={below=7pt},
-    include title in canvas=false,
-    bar label font=\mdseries\scriptsize\color{black!70},
-    bar label node/.append style={left=.6cm},
-    bar/.append style={draw=none, fill=barblue},
-    group/.append style={fill=groupblue},
-    group left shift=0,
-    group right shift=0,
-    group height=.5,
-    group peaks tip position=0,
-    group label node/.append style={left=.2cm},
-    milestone label font=\itshape\scriptsize\color{black!70},
-    milestone label node/.append style={left=.2cm},
-    link/.style={-latex, line width=1.5pt, linkred},
-    link label font=\scriptsize\bfseries,
-    link label node/.append style={below left=-2pt and 0pt}
-    ]{1}{25}
-    \gantttitle[
-    title label node/.append style={below left=7pt and -3pt}
-    ]{weeks:\quad1}{1}
-    \gantttitlelist{2,...,25}{1} \\
-    
-    \ganttgroup[name=tools]{Find usable tools}{1}{3} \\
-    \ganttbar[name=tool-a]{Testing tool A}{1}{1} \\
-    \ganttbar[name=tool-b]{Testing tool B}{2}{2} \\
-    \ganttbar[name=tool-compare]{Tool comparison}{3}{3} \\[grid]
-    
-    \ganttgroup[name=impl]{Implementation}{5}{13} \\
-    \ganttbar[name=impl-a]{Model Behavior}{5}{6} \\
-    \ganttbar[name=impl-b]{Implementing Algorithm}{8}{10} \\
-    \ganttbar[name=impl-c]{Functional Tests}{10}{11} \\
-    \ganttbar[name=impl-d]{Testing Tool A}{12}{12} \\
-    \ganttbar[name=impl-e]{Testing Tool B}{13}{13} \\
-
-    \ganttgroup[name=eval]{Evaluation}{15}{22} \\
-    \ganttbar[name=eval-a]{Define Eval. Strategy}{15}{15} \\
-    \ganttbar[name=eval-b]{Generate Test Cases}{16}{19} \\
-    \ganttbar[name=eval-c]{Prepare Simulation}{19}{19} \\
-    \ganttbar[name=eval-d]{Run Simulations}{20}{22} \\
-    \ganttbar[name=eval-e]{Collect Results}{22}{22} \\
-    
-    \ganttgroup[name=thesis]{Written Thesis}{4}{25} \\
-    \ganttbar[name=thesis-related]{Related Work}{4}{4} \\
-    \ganttbar[name=thesis-method]{Method}{7}{7} \\
-    \ganttbar[name=thesis-impl]{Implementation}{14}{14} \\
-    \ganttmilestone[name=draft]{Draft to supervisor}{14} \\
-    \ganttbar[name=thesis-eval]{Eval}{22}{22} \\
-    \ganttbar[name=thesis-fb]{Intro/Conclusion}{23}{23} \\
-    \ganttbar[name=thesis-rest]{Other Chapters}{24}{24} \\
-    \ganttbar[name=thesis-qual]{Proof Reading}{25}{25} \\
-    \ganttmilestone[name=submit]{Submit thesis}{25 } \\
-    
-    \ganttlink{tool-compare}{thesis-related}
-    \ganttlink{impl-a}{thesis-method}
-    \ganttlink{impl}{thesis-impl}
-    \ganttlink{thesis-impl}{draft}
-    \ganttlink{eval-e}{thesis-eval}
-    \ganttlink{thesis-eval}{thesis-fb}
-    \ganttlink{thesis-fb}{thesis-rest}
-    \ganttlink{thesis-rest}{thesis-qual}
-    \ganttlink{thesis-qual}{submit}
-\end{ganttchart}
+	\definecolor{barblue}{named}{rwu-akzent}
+	\definecolor{groupblue}{named}{rwu}
+	\definecolor{linkred}{named}{rwu-rot}
+	
+	\sffamily
+	
+	\begin{ganttchart}[
+		canvas/.append style={fill=none, draw=black!5, line width=.75pt},
+		hgrid style/.style={draw=black!5, line width=.75pt},
+		vgrid={*1{draw=black!5, line width=.75pt}},
+		y unit chart=0.6cm,
+		title/.style={draw=none, fill=none},
+		title label font=\bfseries\footnotesize,
+		title label node/.append style={below=7pt},
+		include title in canvas=false,
+		bar label font=\mdseries\scriptsize\color{black!70},
+		bar label node/.append style={left=.6cm},
+		bar/.append style={draw=none, fill=barblue},
+		group/.append style={fill=groupblue},
+		group left shift=0,
+		group right shift=0,
+		group height=.5,
+		group peaks tip position=0,
+		group label node/.append style={left=.2cm},
+		milestone label font=\itshape\scriptsize\color{black!70},
+		milestone label node/.append style={left=.2cm},
+		link/.style={-latex, line width=1.5pt, linkred},
+		link label font=\scriptsize\bfseries,
+		link label node/.append style={below left=-2pt and 0pt}
+		]{1}{25}
+		
+		\gantttitle[
+		title label node/.append style={below left=7pt and -3pt}
+		]{Wochen:\quad1}{1}
+		\gantttitlelist{2,...,25}{1} \\
+		
+		% Vorbereitung
+		\ganttgroup[name=prep]{Vorbereitung}{1}{4} \\
+		\ganttbar[name=lit]{Literaturrecherche}{1}{2} \\
+		\ganttbar[name=bench]{Benchmark- und Datensatzauswahl}{2}{3} \\
+		\ganttbar[name=model]{Modellauswahl}{3}{3} \\
+		
+		% Implementierung
+		\ganttgroup[name=impl]{Implementierung}{5}{13} \\
+		\ganttbar[name=evaldesign]{Evaluationsdesign}{5}{5} \\
+		\ganttbar[name=baseline]{Baseline (Single-Prompt)}{7}{8} \\
+		\ganttbar[name=second]{Second-Level Judging}{9}{10} \\
+		\ganttbar[name=dynamic]{Dynamic Prompting}{11}{13} \\
+		\ganttbar[name=pipeline]{Experiment-Pipeline}{8}{13} \\
+		\ganttbar[name=tests]{Tests und Debugging}{8}{13} \\
+		
+		% Evaluation
+		\ganttgroup[name=eval]{Evaluation}{15}{22} \\
+		\ganttbar[name=eval-a]{Evaluationssetup finalisieren}{15}{15} \\
+		\ganttbar[name=eval-b]{Daten und Prompts vorbereiten}{16}{17} \\
+		\ganttbar[name=eval-c]{Experimente durchführen}{18}{20} \\
+		\ganttbar[name=eval-d]{Ergebnisse sammeln}{18}{20} \\
+		\ganttbar[name=eval-e]{Ergebnisse analysieren}{21}{22} \\
+		
+		% Schreiben
+		\ganttgroup[name=thesis]{Schriftliche Ausarbeitung}{3}{25} \\
+		\ganttbar[name=thesis-related]{Verwandte Arbeiten}{4}{4} \\
+		\ganttbar[name=thesis-method]{Methodik}{6}{6} \\
+		\ganttbar[name=thesis-impl]{Implementierung}{14}{14} \\
+		\ganttmilestone[name=draft]{Entwurf an Betreuer}{14} \\
+		\ganttbar[name=thesis-eval]{Evaluation}{23}{23} \\
+		\ganttbar[name=thesis-fb]{Einleitung/Fazit}{24}{24} \\
+		\ganttbar[name=thesis-qual]{Korrekturlesen}{25}{25} \\
+		\ganttmilestone[name=submit]{Abgabe}{25} \\
+		
+		% Verbindungen
+		\ganttlink{evaldesign}{thesis-related}
+		\ganttlink{baseline}{thesis-method}
+		\ganttlink{impl}{thesis-impl}
+		\ganttlink{thesis-impl}{draft}
+		\ganttlink{eval-e}{thesis-eval}
+		\ganttlink{thesis-eval}{thesis-fb}
+		\ganttlink{thesis-fb}{thesis-qual}
+		\ganttlink{thesis-qual}{submit}
+		
+	\end{ganttchart}
 }
-
-
-
+\newpage
 \subsection{\iflanguage{ngerman}
     {Risiken und Ausweichplan}
     {Contingency Plan}}
 \label{sub:contingency}
 
 \iflanguage{ngerman}
-{\hint{(0,5 Seiten)}{Mögliche Risiken (z.B. nicht verfügbare Ressourcen, kein effizienter Algorithmus existent) die bereits vor Beginn der Arbeit abgeschätzt werden können sowie Ausweichstrategien.}}
+{\hint{}{
+		
+		\begin{itemize}
+			
+			\item \textbf{Nicht verfügbare oder eingeschränkt nutzbare Ressourcen (LLM-APIs)}\\
+			Risiko: Budgetüberschreitungen, Rate Limits oder eingeschränkter Zugriff auf Modelle.\\
+			Ausweichplan: Nutzung kostengünstiger oder frei verfügbarer Modelle, Reduktion der Stichprobengröße sowie Caching von Ergebnissen.
+			
+			\item \textbf{Instabilität und geringe Reproduzierbarkeit von LLM-Ergebnissen}\\
+			Risiko: Hohe Varianz durch nicht-deterministisches Verhalten der Modelle.\\
+			Ausweichplan: Durchführung mehrerer Durchläufe, Fixierung von Parametern (z.\,B. Temperature) sowie Einsatz geeigneter Stabilitätsmetriken.
+			
+			\item \textbf{Keine signifikanten Verbesserungen durch mehrstufige Ansätze}\\
+			Risiko: Second-Level Judging und Dynamic Prompting liefern keine besseren Ergebnisse als die Baseline.\\
+			Ausweichplan: Analyse der Einflussfaktoren, Erweiterung der Evaluation um zusätzliche Metriken (z.\,B. Effizienz und Kosten) sowie qualitative Fallanalysen.
+			
+			\item \textbf{Verschlechterung der Ergebnisse durch Second-Level Judging}\\
+			Risiko: Zusätzliche Bewertungsschritte können zu inkonsistenten oder schlechteren Resultaten führen.\\
+			Ausweichplan: Anpassung der Prompt-Strategien, Vergleich mit einfacheren Methoden sowie Analyse der Ursachen für Verschlechterungen.
+			
+			\item \textbf{Hoher Implementierungsaufwand der Experiment-Pipeline}\\
+			Risiko: Verzögerungen durch technische Komplexität.\\
+			Ausweichplan: Iterative Entwicklung, modularer Aufbau sowie Nutzung bestehender Frameworks.
+			
+			\item \textbf{Ungeeignete oder nicht ausreichende Datensätze}\\
+			Risiko: Benchmarks decken die Forschungsfragen nicht ausreichend ab.\\
+			Ausweichplan: Kombination mehrerer Datensätze sowie Ergänzung durch einen eigenen Benchmark.
+			
+			\item \textbf{Kein klar überlegener Prompting-Ansatz identifizierbar}\\
+			Risiko: Es lässt sich kein eindeutig bester Ansatz bestimmen.\\
+			Ausweichplan: Analyse von Trade-offs (Qualität, Kosten, Stabilität) sowie Ableitung praxisnaher Empfehlungen.
+			
+\end{itemize}}}
 {\hint{(0.5 pages)}{Possible risks (e.g., unavailable resources, no sufficiently efficient algorithm exists) that can already be estimated before starting the thesis, as well as possible contingency plans.}}
-
-\begin{enumerate}
-    
-    \iflanguage{ngerman}{
-        \item Risiko \dots 
-        
-        Ausweichplan \dots
-        
-        \item Risiko \dots 
-        
-        Ausweichplan \dots
-    }{
-        \item Risk \dots
-
-        Contingency \dots
-        
-        \item Risk \dots
-        
-        Contingency \dots
-    }
-    
-\end{enumerate}
-
+\newpage
 \nocite{*}
 \printbibliography
 
