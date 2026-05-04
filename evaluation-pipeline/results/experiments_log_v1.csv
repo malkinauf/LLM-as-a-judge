@@ -1,0 +1,2 @@
+run_id,status,comment,model,prompt_type,prompt_file,dataset_file,total_samples,valid_samples,coverage,parsing_errors,invalid_labels,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,timestamp
+r_0504_1511,pending_review,,llama3:latest,second_level,second_level_truthfulness_v1.txt,truthfulqa_binary_40.json,40,20,0.5,20,0,0.5,0.0,0.5,0.65,0.8571428571428571,0.5,0.631578947368421,2026-05-04 18:26:29
