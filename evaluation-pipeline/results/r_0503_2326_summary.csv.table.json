@@ -1,0 +1,184 @@
+{
+  "columns": [
+    {
+      "field": "run_id",
+      "title": "run_id",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 97
+    },
+    {
+      "field": "model",
+      "title": "model",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 97
+    },
+    {
+      "field": "prompt_file",
+      "title": "prompt_file",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 222
+    },
+    {
+      "field": "dataset_file",
+      "title": "dataset_file",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 170
+    },
+    {
+      "field": "total_samples",
+      "title": "total_samples",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 147
+    },
+    {
+      "field": "valid_samples",
+      "title": "valid_samples",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 147
+    },
+    {
+      "field": "parsing_errors",
+      "title": "parsing_errors",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 152
+    },
+    {
+      "field": "invalid_labels",
+      "title": "invalid_labels",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 143
+    },
+    {
+      "field": "parsing_rate",
+      "title": "parsing_rate",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 138
+    },
+    {
+      "field": "invalid_label_rate",
+      "title": "invalid_label_rate",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 169
+    },
+    {
+      "field": "json_success_rate",
+      "title": "json_success_rate",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 172
+    },
+    {
+      "field": "accuracy",
+      "title": "accuracy",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 113
+    },
+    {
+      "field": "precision",
+      "title": "precision",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 116
+    },
+    {
+      "field": "recall",
+      "title": "recall",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 91
+    },
+    {
+      "field": "f1",
+      "title": "f1",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 69
+    },
+    {
+      "field": "tp",
+      "title": "tp",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 69
+    },
+    {
+      "field": "tn",
+      "title": "tn",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 69
+    },
+    {
+      "field": "fp",
+      "title": "fp",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 69
+    },
+    {
+      "field": "fn",
+      "title": "fn",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 69
+    },
+    {
+      "field": "timestamp",
+      "title": "timestamp",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 142
+    }
+  ]
+}
