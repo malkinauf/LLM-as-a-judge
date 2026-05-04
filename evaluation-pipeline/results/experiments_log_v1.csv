@@ -1,2 +1,8 @@
 run_id,status,comment,model,prompt_type,prompt_file,dataset_file,total_samples,valid_samples,coverage,parsing_errors,invalid_labels,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,timestamp
-r_0504_1511,pending_review,,llama3:latest,second_level,second_level_truthfulness_v1.txt,truthfulqa_binary_40.json,40,20,0.5,20,0,0.5,0.0,0.5,0.65,0.8571428571428571,0.5,0.631578947368421,2026-05-04 18:26:29
+r_0504_1511,"RELEVANT
+","1.Second level always returned ""correct"", even when true and predicted labels mismatched.
+2.16/40 parsing errors occurred in first-level responses
+3.9 first-level misclassifications",llama3:latest,second_level,second_level_truthfulness_v1.txt,truthfulqa_binary_40.json,40,20,0.5,20,0,0.5,0.0,0.5,0.65,0.8571428571428571,0.5,0.631578947368421,2026-05-04 18:26:29
+r_0504_1827,"RELEVANT
+",1. 9 (first-level) misclassifications,llama3:latest,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,24,0.6,16,0,0.4,0.0,0.6,0.625,0.7,0.5384615384615384,0.6086956521739131,2026-05-04 18:43:18
+r_0504_2152, NOT_RELEVANT,Consistent parsing issue: missing closing JSON brace,llama3:latest,dynamic,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,3,0.075,37,0,0.925,0.0,0.07499999999999996,1.0,1.0,1.0,1.0,2026-05-04 22:50:10

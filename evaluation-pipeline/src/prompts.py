@@ -34,6 +34,20 @@ def build_experiment_prompt(
             judge_task=data["judge_task"],
             judge_output=data["judge_output"]
         )
+    elif prompt_type == "hint":
+        return build_prompt(
+            templates["hint"],
+            question=data["question"],
+            answer=data["answer"]
+        )
+
+    elif prompt_type == "dynamic":
+        return build_prompt(
+            templates["dynamic"],
+            question=data["question"],
+            answer=data["answer"],
+            hint=data["hint"]
+        )
 
     else:
         raise ValueError(f"Unknown prompt type: {prompt_type}")

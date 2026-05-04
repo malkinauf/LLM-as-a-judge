@@ -50,6 +50,29 @@ def run_judge_experiment(
 
             judge_result = judge_response(prompt, model)
 
+        elif prompt_type == "dynamic":
+            hint_prompt = build_experiment_prompt(
+                prompt_type="hint",
+                templates=templates,
+                data=example
+            )
+
+            hint_result = judge_response(hint_prompt, model)
+
+            dynamic_data = {
+                "question": example["question"],
+                "answer": example["answer"],
+                "hint": hint_result["raw_output"]
+            }
+
+            prompt = build_experiment_prompt(
+                prompt_type="dynamic",
+                templates=templates,
+                data=dynamic_data
+            )
+
+            judge_result = judge_response(prompt, model)
+
         else:
             raise ValueError(f"Unknown prompt_type: {prompt_type}")
 
@@ -90,6 +113,12 @@ def run_judge_experiment(
                 if prompt_type == "second_level"
                 else None
             ),
+            "hint_output": (
+                hint_result["raw_output"]
+                if prompt_type == "dynamic"
+                else None
+            ),
+
 
             "explanation": judge_result.get("corrected_explanation")
             if prompt_type == "second_level"
