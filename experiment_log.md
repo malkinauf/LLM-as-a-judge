@@ -5,3 +5,7 @@
 3. 9 disagreements (true vs first-level)
 <br> ### → issue: unreliable JSON output
 <br> ### → next: improve prompt format
+---
+## exp_02_dynamic_prompt
+93% parsing errors: missing closing JSON brace  
+<br> ### → next: fix prompt format or check parsing code
