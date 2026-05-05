@@ -1,0 +1,419 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{gu2026survey}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=5991953edf30650a94759e62ac9a4282}{%
+           family={Gu},
+           familyi={G\bibinitperiod},
+           given={Jiawei},
+           giveni={J\bibinitperiod}}}%
+        {{hash=967e7c1d78519f3cf3cc1b4284cb36cc}{%
+           family={Jiang},
+           familyi={J\bibinitperiod},
+           given={Xuhui},
+           giveni={X\bibinitperiod}}}%
+        {{hash=b4824fec5091c7117b6916a64f2c16e1}{%
+           family={Shi},
+           familyi={S\bibinitperiod},
+           given={Zhichao},
+           giveni={Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{35acdfd0eb04b9e0eeb343d4e43614fb}
+      \strng{fullhash}{e5428f613ef3b6991c7454add299fec8}
+      \strng{fullhashraw}{e5428f613ef3b6991c7454add299fec8}
+      \strng{bibnamehash}{e5428f613ef3b6991c7454add299fec8}
+      \strng{authorbibnamehash}{e5428f613ef3b6991c7454add299fec8}
+      \strng{authornamehash}{35acdfd0eb04b9e0eeb343d4e43614fb}
+      \strng{authorfullhash}{e5428f613ef3b6991c7454add299fec8}
+      \strng{authorfullhashraw}{e5428f613ef3b6991c7454add299fec8}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The Innovation}
+      \field{month}{1}
+      \field{title}{A Survey on LLM-as-a-Judge}
+      \field{year}{2026}
+      \field{pages}{101253}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1016/j.xinn.2025.101253
+      \endverb
+    \endentry
+    \entry{zheng2023judging}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{5}{}{%
+        {{hash=0beb8f75088bfac1e81ca3840d0e89f0}{%
+           family={Zheng},
+           familyi={Z\bibinitperiod},
+           given={Lianmin},
+           giveni={L\bibinitperiod}}}%
+        {{hash=d5030c6327cf9a55d5a372b89093395a}{%
+           family={Chiang},
+           familyi={C\bibinitperiod},
+           given={Wei-Lin},
+           giveni={W\bibinithyphendelim L\bibinitperiod}}}%
+        {{hash=b99fbe22103d2d6f803495267ee1cac9}{%
+           family={Sheng},
+           familyi={S\bibinitperiod},
+           given={Ying},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=d922f0e30f0817f9514b3360b791d760}{%
+           family={Zhuang},
+           familyi={Z\bibinitperiod},
+           given={Siyuan},
+           giveni={S\bibinitperiod}}}%
+        {{hash=8b10808456d34160e841fd9eac30a4ce}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Zhanghao},
+           giveni={Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{293dcbfb5b9446f7f90cf8d346a542fe}
+      \strng{fullhash}{227bdc13c2e6a33d202f8a29685259b3}
+      \strng{fullhashraw}{227bdc13c2e6a33d202f8a29685259b3}
+      \strng{bibnamehash}{227bdc13c2e6a33d202f8a29685259b3}
+      \strng{authorbibnamehash}{227bdc13c2e6a33d202f8a29685259b3}
+      \strng{authornamehash}{293dcbfb5b9446f7f90cf8d346a542fe}
+      \strng{authorfullhash}{227bdc13c2e6a33d202f8a29685259b3}
+      \strng{authorfullhashraw}{227bdc13c2e6a33d202f8a29685259b3}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2306.05685}
+      \field{title}{Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena}
+      \field{year}{2023}
+    \endentry
+    \entry{biskupski2026evaluating}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=263e846c0a64cf3bc4f5b83c2d0a7651}{%
+           family={Biskupski},
+           familyi={B\bibinitperiod},
+           given={Tom},
+           giveni={T\bibinitperiod}}}%
+        {{hash=1d496d76d339f8b1abbbc13c8926606e}{%
+           family={Kleber},
+           familyi={K\bibinitperiod},
+           given={Stephan},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{fullhash}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{fullhashraw}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{bibnamehash}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{authorbibnamehash}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{authornamehash}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{authorfullhash}{92fc437c58757b16123ba1a9ee38cc46}
+      \strng{authorfullhashraw}{92fc437c58757b16123ba1a9ee38cc46}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2603.22214}
+      \field{title}{Evaluating the Reliability and Fidelity of Automated Judgment Systems of Large Language Models}
+      \field{year}{2026}
+    \endentry
+    \entry{russinovich2025crescendo}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=919fb8726d3288990df583cebfbfadf6}{%
+           family={Russinovich},
+           familyi={R\bibinitperiod},
+           given={Mark},
+           giveni={M\bibinitperiod}}}%
+        {{hash=357bf352587c9249c82dccdcb59815d0}{%
+           family={Salem},
+           familyi={S\bibinitperiod},
+           given={Ahmed},
+           giveni={A\bibinitperiod}}}%
+        {{hash=27421e7dfe018659c3d41261cfb55892}{%
+           family={Eldan},
+           familyi={E\bibinitperiod},
+           given={Ronen},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{11fca4f7cb3331fbc205077a4974bd48}
+      \strng{fullhash}{82307c889b8b1de677474498ecf0faa0}
+      \strng{fullhashraw}{82307c889b8b1de677474498ecf0faa0}
+      \strng{bibnamehash}{82307c889b8b1de677474498ecf0faa0}
+      \strng{authorbibnamehash}{82307c889b8b1de677474498ecf0faa0}
+      \strng{authornamehash}{11fca4f7cb3331fbc205077a4974bd48}
+      \strng{authorfullhash}{82307c889b8b1de677474498ecf0faa0}
+      \strng{authorfullhashraw}{82307c889b8b1de677474498ecf0faa0}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2404.01833}
+      \field{title}{Great, Now Write an Article About That: The Crescendo Multi-Turn LLM Jailbreak Attack}
+      \field{year}{2025}
+    \endentry
+    \entry{huynh2025dynamic}{article}{}{}
+      \name{author}{7}{}{%
+        {{hash=d994ce4824d70f201f22820e73e9835e}{%
+           family={Huynh},
+           familyi={H\bibinitperiod},
+           given={Larry},
+           giveni={L\bibinitperiod}}}%
+        {{hash=d4c50fc72f554c8612608beaee811556}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Yinghao},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=2bf3c92b89cce0992339ae1d1cbe5476}{%
+           family={Jayasundera},
+           familyi={J\bibinitperiod},
+           given={Djimon},
+           giveni={D\bibinitperiod}}}%
+        {{hash=49c0a910f4a7f3707c3fbe193457579f}{%
+           family={Jeon},
+           familyi={J\bibinitperiod},
+           given={Woojin},
+           giveni={W\bibinitperiod}}}%
+        {{hash=3587bd1be4ca32215645ec1603bccf89}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Hyoungshick},
+           giveni={H\bibinitperiod}}}%
+        {{hash=03588c1b702bbc02206dfa8a42580c08}{%
+           family={Bi},
+           familyi={B\bibinitperiod},
+           given={Tingting},
+           giveni={T\bibinitperiod}}}%
+        {{hash=31a2f9e2a27383e1d7c91d5df19e6de7}{%
+           family={Hong},
+           familyi={H\bibinitperiod},
+           given={Jin\bibnamedelima B.},
+           giveni={J\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \strng{namehash}{ce4d94abaa4bdd0eacdb5b6e2843ec69}
+      \strng{fullhash}{f80edc9ee970f7f1bf613190d7b7f16c}
+      \strng{fullhashraw}{f80edc9ee970f7f1bf613190d7b7f16c}
+      \strng{bibnamehash}{ce4d94abaa4bdd0eacdb5b6e2843ec69}
+      \strng{authorbibnamehash}{ce4d94abaa4bdd0eacdb5b6e2843ec69}
+      \strng{authornamehash}{ce4d94abaa4bdd0eacdb5b6e2843ec69}
+      \strng{authorfullhash}{f80edc9ee970f7f1bf613190d7b7f16c}
+      \strng{authorfullhashraw}{f80edc9ee970f7f1bf613190d7b7f16c}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{DSN 2025}
+      \field{title}{Detecting Code Vulnerabilities using LLMs}
+      \field{year}{2025}
+    \endentry
+    \entry{madaan2023selfrefine}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{9}{}{%
+        {{hash=bc045738b58bf295d87617ee066e6714}{%
+           family={Madaan},
+           familyi={M\bibinitperiod},
+           given={Aman},
+           giveni={A\bibinitperiod}}}%
+        {{hash=f9b95767083699c381b0947cda0c3410}{%
+           family={Tandon},
+           familyi={T\bibinitperiod},
+           given={Niket},
+           giveni={N\bibinitperiod}}}%
+        {{hash=28bfe2903e1a60a16f1960bc8115cb38}{%
+           family={Gupta},
+           familyi={G\bibinitperiod},
+           given={Prakhar},
+           giveni={P\bibinitperiod}}}%
+        {{hash=ef6f2f453b91e268c47351b20124db83}{%
+           family={Hallinan},
+           familyi={H\bibinitperiod},
+           given={Skyler},
+           giveni={S\bibinitperiod}}}%
+        {{hash=7ef8e07d2bd57499ac7dd40d1123fb5d}{%
+           family={Gao},
+           familyi={G\bibinitperiod},
+           given={Luyu},
+           giveni={L\bibinitperiod}}}%
+        {{hash=cd2bb336655f68d528050759802b83f4}{%
+           family={Wiegreffe},
+           familyi={W\bibinitperiod},
+           given={Sarah},
+           giveni={S\bibinitperiod}}}%
+        {{hash=a0026e806b0c3123f7fb978a2c810b66}{%
+           family={Alon},
+           familyi={A\bibinitperiod},
+           given={Uri},
+           giveni={U\bibinitperiod}}}%
+        {{hash=ad932527c4d078ff96e5f0b189c66c61}{%
+           family={Beltagy},
+           familyi={B\bibinitperiod},
+           given={Iz},
+           giveni={I\bibinitperiod}}}%
+        {{hash=fa7715d3fe113b4856fbe5933ea9c7aa}{%
+           family={Downey},
+           familyi={D\bibinitperiod},
+           given={Doug},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{f2d6bdb6a746f6f1855ff0b377e7960a}
+      \strng{fullhash}{f8ba5f557ef1540b5324f5cdf51b1b52}
+      \strng{fullhashraw}{f8ba5f557ef1540b5324f5cdf51b1b52}
+      \strng{bibnamehash}{f2d6bdb6a746f6f1855ff0b377e7960a}
+      \strng{authorbibnamehash}{f2d6bdb6a746f6f1855ff0b377e7960a}
+      \strng{authornamehash}{f2d6bdb6a746f6f1855ff0b377e7960a}
+      \strng{authorfullhash}{f8ba5f557ef1540b5324f5cdf51b1b52}
+      \strng{authorfullhashraw}{f8ba5f557ef1540b5324f5cdf51b1b52}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.CL}
+      \field{eprinttype}{arXiv}
+      \field{title}{Self-Refine: Iterative Refinement with Self-Feedback}
+      \field{year}{2023}
+      \verb{eprint}
+      \verb 2303.17651
+      \endverb
+    \endentry
+    \entry{shinn2023reflexion}{article}{}{}
+      \name{author}{6}{}{%
+        {{hash=38e6ccf26c31cd565451a2e0601fc217}{%
+           family={Shinn},
+           familyi={S\bibinitperiod},
+           given={Noah},
+           giveni={N\bibinitperiod}}}%
+        {{hash=15ade32e599348080efb674963a6a809}{%
+           family={Cassano},
+           familyi={C\bibinitperiod},
+           given={Federico},
+           giveni={F\bibinitperiod}}}%
+        {{hash=009a9e2642b1924ed75df5ac207aec93}{%
+           family={Labash},
+           familyi={L\bibinitperiod},
+           given={Bryce},
+           giveni={B\bibinitperiod}}}%
+        {{hash=8116f380b438e21c1ff02d3ff5003f67}{%
+           family={Gopinath},
+           familyi={G\bibinitperiod},
+           given={Divya},
+           giveni={D\bibinitperiod}}}%
+        {{hash=997c3143c2e5d593e816d2ff704fbf98}{%
+           family={Narasimhan},
+           familyi={N\bibinitperiod},
+           given={Karthik},
+           giveni={K\bibinitperiod}}}%
+        {{hash=5c1b62cbd4e181d818b927549813cf73}{%
+           family={Yao},
+           familyi={Y\bibinitperiod},
+           given={Shunyu},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{12245f7b03ee8503d0090c91d4d31ec0}
+      \strng{fullhash}{2c99ffadbbbd3773d74b83ac6728e42a}
+      \strng{fullhashraw}{2c99ffadbbbd3773d74b83ac6728e42a}
+      \strng{bibnamehash}{2c99ffadbbbd3773d74b83ac6728e42a}
+      \strng{authorbibnamehash}{2c99ffadbbbd3773d74b83ac6728e42a}
+      \strng{authornamehash}{12245f7b03ee8503d0090c91d4d31ec0}
+      \strng{authorfullhash}{2c99ffadbbbd3773d74b83ac6728e42a}
+      \strng{authorfullhashraw}{2c99ffadbbbd3773d74b83ac6728e42a}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2303.11366}
+      \field{title}{Reflexion: Language Agents with Verbal Reinforcement Learning}
+      \field{year}{2023}
+    \endentry
+    \entry{liu2023geval}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=621013bf54d3546375ad71f17f020b5b}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Yang},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=5491649d7b9eeab75bf54d1832e83bc5}{%
+           family={Iter},
+           familyi={I\bibinitperiod},
+           given={Dan},
+           giveni={D\bibinitperiod}}}%
+        {{hash=e8acff368822f4c09bf6b92fc68f8b56}{%
+           family={Xu},
+           familyi={X\bibinitperiod},
+           given={Yichong},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \strng{namehash}{df83681b9acfd53a0c867d0eb509f8f3}
+      \strng{fullhash}{6761ccbcf057a8dd8903bbecc1f74fcb}
+      \strng{fullhashraw}{6761ccbcf057a8dd8903bbecc1f74fcb}
+      \strng{bibnamehash}{6761ccbcf057a8dd8903bbecc1f74fcb}
+      \strng{authorbibnamehash}{6761ccbcf057a8dd8903bbecc1f74fcb}
+      \strng{authornamehash}{df83681b9acfd53a0c867d0eb509f8f3}
+      \strng{authorfullhash}{6761ccbcf057a8dd8903bbecc1f74fcb}
+      \strng{authorfullhashraw}{6761ccbcf057a8dd8903bbecc1f74fcb}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2303.16634}
+      \field{title}{G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment}
+      \field{year}{2023}
+    \endentry
+    \entry{silva2026metajudge}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=f92ff3f02fcf96e5ec8de47e1cf5f70a}{%
+           family={Silva},
+           familyi={S\bibinitperiod},
+           given={Hugo},
+           giveni={H\bibinitperiod}}}%
+        {{hash=089832fac3053be29e2cc9cfa29cd770}{%
+           family={Mendes},
+           familyi={M\bibinitperiod},
+           given={Mateus},
+           giveni={M\bibinitperiod}}}%
+        {{hash=7939eda049b6e03a2c5e04753feba1ae}{%
+           family={Oliveira},
+           familyi={O\bibinitperiod},
+           given={Hugo\bibnamedelima Gonçalo},
+           giveni={H\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \strng{namehash}{10de4d74b19c3926c3a48f991e504f5d}
+      \strng{fullhash}{e2c85317c5e0a1c527c94931ff2d5476}
+      \strng{fullhashraw}{e2c85317c5e0a1c527c94931ff2d5476}
+      \strng{bibnamehash}{e2c85317c5e0a1c527c94931ff2d5476}
+      \strng{authorbibnamehash}{e2c85317c5e0a1c527c94931ff2d5476}
+      \strng{authornamehash}{10de4d74b19c3926c3a48f991e504f5d}
+      \strng{authorfullhash}{e2c85317c5e0a1c527c94931ff2d5476}
+      \strng{authorfullhashraw}{e2c85317c5e0a1c527c94931ff2d5476}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2601.17312}
+      \field{title}{Meta-Judging with Large Language Models: Concepts, Methods, and Challenges}
+      \field{year}{2026}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
