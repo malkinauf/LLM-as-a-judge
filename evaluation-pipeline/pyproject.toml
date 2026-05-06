@@ -8,7 +8,8 @@ dependencies = [
     "jupyter",
     "ipykernel",
     "ollama",
-    "datasets"
+    "datasets",
+    "scikit-learn"
 
 ]
 
