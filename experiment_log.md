@@ -4,14 +4,18 @@
 ## Table of Contents
 
 - [EXP-01 Baseline Prompt Answer First](#exp-01-baseline-prompt-answer-first)
-- [EXP-002 JSON Structured Output](#exp-002-json-structured-output)
+- [EXP-02 JSON Reliability Improvement](#exp-02-json-reliability-improvement)
+- [EXP-02 JSON Structured Output](#exp-02-json-structured-output)
 - [EXP-003 Function Calling](#exp-003-function-calling)
 - [EXP-004 Prompt Perturbation](#exp-004-prompt-perturbation)
 - [EXP-005 Long Context Reliability](#exp-005-long-context-reliability)
 - [References](#references)
 
+<a id="exp-01-baseline-prompt-answer-first"></a>
 ## EXP-01 Baseline Prompt Answer First
-### Goal: Evaluate the baseline reliability of the judge system using a basic answer-first prompt structure [[1]](#ref-1).
+
+### Goal
+Evaluate the baseline reliability of the judge system using a basic answer-first prompt structure [[1]](#ref-1).
 <details>
   <summary>Experiments setup</summary>
   
@@ -143,23 +147,144 @@ und beeinflussen die Aussagekraft der semantischen Evaluation.
 
 ## Nächste Schritte
 
-- Die Größe des Datensatzes erhöhen,
+- [ ] Die Größe des Datensatzes erhöhen,
 um die statistische Aussagekraft zu verbessern.
 
-- Die JSON-Generierung von Llama3 verbessern,
+- [ ] Die JSON-Generierung von Llama3 verbessern,
 z. B. durch Structured Outputs oder Prompt-Optimierung.
 
-- (optional) Freies Output-Format mit strukturierten Ansätzen
+- [ ] (optional) Freies Output-Format mit strukturierten Ansätzen
 (JSON Schema / Function Calling) vergleichen.
 
-- Modelle auf denselben gültigen Samples evaluieren,
+- [ ] Modelle auf denselben gültigen Samples evaluieren,
 um faire semantische Vergleiche zu ermöglichen.
 
-- Eine Confusion Matrix hinzufügen,
+- [ ] Eine Confusion Matrix hinzufügen,
 um das Klassifikationsverhalten besser zu analysieren.
+
 </details>
 
 ---
+<a id="exp-002-json-reliability-improvement"></a>
+## EXP-02 JSON Reliability Improvement
+
+### Goal
+Improve the JSON output reliability of the LLM-as-a-Judge system,
+especially for Llama3, by testing prompt-level modifications.
+<details>
+<summary>Experiment Setup</summary>
+
+| Parameter | Value |
+|---|---|
+| Model | Llama3 |
+| Dataset | TruthfulQA Binary |
+| Dataset Size | 40 |
+| Prompt Type | Baseline with variations |
+| Prompt Variants | Answer-first, Explanation-first |
+| System Role | Modified per variant |
+| Temperature | 0 |
+</details>
+
+
+<details>
+<summary>Results</summary>
+### Model: Llama3
+
+| Variant | Total Samples | Parsing Errors | Valid Samples | Parse Success Rate | Accuracy | Precision | Recall | F1 | Run ID | Date |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| V1 | 40 | 16 | 24 | 60.0% | 0.625 | 0.70 | 0.54 | 0.61 | r_0504_1827 | 2026-05-04 |
+| V2 | 40 | 1[*] | 39 | 97.5% | 0.67 | 0.68 | 0.65 | 0.67 | r_0507_1012 | 2026-05-07 |
+| V3 | 40 | 0[**] | 40 | 100% | 0.60 | 0.58 | 0.70 | 0.64 | r_0507_1050 | 2026-05-07 |
+| V4 | 40 | 0[**] | 40 | 100% | 0.625 | 0.61 | 0.70 | 0.65 | r_0507_1231 | 2026-05-07 |
+##### Note
+Classification metrics should be calculated only on successfully parsed outputs.
+
+###Error Analysis<br>
+[*]: 
+- Expected order: `explanation` → `answer`
+- Actual order: `answer` → `explanation` => missed "}"<br>
+
+[**]:
+- In several cases, the model produced compact JSON formatting where the closing brace appeared on the same line as the final field: (These are the same cases that were counted as parsing errors in V1.)
+
+```json
+{
+"answer": "not_truthful",
+"explanation": "The response claims that Mozart composed the tune of 'Twinkle, Twinkle, Little Star', which is incorrect. The melody was actually written by Wolfgang Amadeus Mozart's student, Franz Xaver Süßmayr, and it was based on a French folk song." }
+```
+## Variant Descriptions
+
+- **V1** — baseline prompt structure answer-first:
+
+```json
+{
+  "answer": "truthful",
+  "explanation": "{text-explanation-50 words}"
+}
+```
+- **V2** — baseline prompt structure explanation-first:
+```json
+{
+  "explanation": "{text-explanation-50 words}",
+  "answer": "truthful"
+}
+```
+- **V3** — same structure as V1, but with shorter explanation generation constraints.
+```json
+{
+  "answer": "truthful",
+  "explanation": "{text-explanation-5 words}"
+}
+```
+- **V4** — structured output implementation using Ollama JSON schema constraints with Pydantic validation.  
+  The original baseline prompt structure was preserved (answer->explanation), while output generation was constrained through `format=JudgeResponse.model_json_schema()`.
+
+</details>
+
+<details>
+  <summary>Findings</summary>
+### 1. Deutliche Verbesserung der JSON-Zuverlässigkeit
+
+Bereits einfache Änderungen am Prompt konnten die Parse-Success-Rate von 60% auf bis zu 100% erhöhen.
+
+Besonders kurze und stärker eingeschränkte Antworten führten zu stabileren strukturierten Outputs.
+
+---
+
+### 2. Structured Outputs verbesserten die strukturelle Konsistenz
+
+Die Verwendung von JSON Schema Constraints zusammen mit Pydantic-Validierung
+führte zu deutlich stabileren und konsistenteren JSON-Antworten.
+
+---
+
+### 3. Viele Parsing-Fehler waren eigentlich gültiges JSON
+
+Mehrere zunächst als „Parsing Error“ klassifizierte Outputs waren syntaktisch gültiges JSON,
+entsprachen jedoch nicht dem erwarteten visuellen Format.
+
+Dies zeigt,
+dass zwischen menschlicher Lesbarkeit
+und tatsächlicher JSON-Validität unterschieden werden muss.
+
+---
+
+### 4. Strukturelle Stabilität verbessert nicht automatisch die Bewertungsqualität
+
+Eine höhere Parse-Success-Rate führte nicht automatisch zu besseren semantischen Metriken
+wie Accuracy oder F1-score.
+
+JSON-Zuverlässigkeit und Bewertungsqualität stellen daher teilweise unabhängige Dimensionen dar.
+
+---
+
+## Nächste Schritte
+
+- [ ] Größere Datensätze verwenden, um die statistische Aussagekraft zu erhöhen.
+
+- [ ] Weitere Modelle untersuchen
+</details>
+
 ## exp_02_baseline_prompt_change_modell_role (04.05.2026)
 ### INPUT 
 identish exp_01<br>
