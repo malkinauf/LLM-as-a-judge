@@ -18,6 +18,12 @@ def save_dataset_to_file(
         logger.warning(f"File already exists: {file_path}")
         logger.info("Skipping save to avoid overwrite.")
         return
+    if not isinstance(dataset, list):
+        logger.error("Dataset must be a list of dictionaries.")
+        raise ValueError("Invalid dataset format. Expected a list of dictionaries.")
+    if not all(isinstance(item, dict) for item in dataset):
+        logger.error("All items in the dataset must be dictionaries.")
+        raise ValueError("Invalid dataset format. Expected a list of dictionaries.")
 
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
