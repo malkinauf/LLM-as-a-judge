@@ -22,3 +22,10 @@ dist/
 
 # OS
 .DS_Store
+
+# Node
+node_modules/
+
+#results
+results/* 
+!results/experiments_log_v1.csv
