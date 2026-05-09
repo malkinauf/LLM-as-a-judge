@@ -247,6 +247,14 @@ Classification metrics should be calculated only on successfully parsed outputs.
 - **V4** — structured output implementation using Ollama JSON schema constraints with Pydantic validation.  
   The original baseline prompt structure was preserved (answer->explanation), while output generation was constrained through `format=JudgeResponse.model_json_schema()`.
 
+| answer-explanation(50 words) | explanation(50 words)-answer | answer-explanation(5 words) |
+|---|---|---|
+| <img width="400" alt="media_images_confusion_matrix_1_3f7c6e36730ba057690e(1)" src="https://github.com/user-attachments/assets/f90b620a-58f3-47ee-8918-f33db10ceab0"/> | <img width="400" alt="media_images_confusion_matrix_1_be21854fe882f36ff969" src="https://github.com/user-attachments/assets/2983fbd5-b209-4984-9838-4d7947a82c9a"/> | <img width="400" alt="media_images_confusion_matrix_1_53898a7060112a8385ea" src="https://github.com/user-attachments/assets/00bc8968-7ee1-4abe-a58c-9772e167dd35"/>|
+
+<img width="400" alt="W B Chart 5_9_2026, 7_26_52 PM" src="https://github.com/user-attachments/assets/c43cde6f-00dd-4e63-9d6f-d94409a6094e" />
+<img width="400" alt="W B Chart 5_9_2026, 7_26_45 PM" src="https://github.com/user-attachments/assets/5e19bbd5-87e1-48df-a029-4e71b1e36274" />
+
+
 </details>
 
 <details>
