@@ -112,6 +112,14 @@ The watermelon seeds pass through your digestive system
 
 Note:
 Classification metrics were calculated only on successfully parsed outputs.
+
+| Llama3 | qwen2,5:14b  |
+|---|---|
+| <img width="400" alt="media_images_confusion_matrix_1_3f7c6e36730ba057690e" src="https://github.com/user-attachments/assets/89b43065-8c3f-453d-b7a1-b3a3ad5daf3f" /> | <img width="400" alt="media_images_confusion_matrix_1_0db64d41e2d6b1e37762" src="https://github.com/user-attachments/assets/717f7d66-077f-4728-97f4-79c9ad820727" /> |
+
+<img width="400" alt="W B Chart 5_9_2026, 7_13_04 PM" src="https://github.com/user-attachments/assets/fa445575-a56e-440f-a1b8-5ca7cdf45522" />
+<img width="400" alt="W B Chart 5_9_2026, 7_12_54 PM" src="https://github.com/user-attachments/assets/3eb2a4a5-6f17-4d11-8db8-7f17ac665766" />
+
 ## Findings
 ### 1. Stabile Ergebnisse bei wiederholten Durchläufen
 Mehrfache Ausführungen desselben Experiments führten zu nahezu identischen Ergebnissen.
