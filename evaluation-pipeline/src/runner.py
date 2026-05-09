@@ -1,7 +1,9 @@
 from tqdm import tqdm
 from .judge import judge_response
 from .prompts import build_experiment_prompt
+import logging
 
+logger = logging.getLogger(__name__)
 
 def run_judge_experiment(
     dataset,
@@ -128,5 +130,5 @@ def run_judge_experiment(
             "final_prompt": prompt
         })
 
-    print(f"Finished. Collected {len(results)} results.")
+    logger.info(f"Finished. Collected {len(results)} results.")
     return results
