@@ -255,6 +255,7 @@ Klassifikationsmetriken sollten nur auf erfolgreich geparsten Ausgaben berechnet
 <img width="400" alt="W B Chart 5_9_2026, 7_26_52 PM" src="https://github.com/user-attachments/assets/c43cde6f-00dd-4e63-9d6f-d94409a6094e" />
 <img width="400" alt="W B Chart 5_9_2026, 7_26_45 PM" src="https://github.com/user-attachments/assets/5e19bbd5-87e1-48df-a029-4e71b1e36274" />
 
+Die Confusion Matrices zeigen, dass die Prompt-Struktur die Klassifikationsbalance stark beeinflusst. Die Variante explanation→answer liefert die stabilsten und ausgewogensten Ergebnisse.
 
 </details>
 
