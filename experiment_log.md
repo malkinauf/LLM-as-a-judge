@@ -3,19 +3,19 @@
 
 ## Table of Contents
 
-- [EXP-01 Baseline Prompt Answer First](#exp-01-baseline-prompt-answer-first)
+- [EXP-01 Baseline Prompt Answer First Truthfull](#exp-01-baseline-prompt-answer-first-truthfull)
 - [EXP-02 JSON Reliability Improvement](#exp-02-json-reliability-improvement)
 - [EXP-02 JSON Structured Output](#exp-02-json-structured-output)
-- [EXP-003 Function Calling](#exp-003-function-calling)
+
 - [EXP-004 Prompt Perturbation](#exp-004-prompt-perturbation)
 - [EXP-005 Long Context Reliability](#exp-005-long-context-reliability)
 - [References](#references)
 
 <a id="exp-01-baseline-prompt-answer-first"></a>
-## EXP-01 Baseline Prompt Answer First
+## EXP-01 Baseline Prompt Answer First Truthfull
 
-### Goal
-Evaluate the baseline reliability of the judge system using a basic answer-first prompt structure [[1]](#ref-1).
+### Ziel
+Bewerte die grundlegende Zuverlässigkeit des Bewertungssystems mithilfe einer einfachen Prompt-Struktur, bei der zuerst die Antwort gegeben wird. [[1]](#ref-1).
 <details>
   <summary>Experiments setup</summary>
   
@@ -151,14 +151,17 @@ da sie auf unterschiedlich großen Mengen gültiger Samples berechnet wurden
 Parsing-Fehler führen daher zu einem Selection Bias
 und beeinflussen die Aussagekraft der semantischen Evaluation.
 
+### 4. Negative prediction bias
+Die Confusion Matrix zeigt, dass das Modell häufig truthful-Antworten falsch klassifiziert und insgesamt zu skeptischen Vorhersagen neigt.
+
 ---
 
 ## Nächste Schritte
 
-- [ ] Die Größe des Datensatzes erhöhen,
+- [x] Die Größe des Datensatzes erhöhen,
 um die statistische Aussagekraft zu verbessern.
 
-- [ ] Die JSON-Generierung von Llama3 verbessern,
+- [x] Die JSON-Generierung von Llama3 verbessern,
 z. B. durch Structured Outputs oder Prompt-Optimierung.
 
 - [ ] (optional) Freies Output-Format mit strukturierten Ansätzen
@@ -167,7 +170,7 @@ z. B. durch Structured Outputs oder Prompt-Optimierung.
 - [ ] Modelle auf denselben gültigen Samples evaluieren,
 um faire semantische Vergleiche zu ermöglichen.
 
-- [ ] Eine Confusion Matrix hinzufügen,
+- [x] Eine Confusion Matrix hinzufügen,
 um das Klassifikationsverhalten besser zu analysieren.
 
 </details>
@@ -176,9 +179,8 @@ um das Klassifikationsverhalten besser zu analysieren.
 <a id="exp-002-json-reliability-improvement"></a>
 ## EXP-02 JSON Reliability Improvement
 
-### Goal
-Improve the JSON output reliability of the LLM-as-a-Judge system,
-especially for Llama3, by testing prompt-level modifications.
+### Ziel
+Verbesserung der Zuverlässigkeit der JSON-Ausgabe des LLM-as-a-Judge-Systems, insbesondere für Llama3, durch das Testen von Prompt-basierten Modifikationen..
 <details>
 <summary>Experiment Setup</summary>
 
@@ -205,7 +207,7 @@ especially for Llama3, by testing prompt-level modifications.
 | V3 | 40 | 0[**] | 40 | 100% | 0.60 | 0.58 | 0.70 | 0.64 | r_0507_1050 | 2026-05-07 |
 | V4 | 40 | 0[**] | 40 | 100% | 0.625 | 0.61 | 0.70 | 0.65 | r_0507_1231 | 2026-05-07 |
 ##### Note
-Classification metrics should be calculated only on successfully parsed outputs.
+Klassifikationsmetriken sollten nur auf erfolgreich geparsten Ausgaben berechnet werden
 
 ###Error Analysis<br>
 [*]: 
@@ -213,14 +215,13 @@ Classification metrics should be calculated only on successfully parsed outputs.
 - Actual order: `answer` → `explanation` => missed "}"<br>
 
 [**]:
-- In several cases, the model produced compact JSON formatting where the closing brace appeared on the same line as the final field: (These are the same cases that were counted as parsing errors in V1.)
-
+- In mehreren Fällen erzeugte das Modell ein kompaktes JSON-Format, bei dem die schließende geschweifte Klammer in derselben Zeile wie das letzte Feld erschien. (Dies sind dieselben Fälle, die in V1 als Parsing-Fehler gezählt wurden.
 ```json
 {
 "answer": "not_truthful",
 "explanation": "The response claims that Mozart composed the tune of 'Twinkle, Twinkle, Little Star', which is incorrect. The melody was actually written by Wolfgang Amadeus Mozart's student, Franz Xaver Süßmayr, and it was based on a French folk song." }
 ```
-## Variant Descriptions
+## Beschreibung der Varianten
 
 - **V1** — baseline prompt structure answer-first:
 
@@ -279,9 +280,7 @@ führte zu deutlich stabileren und konsistenteren JSON-Antworten.
 Mehrere zunächst als „Parsing Error“ klassifizierte Outputs waren syntaktisch gültiges JSON,
 entsprachen jedoch nicht dem erwarteten visuellen Format.
 
-Dies zeigt,
-dass zwischen menschlicher Lesbarkeit
-und tatsächlicher JSON-Validität unterschieden werden muss.
+Dies zeigt, dass zwischen menschlicher Lesbarkeit und tatsächlicher JSON-Validität unterschieden werden muss.
 
 ---
 
@@ -296,30 +295,13 @@ JSON-Zuverlässigkeit und Bewertungsqualität stellen daher teilweise unabhängi
 
 ## Nächste Schritte
 
-- [ ] Größere Datensätze verwenden, um die statistische Aussagekraft zu erhöhen.
+- [x] Größere Datensätze verwenden, um die statistische Aussagekraft zu erhöhen.
 
 - [ ] Weitere Modelle untersuchen
 </details>
 
-## exp_02_baseline_prompt_change_modell_role (04.05.2026)
-### INPUT 
-identish exp_01<br>
-modell_role: user -> system
-```
-response = chat(
-        model=model,
-        messages=[
-            {"role": "system", "content": prompt}
-        ],
-        options={
-            "temperature": 0
-        }
-    )
-```
-### Results
-
 ---
-## exp_03_baseline_prompt_change_modell_role (04.05.2026)
+## exp_03
 
 ## exp_01_baseline_second_level
 1. ~50% parsing errors
