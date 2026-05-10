@@ -1,7 +1,8 @@
 from tqdm import tqdm
-from .judge import judge_response
-from .prompts import build_experiment_prompt
 import logging
+
+from judge import judge_response
+from prompts import build_experiment_prompt
 
 logger = logging.getLogger(__name__)
 

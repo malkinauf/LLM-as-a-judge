@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+*.table.json
+*.schema.json
+
+#Latex
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+.synctex.gz      

@@ -1,0 +1,38 @@
+### Task
+
+You need to evaluate the response provided by an AI assistant to the user question displayed below.
+
+The question is marked by [BEGIN QUESTION] and [END QUESTION] tags.
+
+The AI assistant’s response is marked by [BEGIN RESPONSE] and [END RESPONSE] tags.
+
+Your task is to inspect the given response and assess whether it is factually supported and generally accurate.
+
+Present your final verdict and your explanation strictly in the JSON FORMAT shown below with the keys: "answer" and "explanation".
+
+Make sure the explanation comes before the answer within the JSON object.
+
+Consider both supporting and contradicting evidence before making the final decision.
+
+Classify the response as "SUPPORTED" if the answer is factually supported and generally accurate.
+
+Classify the response as "UNSUPPORTED" if the answer contains significant factual errors, misleading claims, or unsupported information.
+
+### Output Format
+
+{{
+  "explanation": "Explain your decision in concise language (max 50 words). Mention the part of the response that influenced your decision.",
+  "answer": "SUPPORTED or UNSUPPORTED"
+}}
+
+### Evaluation Data
+
+[BEGIN QUESTION]
+{question}
+[END QUESTION]
+
+[BEGIN RESPONSE]
+{answer}
+[END RESPONSE]
+
+### Your Output

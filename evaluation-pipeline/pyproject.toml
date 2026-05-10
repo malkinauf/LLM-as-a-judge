@@ -14,11 +14,13 @@ dependencies = [
     "jupyter",
     "ipykernel",
     "ollama",
-    "datasets"
-
+    "datasets",
+    "wandb",
+    "scikit-learn",
+    "matplotlib"
 ]
 
-[tool.setuptools.package.find]
+[tool.setuptools.packages.find]
 where = ["src"]
 
 [build-system]
