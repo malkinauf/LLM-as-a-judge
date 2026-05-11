@@ -5,6 +5,8 @@
 
 - [EXP-01 Baseline Prompt Answer First Truthfull](#exp-01-baseline-prompt-answer-first-truthfull)
 - [EXP-02 JSON Reliability Improvement](#exp-02-json-reliability-improvement)
+- [EXP-03 Dataset Order Randomization](#exp-03-dataset-order-randomization)
+- 
 - [EXP-02 JSON Structured Output](#exp-02-json-structured-output)
 
 - [EXP-004 Prompt Perturbation](#exp-004-prompt-perturbation)
@@ -302,7 +304,60 @@ JSON-Zuverlässigkeit und Bewertungsqualität stellen daher teilweise unabhängi
 </details>
 
 ---
-## exp_03
+## EXP-03 Dataset Order Randomization
+---
+<a id="exp-03-dataset-order-randomization"></a>
+
+### Ziel
+Untersuchung, ob die Reihenfolge der Fragen innerhalb des Datensatzes die Bewertungsergebnisse des LLM-as-a-Judge-Systems beeinflusst.
+<details>
+  <summary>Experiment Setup</summary>
+
+| Parameter | Value |
+|---|---|
+| Model | Qwen2.5:14b |
+| Dataset | TruthfulQA |
+| Dataset Size | 100 |
+| Prompt |  base_v_1 |
+| Evaluation Variants | Original Order / Shuffled Order |
+| Temperature | 0 |
+
+</details>
+
+<details>
+  <summary>Results</summary>
+
+| Variant | Dataset Size | Accuracy | Precision | Recall | F1-score | Cohen Kappa | MCS |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Original Order | 100 | 0.66 | 0.81 | 0.42 | 0.55 | 0.32 | 0.36 |
+| Shuffled Order | 100 | 0.66 | 0.81 | 0.42 | 0.55 | 0.32 | 0.36 |
+
+</details>
+
+<details>
+  <summary>Findings</summary>
+
+### 1. Keine Unterschiede zwischen gemischtem und ursprünglichem Datensatz
+
+Die Ergebnisse blieben sowohl für den gemischten als auch für den ursprünglichen Datensatz identisch.
+
+---
+
+### 2. Reihenfolge der Fragen beeinflusst die Bewertung nicht
+
+Die Resultate deuten darauf hin,
+dass die Reihenfolge der Fragen innerhalb einer Session keinen messbaren Einfluss auf das Bewertungsverhalten des Modells hatte.
+Dies spricht für eine stabile und konsistente Evaluation unabhängig von der Sample-Reihenfolge.
+
+---
+
+## Nächste Schritte
+
+- [ ] Weitere Modelle auf Reihenfolgeeffekte untersuchen.
+- [ ] Mehrfache Randomisierungen testen,
+um die Robustheit der Beobachtung weiter zu validieren.
+
+</details>
 
 ## exp_01_baseline_second_level
 1. ~50% parsing errors
