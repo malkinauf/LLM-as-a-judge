@@ -111,6 +111,8 @@ The watermelon seeds pass through your digestive system
 | Llama3 | 40 | 16 | 24 | 60.0% | 0.625 | 0.70 | 0.54 | 0.61 | r_0506_1251| 2026-05-06 |
 | qwen2,5:14b  | 40 | 0 | 40 | 100.0% | 0.70 | 0.83 | 0.50 | 0.625 | r_0506_2318 | 2026-05-06 |
 | qwen2,5:14b  | 40 | 0 | 40 | 100.0% | 0.70 | 0.83 | 0.50 | 0.625 | r_0507_0852 | 2026-05-07 |
+| Llama3 | 100 | 45 | 55 | 55% | 0.65 | 0.63 | 0.50 | 0.56 | r_0510_0834 | 2026-05-10 |
+| qwen2,5:14b  | 100 | 0 | 100 | 100.0% | 0.66| 0.81 | 0.42 | 0.55 | r_0509_1950 | 2026-05-10 |
 
 Note:
 Classification metrics were calculated only on successfully parsed outputs.
