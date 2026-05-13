@@ -1,7 +1,9 @@
-from tqdm import tqdm
-from .judge import judge_response
-from .prompts import build_experiment_prompt
 import logging
+
+from tqdm import tqdm
+from evaluation_pipeline.judge import judge_response
+from evaluation_pipeline.prompts import build_experiment_prompt
+
 
 logger = logging.getLogger(__name__)
 
