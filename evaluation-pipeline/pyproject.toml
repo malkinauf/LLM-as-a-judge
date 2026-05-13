@@ -15,11 +15,13 @@ dependencies = [
     "ipykernel",
     "ollama",
     "datasets"
+    "scikit-learn"
+    "matplotlib"
 
 ]
 
 [tool.setuptools.package.find]
-where = ["src"]
+package-dir = {"" = "src"}
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]

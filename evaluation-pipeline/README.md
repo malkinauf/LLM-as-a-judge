@@ -1,55 +1,337 @@
 # LLM-as-a-Judge Evaluation Pipeline
 
-This project provides a simple pipeline to run LLM-as-a-judge experiments using custom prompts and datasets.
+A lightweight evaluation pipeline for running LLM-as-a-judge experiments with local language models through Ollama.
 
-## Project Structure
+This project is located inside the larger `LLM` repository.
 
-```
-evaluation-pipeline/
-├── datasets/ # Raw and prepared datasets
-├── notebooks/ # Jupyter notebooks for experiments
-├── prompts/ # Prompt templates
-├── results/ # Experiment outputs (ignored by git)
-├── src/ # Core logic
-│ ├── ___init___.py
-│ ├── dataset.py
-│ ├── judge.py
-│ ├── prompts.py
-│ └── runner.py
-├── pyproject.toml # Project dependencies
-├── .gitignore
-└── README.md
+---
+
+## Project structure
+
+```text
+LLM/
+└── evaluation-pipeline/
+    ├── datasets/
+    ├── notebooks/
+    │   └── run_experiments.ipynb
+    |   └── prepare_dataset.ipynb
+    ├── prompts/
+    ├── results/
+    ├── src/
+    │   └── evaluation_pipeline/
+    │       ├── __init__.py
+    │       ├── dataset.py
+    │       ├── judge.py
+    │       ├── prompts.py
+    │       └── runner.py
+    ├── pyproject.toml
+    └── README.md
 ```
 
 ---
 
-## Setup
+## Requirements
 
-### 1. Clone the repository
+Before setting up the project, make sure the following tools are installed:
+
+- Python 3.10 or newer
+- Git
+- Ollama
+
+---
+
+## 1. Install Ollama
+
+Download and install Ollama from:
+
+```text
+https://ollama.com/download
+```
+
+After installation, verify that Ollama is available:
 
 ```bash
-git clone <your-repo-url>
-cd evaluation-pipeline
+ollama --version
 ```
-### 2. Create virtual environment
+
+If Ollama is not running automatically, start it manually:
+
+```bash
+ollama serve
+```
+
+---
+
+## 2. Download local models
+
+Download at least one model before running the experiments.
+
+Examples:
+
+```bash
+ollama pull llama3
+ollama pull llama3.1
+ollama pull qwen2.5:14b
+ollama pull mistral
+```
+
+Check which models are installed:
+
+```bash
+ollama list
+```
+
+The model name used in the notebook must exactly match the name shown by `ollama list`.
+
+---
+
+## 3. Clone the repository
+
+Clone the main `LLM` repository:
+
+```bash
+git clone <repository-url>
+```
+
+Navigate to the evaluation pipeline project:
+
+```bash
+cd LLM/evaluation-pipeline
+```
+
+All following commands should be executed from the `evaluation-pipeline` directory.
+
+---
+
+## 4. Create a virtual environment
+
+### macOS / Linux
+
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate   # Mac/Linux
+source .venv/bin/activate
 ```
-### 3. Install dependencies
+
+### Windows PowerShell
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks the activation script, run:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Then activate the environment again:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+---
+
+## 5. Install the project
+
+Upgrade pip:
+
+```bash
+python -m pip install --upgrade pip
+```
+
+Install the package in editable mode:
+
 ```bash
 pip install -e .
 ```
-### 4. (Optional but recommended) Add Jupyter kernel
+
+Editable mode allows changes in `src/evaluation_pipeline/` to be used immediately without reinstalling the package.
+
+---
+
+## 6. Set up the Jupyter kernel
+
+Install the kernel for this virtual environment:
+
 ```bash
-python -m ipykernel install --user --name={name}
+python -m ipykernel install --user --name evaluation-pipeline --display-name "Python (evaluation-pipeline)"
 ```
 
-###  How it works
-- You configure experiments in the notebook
-- Core logic lives in src/
-- Prompts are loaded from prompts/
-- Results are saved to results/
+This makes the environment available in Jupyter and VS Code notebooks.
 
-### Troubleshooting
-continue
+To check available kernels:
+
+```bash
+jupyter kernelspec list
+```
+
+You should see a kernel named:
+
+```text
+evaluation-pipeline
+```
+
+---
+
+## 7. Verify the installation
+
+Check that the package can be imported:
+
+```bash
+python -c "import evaluation_pipeline; print('Package import OK')"
+```
+
+Check that Ollama is accessible from Python:
+
+```bash
+python -c "import ollama; print(ollama.list())"
+```
+
+---
+
+## 8. Run the notebook
+
+Start Jupyter from the project directory:
+
+```bash
+jupyter notebook
+```
+
+Open:
+
+```text
+notebooks/run_experiments.ipynb
+```
+
+Select the kernel:
+
+```text
+Python (evaluation-pipeline)
+```
+
+---
+
+## 9. Configure the model
+
+Inside `run_experiments.ipynb`, set the model name.
+
+Examples:
+
+```python
+model_name = "llama3"
+```
+
+```python
+model_name = "llama3.1"
+```
+
+```python
+model_name = "qwen2.5:14b"
+```
+
+```python
+model_name = "mistral"
+```
+
+The selected model must already be installed locally with Ollama.
+
+---
+
+## 10. Run experiments
+
+Run the notebook cells sequentially.
+
+Experiment outputs are saved in:
+
+```text
+results/
+```
+
+---
+
+## Clean reinstall
+
+Use this if you want to test the setup from scratch.
+
+### macOS / Linux
+
+```bash
+deactivate 2>/dev/null || true
+rm -rf .venv build dist *.egg-info src/*.egg-info
+
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e .
+```
+
+### Windows PowerShell
+
+```powershell
+deactivate
+Remove-Item -Recurse -Force .venv -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force *.egg-info -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force src\*.egg-info -ErrorAction SilentlyContinue
+
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -e .
+```
+
+---
+
+## Troubleshooting
+
+### `ModuleNotFoundError: No module named 'evaluation_pipeline'`
+
+Make sure you installed the package from the `evaluation-pipeline` directory:
+
+```bash
+pip install -e .
+```
+
+Also check that the package structure contains:
+
+```text
+src/evaluation_pipeline/__init__.py
+```
+
+### Ollama is not found
+
+Make sure Ollama is installed and available in your terminal:
+
+```bash
+ollama --version
+```
+
+### Model not found
+
+Download the model first:
+
+```bash
+ollama pull llama3
+```
+
+Or use a model name listed by:
+
+```bash
+ollama list
+```
+
+### Notebook uses the wrong environment
+
+Reinstall the Jupyter kernel:
+
+```bash
+python -m ipykernel install --user --name evaluation-pipeline --display-name "Python (evaluation-pipeline)"
+```
+
+Then restart Jupyter and select:
+
+```text
+Python (evaluation-pipeline)
+```
