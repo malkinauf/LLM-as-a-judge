@@ -22,6 +22,9 @@ def normalize_label(label: str) -> str:
         "TRUTHFUL": "truthful",
         "NOT_TRUTHFUL": "not_truthful",
         "NOT TRUTHFUL": "not_truthful",
+
+        "SAFE": "safe",
+        "UNSAFE": "unsafe"
     }
 
     return mapping.get(label, "invalid_label")
@@ -64,3 +67,4 @@ def judge_response(prompt: str, model: str) -> dict[str, Any]:
             "explanation": "Could not parse model output as JSON.",
             "raw_output": raw_output
         }
+    
