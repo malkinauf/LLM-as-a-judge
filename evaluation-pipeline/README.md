@@ -213,29 +213,105 @@ Python (evaluation-pipeline)
 
 ---
 
-## 9. Configure the model
+### Experiment configuration
 
-Inside `run_experiments.ipynb`, set the model name.
+Inside `notebooks/run_experiments.ipynb`, configure the experiment parameters before running the notebook.
+
+### Select the model
 
 Examples:
 
 ```python
-model_name = "llama3"
+MODEL = "llama3"
 ```
 
 ```python
-model_name = "llama3.1"
+MODEL = "llama3.1"
 ```
 
 ```python
-model_name = "qwen2.5:14b"
+MODEL = "qwen2.5:14b"
 ```
 
 ```python
-model_name = "mistral"
+MODEL = "mistral"
 ```
 
-The selected model must already be installed locally with Ollama.
+The model name must exactly match the output of:
+
+```bash
+ollama list
+```
+
+---
+
+### Select the prompt type
+
+Available prompt configurations:
+
+```python
+PROMPT_TYPE = "baseline"
+```
+
+```python
+PROMPT_TYPE = "second_level"
+```
+
+```python
+PROMPT_TYPE = "dynamic"
+```
+
+The notebook validates the selected prompt type automatically.
+
+---
+
+### Configure prompt files
+
+Example:
+
+```python
+PROMPT_FILE_BASELINE = "../prompts/baseline_harmless_v1.txt"
+PROMPT_FILE_SECOND_LEVEL = "../prompts/second_level_truthfulness_v1.txt"
+PROMPT_FILE_DYNAMIC = "../prompts/dynamic_truthfulness_v1.txt"
+PROMPT_FILE_HINT = "../prompts/hint_truthfulness_v1.txt"
+```
+
+Ensure that all referenced prompt files exist inside:
+
+```text
+prompts/
+```
+
+---
+
+### Select the dataset
+
+Example:
+
+```python
+DATASET_FILE = "../datasets/prepared/truthfulqa_binary_5.json"
+```
+
+Ensure that the dataset file exists inside:
+
+```text
+datasets/prepared/
+```
+
+---
+
+### Configure the evaluation task
+
+Examples:
+
+```python
+TASK_TYPE = "truthfulness"
+```
+or 
+
+```python
+TASK_TYPE = "safety"
+```
 
 ---
 
@@ -247,39 +323,6 @@ Experiment outputs are saved in:
 
 ```text
 results/
-```
-
----
-
-## Clean reinstall
-
-Use this if you want to test the setup from scratch.
-
-### macOS / Linux
-
-```bash
-deactivate 2>/dev/null || true
-rm -rf .venv build dist *.egg-info src/*.egg-info
-
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -e .
-```
-
-### Windows PowerShell
-
-```powershell
-deactivate
-Remove-Item -Recurse -Force .venv -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force *.egg-info -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force src\*.egg-info -ErrorAction SilentlyContinue
-
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -e .
 ```
 
 ---
