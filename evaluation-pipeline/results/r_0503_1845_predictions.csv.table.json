@@ -1,0 +1,103 @@
+{
+  "columns": [
+    {
+      "field": "run_id",
+      "title": "run_id",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 97
+    },
+    {
+      "field": "model",
+      "title": "model",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 97
+    },
+    {
+      "field": "prompt_file",
+      "title": "prompt_file",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 259
+    },
+    {
+      "field": "dataset_file",
+      "title": "dataset_file",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 309
+    },
+    {
+      "field": "id",
+      "title": "id",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 68
+    },
+    {
+      "field": "question",
+      "title": "question",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 430
+    },
+    {
+      "field": "answer",
+      "title": "answer",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 550
+    },
+    {
+      "field": "true_label",
+      "title": "true_label",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 121
+    },
+    {
+      "field": "predicted_label",
+      "title": "predicted_label",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 156
+    },
+    {
+      "field": "explanation",
+      "title": "explanation",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 1844
+    },
+    {
+      "field": "raw_output",
+      "title": "raw_output",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 2105
+    }
+  ]
+}

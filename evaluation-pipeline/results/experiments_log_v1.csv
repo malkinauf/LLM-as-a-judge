@@ -1,0 +1,18 @@
+run_id,status,comment,model,prompt_type,prompt_file,dataset_file,total_samples,valid_samples,coverage,parsing_errors,invalid_labels,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,timestamp,json_valid_rate
+r_0504_1511,"RELEVANT
+","1.Second level always returned ""correct"", even when true and predicted labels mismatched.
+2.16/40 parsing errors occurred in first-level responses
+3.9 first-level misclassifications",llama3:latest,second_level,second_level_truthfulness_v1.txt,truthfulqa_binary_40.json,40,20,0.5,20,0,0.5,0.0,0.5,0.65,0.8571428571428571,0.5,0.631578947368421,2026-05-04 18:26:29,
+r_0504_1827,"RELEVANT
+",1. 9 (first-level) misclassifications,llama3:latest,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,24,0.6,16,0,0.4,0.0,0.6,0.625,0.7,0.5384615384615384,0.6086956521739131,2026-05-04 18:43:18,
+r_0504_2152, NOT_RELEVANT,Consistent parsing issue: missing closing JSON brace,llama3:latest,dynamic,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,3,0.075,37,0,0.925,0.0,0.0749999999999999,1.0,1.0,1.0,1.0,2026-05-04 22:50:10,
+r_0506_1251,pending_review,,llama3:latest,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,24,0.6,16,0,0.4,0.0,,0.625,0.7,0.5384615384615384,0.6086956521739131,2026-05-06 13:06:18,0.6
+r_0506_1313,pending_review,,llama3:latest,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,27,0.675,13,0,0.325,0.0,,0.7037037037037037,0.6875,0.7857142857142857,0.7333333333333333,2026-05-06 13:28:33,0.675
+r_0506_1329,pending_review,,llama3:latest,baseline,baseline_truthfulness_v2.txt,truthfulqa_binary_40.json,40,39,0.975,1,0,0.025,0.0,,0.6666666666666666,0.6842105263157895,0.65,0.6666666666666666,2026-05-06 13:44:33,0.975
+r_0506_1540,pending_review,,llama3:latest,baseline,baseline_truthfulness_v3.txt,truthfulqa_binary_40.json,40,40,1.0,0,0,0.0,0.0,,0.6,0.5833333333333334,0.7,0.6363636363636364,2026-05-06 15:45:49,1.0
+r_0506_2318,pending_review,,qwen2.5:14b,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,40,1.0,0,0,0.0,0.0,,0.7,0.8333333333333334,0.5,0.625,2026-05-06 23:40:41,1.0
+r_0506_2343,pending_review,,qwen2.5:14b,baseline,baseline_truthfulness_v2.txt,truthfulqa_binary_40.json,40,40,1.0,0,0,0.0,0.0,,0.625,0.7272727272727273,0.4,0.5161290322580645,2026-05-07 00:06:26,1.0
+r_0507_0010,pending_review,,qwen2.5:14b,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_100.json,100,100,1.0,0,0,0.0,0.0,,0.66,0.8076923076923077,0.42,0.5526315789473685,2026-05-07 07:08:08,1.0
+r_0507_0852,pending_review,,qwen2.5:14b,baseline,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,40,1.0,0,0,0.0,0.0,,0.7,0.8333333333333334,0.5,0.625,2026-05-07 09:12:46,1.0
+r_0507_1012,pending_review,,llama3:latest,baseline,baseline_truthfulness_v2.txt,truthfulqa_binary_40.json,40,39,0.975,1,0,0.025,0.0,,0.6666666666666666,0.6842105263157895,0.65,0.6666666666666666,2026-05-07 10:27:14,0.975
+r_0507_1050,pending_review,,llama3:latest,baseline,baseline_truthfulness_v3.txt,truthfulqa_binary_40.json,40,40,1.0,0,0,0.0,0.0,,0.6,0.5833333333333334,0.7,0.6363636363636364,2026-05-07 10:56:31,1.0
