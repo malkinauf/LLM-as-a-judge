@@ -1,2 +1,0 @@
-run_id,status,comment,model,prompt_file,dataset_file,total_samples,valid_samples,parsing_errors,invalid_labels,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,tp,tn,fp,fn,timestamp
-r_0503_2358,pending_review,,llama3:latest,second_level_truthfulness_v1.txt,truthfulqa_binary_5.json,10,0,4,6,0.4,0.6,0.6,,0,0,0,0,0,0,0,2026-05-04 00:17:32

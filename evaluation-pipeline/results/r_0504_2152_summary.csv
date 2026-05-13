@@ -1,2 +1,0 @@
-run_id,comment,model,prompt_type,prompt_file,dataset_file,total_samples,valid_samples,coverage,parsing_errors,invalid_labels,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,timestamp
-r_0504_2152,,llama3:latest,dynamic,baseline_truthfulness_v1.txt,truthfulqa_binary_40.json,40,3,0.075,37,0,0.925,0.0,0.07499999999999996,1.0,1.0,1.0,1.0,2026-05-04 22:50:10

@@ -1,2 +1,0 @@
-run_id,model,prompt_file,dataset_file,total_samples,valid_samples,parsing_errors,invalid_labels,parsing_rate,invalid_label_rate,json_success_rate,accuracy,precision,recall,f1,tp,tn,fp,fn,timestamp
-run_001,llama3:latest,baseline_truthfulness_v1.txt,truthfulqa_binary_5.json,10,6,4,0,0.4,0.0,0.6,0.8333333333333334,0.75,1.0,0.8571428571428571,3,2,1,0,2026-05-03 18:27:47
