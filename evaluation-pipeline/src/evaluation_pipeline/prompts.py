@@ -1,6 +1,3 @@
-#
-
-
 from pathlib import Path
 
 def load_prompt_template(prompt_file: str) -> str:

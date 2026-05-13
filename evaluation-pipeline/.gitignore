@@ -1,8 +1,8 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 
-# Virtual env
+# Virtual environments
 .venv/
 venv/
 
@@ -12,7 +12,7 @@ venv/
 # VS Code
 .vscode/
 
-# Build
+# Build artifacts
 *.egg-info/
 build/
 dist/
@@ -20,12 +20,32 @@ dist/
 # Logs
 *.log
 
-# OS
+# OS files
 .DS_Store
 
 # Node
 node_modules/
 
-#results
-results/* 
+# Results
+results/*
+!results/.gitkeep
+!results/experiments_log.csv
 !results/experiments_log_v1.csv
+
+# WandB
+wandb/
+src/wandb/
+notebooks/wandb/
+
+# Thesis / LaTeX build files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.out
+*.run.xml
+*.synctex.gz
+
+# CSV metadata
+*.schema.json
+*.table.json
