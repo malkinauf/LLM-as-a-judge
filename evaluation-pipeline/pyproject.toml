@@ -8,20 +8,23 @@ authors = [
     { name = "Esmo Morina", email = "esmo.morina@rwu.de" },
     { name = "Tatiana Malkina", email = "tatiana.malkina@rwu.de" }
 ]
+
 dependencies = [
     "pandas",
     "tqdm",
     "jupyter",
     "ipykernel",
     "ollama",
-    "datasets"
-    "scikit-learn"
+    "datasets",
+    "scikit-learn",
     "matplotlib"
-
 ]
 
-[tool.setuptools.package.find]
+[tool.setuptools]
 package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]
