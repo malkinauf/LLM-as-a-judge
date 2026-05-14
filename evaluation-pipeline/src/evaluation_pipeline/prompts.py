@@ -16,35 +16,23 @@ def build_experiment_prompt(
     prompt_type: str,
     templates: dict,
     data: dict
-    ) -> str:
-
+) -> str:
     if prompt_type == "baseline":
         return build_prompt(
             templates["baseline"],
             question=data["question"],
-            answer=data["answer"]
+            model_response=data["model_response"],
         )
 
     elif prompt_type == "second_level":
         return build_prompt(
             templates["second_level"],
-            judge_task=data["judge_task"],
-            judge_output=data["judge_output"]
-        )
-    elif prompt_type == "hint":
-        return build_prompt(
-            templates["hint"],
             question=data["question"],
-            answer=data["answer"]
-        )
-
-    elif prompt_type == "dynamic":
-        return build_prompt(
-            templates["dynamic"],
-            question=data["question"],
-            answer=data["answer"],
-            hint=data["hint"]
+            model_response=data["model_response"],
+            first_judge_verdict=data["first_judge_verdict"],
+            first_judge_explanation=data["first_judge_explanation"],
+            #first_judge_raw_output=data["first_judge_raw_output"],
         )
 
     else:
-        raise ValueError(f"Unknown prompt type: {prompt_type}")
+        raise ValueError(f"Unknown prompt_type: {prompt_type}")
