@@ -14,11 +14,12 @@ def run_judge_experiment(
     model,
     method,
     templates,
-    prompt_file,
     dataset_file
 ):
     results = []
+    
 # ToDo: need refactoring of the code
+
     if not run_id:
         print("Experiment skipped. Set RUN_EXPERIMENT = True to run.")
         return results
