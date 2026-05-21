@@ -17,7 +17,9 @@ dependencies = [
     "ollama",
     "datasets",
     "scikit-learn",
-    "matplotlib"
+    "matplotlib",
+    "wandb",
+    "openpyxl"
 ]
 
 [tool.setuptools]

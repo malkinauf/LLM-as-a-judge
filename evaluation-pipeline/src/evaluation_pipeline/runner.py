@@ -1,136 +1,198 @@
 import logging
+from typing import Any
 
 from tqdm import tqdm
+
 from evaluation_pipeline.judge import judge_response
 from evaluation_pipeline.prompts import build_experiment_prompt
 
 
 logger = logging.getLogger(__name__)
 
+
+VALID_METHODS = (
+    "baseline",
+    "second_level",
+)
+
+VALID_JUDGE_LABELS = {
+    "truthful",
+    "not_truthful",
+}
+
+VALID_SECOND_LEVEL_VERDICTS = {
+    "correct",
+    "not_correct",
+}
+
+
 def run_judge_experiment(
-    dataset,
-    run_id,
-    model,
-    prompt_type,
-    templates,
-    prompt_file,
-    dataset_file
-):
-    results = []
-# ToDo: need refactoring of the code
+    dataset: list[dict[str, Any]],
+    run_id: str,
+    model: str,
+    method: str,
+    templates: dict[str, str],
+    dataset_file: str,
+) -> list[dict[str, Any]]:
+
+    if method not in VALID_METHODS:
+        raise ValueError(
+            f"Unknown method: {method}. "
+            f"Expected one of: {VALID_METHODS}"
+        )
+
+    results: list[dict[str, Any]] = []
+
     if not run_id:
-        print("Experiment skipped. Set RUN_EXPERIMENT = True to run.")
+        logger.info(
+            "Experiment skipped because run_id is empty."
+        )
         return results
 
-    for example in tqdm(dataset):
+    for example in tqdm(
+        dataset,
+        desc=f"Running {method} judge experiment",
+    ):
 
-        if prompt_type == "baseline":
-            prompt = build_experiment_prompt(
-                prompt_type="baseline",
-                templates=templates,
-                data=example
-            )
-            judge_result = judge_response(prompt, model)
+        baseline_prompt = build_experiment_prompt(
+            prompt_type="baseline",
+            templates=templates,
+            data=example,
+        )
 
-        elif prompt_type == "second_level":
-            judge_prompt = build_experiment_prompt(
-                prompt_type="baseline",
-                templates=templates,
-                data=example
-            )
-
-            first_judge_result = judge_response(judge_prompt, model)
-
-            second_level_data = {
-                "judge_task": judge_prompt.split("### Your Output")[0].strip(),
-                "judge_output": first_judge_result["raw_output"]
-            }
-
-            prompt = build_experiment_prompt(
-                prompt_type="second_level",
-                templates=templates,
-                data=second_level_data
+        try:
+            first_judge_result = judge_response(
+                baseline_prompt,
+                model,
             )
 
-            judge_result = judge_response(prompt, model)
-
-        elif prompt_type == "dynamic":
-            hint_prompt = build_experiment_prompt(
-                prompt_type="hint",
-                templates=templates,
-                data=example
+        except Exception as e:
+            logger.exception(
+                f"First-level judge failed "
+                f"for example {example.get('id')}: {e}"
             )
 
-            hint_result = judge_response(hint_prompt, model)
+            results.append({
+                "id": example.get("id"),
+                "predicted_label": "runtime_error",
+                "error": str(e),
+            })
 
-            dynamic_data = {
-                "question": example["question"],
-                "answer": example["answer"],
-                "hint": hint_result["raw_output"]
-            }
+            continue
 
-            prompt = build_experiment_prompt(
-                prompt_type="dynamic",
-                templates=templates,
-                data=dynamic_data
-            )
+        first_level_label = first_judge_result.get(
+            "predicted_label"
+        )
 
-            judge_result = judge_response(prompt, model)
-
-        else:
-            raise ValueError(f"Unknown prompt_type: {prompt_type}")
-
-        results.append({
-            "run_id": run_id,
-            "model": model,
-            "prompt_type": prompt_type,
-            "prompt_file": prompt_file,
-            "dataset_file": dataset_file,
-
+        result = {
             "id": example["id"],
             "question": example["question"],
-            "answer": example["answer"],
-
+            "model_response": example["model_response"],
             "true_label": example["y_true"],
 
-            # prediction of the first-level judge
-            "first_level_label": (
-                first_judge_result["predicted_label"]
-                if prompt_type == "second_level"
-                else judge_result["predicted_label"]
+            "model": model,
+            "method": method,
+            "run_id": run_id,
+            "dataset_file": dataset_file,
+
+            "first_prompt": baseline_prompt,
+            "first_raw_output": first_judge_result.get(
+                "raw_output"
+            ),
+            "first_level_label": first_level_label,
+            "first_level_explanation": first_judge_result.get(
+                "explanation"
             ),
 
-            # final prediction used for metrics
-            "predicted_label": (
-                first_judge_result["predicted_label"]
-                if prompt_type == "second_level" and judge_result["predicted_label"] == "correct"
-                else (
-                    judge_result.get("corrected_answer")
-                    if prompt_type == "second_level"
-                    else judge_result["predicted_label"]
+            "second_level_prompt": None,
+            "second_level_raw_output": None,
+            "second_level_verdict": None,
+            "second_level_explanation": None,
+
+            "predicted_label": None,
+        }
+
+        if method == "baseline":
+            if first_level_label in VALID_JUDGE_LABELS:
+                result["predicted_label"] = first_level_label
+            else:
+                result["predicted_label"] = "parsing_error"
+
+            results.append(result)
+            continue
+
+        if method == "second_level":
+
+            if first_level_label not in VALID_JUDGE_LABELS:
+                result["predicted_label"] = "parsing_error"
+                results.append(result)
+                continue
+
+            second_level_prompt = build_experiment_prompt(
+                prompt_type="second_level",
+                templates=templates,
+                data={
+                    "question": example["question"],
+                    "model_response": example["model_response"],
+                    "first_judge_verdict": first_level_label,
+                    "first_judge_explanation": result[
+                        "first_level_explanation"
+                    ],
+                },
+            )
+
+            try:
+                second_result = judge_response(
+                    second_level_prompt,
+                    model,
                 )
-            ),
 
-            # whether the second-level judge thinks the first judge was correct
-            "second_level_verdict": (
-                judge_result["predicted_label"]
-                if prompt_type == "second_level"
-                else None
-            ),
-            "hint_output": (
-                hint_result["raw_output"]
-                if prompt_type == "dynamic"
-                else None
-            ),
+            except Exception as e:
+                logger.exception(
+                    f"Second-level judge failed "
+                    f"for example {example.get('id')}: {e}"
+                )
 
+                result["predicted_label"] = "runtime_error"
+                result["error"] = str(e)
 
-            "explanation": judge_result.get("corrected_explanation")
-            if prompt_type == "second_level"
-            else judge_result.get("explanation"),
+                results.append(result)
+                continue
 
-            "raw_output": judge_result["raw_output"],
-            "final_prompt": prompt
-        })
+            second_level_verdict = second_result.get(
+                "predicted_label"
+            )
 
-    logger.info(f"Finished. Collected {len(results)} results.")
+            result["second_level_prompt"] = second_level_prompt
+            result["second_level_raw_output"] = second_result.get(
+                "raw_output"
+            )
+            result["second_level_verdict"] = second_level_verdict
+            result["second_level_explanation"] = (
+                second_result.get("corrected_explanation")
+                or second_result.get("explanation")
+            )
+
+            if second_level_verdict == "correct":
+                result["predicted_label"] = first_level_label
+
+            elif second_level_verdict == "not_correct":
+                corrected_verdict = second_result.get(
+                    "corrected_verdict"
+                )
+
+                if corrected_verdict in VALID_JUDGE_LABELS:
+                    result["predicted_label"] = corrected_verdict
+                else:
+                    result["predicted_label"] = "parsing_error"
+
+            else:
+                result["predicted_label"] = "parsing_error"
+
+            results.append(result)
+
+    logger.info(
+        f"Finished. Collected {len(results)} results."
+    )
+
     return results
