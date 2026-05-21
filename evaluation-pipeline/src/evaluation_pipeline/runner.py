@@ -29,11 +29,15 @@ VALID_SECOND_LEVEL_VERDICTS = {
 def run_judge_experiment(
     dataset: list[dict[str, Any]],
     run_id: str,
-    model: str,
-    method: str,
-    templates: dict[str, str],
-    dataset_file: str,
+    first_model: str,
+    second_model: str | None = None,
+    method: str = "baseline",
+    templates: dict[str, str] | None = None,
+    dataset_file: str = "",
 ) -> list[dict[str, Any]]:
+
+    if templates is None:
+        templates = {}
 
     if method not in VALID_METHODS:
         raise ValueError(
@@ -63,7 +67,7 @@ def run_judge_experiment(
         try:
             first_judge_result = judge_response(
                 baseline_prompt,
-                model,
+                first_model,
             )
 
         except Exception as e:
@@ -90,7 +94,8 @@ def run_judge_experiment(
             "model_response": example["model_response"],
             "true_label": example["y_true"],
 
-            "model": model,
+            "first_model": first_model,
+            "second_model": second_model,
             "method": method,
             "run_id": run_id,
             "dataset_file": dataset_file,
@@ -144,7 +149,7 @@ def run_judge_experiment(
             try:
                 second_result = judge_response(
                     second_level_prompt,
-                    model,
+                    second_model,
                 )
 
             except Exception as e:
