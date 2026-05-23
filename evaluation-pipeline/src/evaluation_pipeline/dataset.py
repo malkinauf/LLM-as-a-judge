@@ -2,6 +2,10 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
+from datasets import load_dataset
+from tqdm import tqdm
+from collections import Counter
+from datasets import concatenate_datasets
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +14,9 @@ REQUIRED_DATASET_KEYS = {"id", "question", "model_response", "y_true"}
 
 VALID_LABELS = {
     "truthful",
-    "not_truthful"
+    "not_truthful",
+    "SAFE",
+    "UNSAFE"
 }
 
 
@@ -51,14 +57,33 @@ def save_dataset_to_file(
     dataset: list[dict[str, Any]],
     path: str,
     overwrite: bool = False,
+    raise_on_exists: bool = False
 ) -> None:
+    """
+    Save prepared dataset to a JSON file.
+    
+    Expected dataset format:
+    [
+        {
+        "id": str,
+        "question": str,
+        "model_response":str,
+        "y_true": str
+        }
+    ]"""
+
     validate_dataset(dataset)
 
     file_path = Path(path)
 
     if file_path.exists() and not overwrite:
-        logger.warning(f"File already exists: {file_path}")
-        logger.info("Skipping save to avoid overwrite.")
+        message = f"File already exists: {file_path}"
+
+        if raise_on_exists:
+            raise FileExistsError(message)
+        
+        logger.warning(message)
+        logger.info("skipping save to avoid aoverwrite")
         return
 
     file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -67,6 +92,89 @@ def save_dataset_to_file(
         json.dump(dataset, f, ensure_ascii=False, indent=2)
 
     logger.info(f"Dataset saved to {file_path}")
+
+
+def prepare_beavertails(n_samples, seed=42):
+
+
+    ds =load_dataset("PKU-Alignment/BeaverTails")["330k_train"]
+
+    safe_ds = ds.filter(lambda x: x["is_safe"])
+    unsafe_ds = ds.filter(lambda x:not x["is_safe"])
+    
+    half = n_samples // 2
+
+    safe_ds =safe_ds.shuffle(seed=seed).select(range(half))
+    unsafe_ds = unsafe_ds.shuffle(seed=seed).select(range(half))
+
+    final_ds = concatenate_datasets([safe_ds,unsafe_ds])
+    final_ds = final_ds.shuffle(seed=seed)
+
+    data = []
+                                            
+
+    for i, row in enumerate(tqdm(final_ds)):
+        label ="SAFE" if row["is_safe"] else "UNSAFE"
+
+        data.append({
+            "id": f"beavertails_{i}",
+            "question": row["prompt"],
+            "model_response": row["response"],
+            "y_true": label
+        })
+
+    return data
+
+
+def prepare_truthfulqa(n_samples, seed=42):
+
+    ds = load_dataset(
+        "truthful_qa",
+        "generation"
+    )["validation"]
+
+    ds = ds.shuffle(seed=seed).select(range(n_samples))
+
+    data = []
+
+    for i, row in enumerate(tqdm(ds)):
+
+        question = row["question"]
+
+        # TRUE sample
+        if row["correct_answers"]:
+
+            data.append({
+                "id": f"truthfulqa_true_{i}",
+                "dataset": "truthfulqa",
+                "question": question,
+                "model_response": row["correct_answers"][0],
+                "y_true": "TRUE",
+            })
+
+        # FALSE sample
+        if row["incorrect_answers"]:
+
+            data.append({
+                "id": f"truthfulqa_false_{i}",
+                "dataset": "truthfulqa",
+                "question": question,
+                "model_response": row["incorrect_answers"][0],
+                "y_true": "FALSE",
+            })
+
+    return data
+
+def preview_dataset(data):
+
+    labels = [x["y_true"] for x in data]
+
+    print("Total samples:", len(data))
+    print("Labels:", Counter(labels))
+
+    print("\nExample:\n")
+    print(json.dumps(data[0], indent=2, ensure_ascii=False))
+                          
 
 
 def load_dataset_from_file(path: str) -> list[dict[str, Any]]:
