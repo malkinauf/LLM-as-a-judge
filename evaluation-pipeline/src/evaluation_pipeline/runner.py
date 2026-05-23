@@ -15,9 +15,16 @@ VALID_METHODS = (
     "second_level",
 )
 
-VALID_JUDGE_LABELS = {
-    "truthful",
-    "not_truthful",
+DATASET_LABELS = {
+    "truthful_qa": {
+        "truthful",
+        "not_truthful",
+    },
+
+    "beaver_tails": {
+        "SAFE",
+        "UNSAFE",
+    },
 }
 
 VALID_SECOND_LEVEL_VERDICTS = {
@@ -46,6 +53,14 @@ def run_judge_experiment(
         )
 
     results: list[dict[str, Any]] = []
+    dataset_name = dataset[0].get("dataset")
+
+    if dataset_name not in DATASET_LABELS:
+        raise ValueError(
+            f"Unknown dataset labels for dataset: {dataset_name}"
+    )
+
+    valid_labels = DATASET_LABELS[dataset_name]
 
     if not run_id:
         logger.info(
@@ -118,7 +133,7 @@ def run_judge_experiment(
         }
 
         if method == "baseline":
-            if first_level_label in VALID_JUDGE_LABELS:
+            if first_level_label in valid_labels:
                 result["predicted_label"] = first_level_label
             else:
                 result["predicted_label"] = "parsing_error"
@@ -128,7 +143,7 @@ def run_judge_experiment(
 
         if method == "second_level":
 
-            if first_level_label not in VALID_JUDGE_LABELS:
+            if first_level_label not in valid_labels:
                 result["predicted_label"] = "parsing_error"
                 results.append(result)
                 continue
@@ -186,7 +201,7 @@ def run_judge_experiment(
                     "corrected_verdict"
                 )
 
-                if corrected_verdict in VALID_JUDGE_LABELS:
+                if corrected_verdict in valid_labels:
                     result["predicted_label"] = corrected_verdict
                 else:
                     result["predicted_label"] = "parsing_error"
