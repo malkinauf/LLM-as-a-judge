@@ -34,8 +34,13 @@ results/*
 
 # WandB
 wandb/
+wandb_utils/
 src/wandb/
 notebooks/wandb/
+
+*.zip
+
+.ipynb_checkpoints
 
 # Thesis / LaTeX build files
 *.aux
