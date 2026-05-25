@@ -22,8 +22,8 @@ DATASET_LABELS = {
     },
 
     "beaver_tails": {
-        "SAFE",
-        "UNSAFE",
+        "safe",
+        "unsafe",
     },
 }
 
@@ -31,6 +31,7 @@ VALID_SECOND_LEVEL_VERDICTS = {
     "correct",
     "not_correct",
 }
+
 
 
 def run_judge_experiment(
@@ -51,8 +52,14 @@ def run_judge_experiment(
             f"Unknown method: {method}. "
             f"Expected one of: {VALID_METHODS}"
         )
-
-    results: list[dict[str, Any]] = []
+    
+    if method == "second_level" and not second_model:
+        raise ValueError("second_model is required for second_level method")
+    
+    if not dataset:
+        raise ValueError("Dataset is empty")
+    
+    
     dataset_name = dataset[0].get("dataset")
 
     if dataset_name not in DATASET_LABELS:
@@ -61,6 +68,7 @@ def run_judge_experiment(
     )
 
     valid_labels = DATASET_LABELS[dataset_name]
+    results: list[dict[str, Any]] = []
 
     if not run_id:
         logger.info(

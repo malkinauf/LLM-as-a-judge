@@ -15,8 +15,8 @@ REQUIRED_DATASET_KEYS = {"id", "question", "model_response", "y_true"}
 VALID_LABELS = {
     "truthful",
     "not_truthful",
-    "SAFE",
-    "UNSAFE"
+    "safe",
+    "unsafe"
 }
 
 
@@ -114,10 +114,11 @@ def prepare_beavertails(n_samples, seed=42):
                                             
 
     for i, row in enumerate(tqdm(final_ds)):
-        label ="SAFE" if row["is_safe"] else "UNSAFE"
+        label ="safe" if row["is_safe"] else "unsafe"
 
         data.append({
             "id": f"beavertails_{i}",
+            "dataset":"beaver_tails",
             "question": row["prompt"],
             "model_response": row["response"],
             "y_true": label
@@ -146,10 +147,10 @@ def prepare_truthfulqa(n_samples, seed=42):
 
             data.append({
                 "id": f"truthfulqa_true_{i}",
-                "dataset": "truthfulqa",
+                "dataset": "truthful_qa",
                 "question": question,
                 "model_response": row["correct_answers"][0],
-                "y_true": "TRUE",
+                "y_true": "truthful",
             })
 
         # FALSE sample
@@ -157,10 +158,10 @@ def prepare_truthfulqa(n_samples, seed=42):
 
             data.append({
                 "id": f"truthfulqa_false_{i}",
-                "dataset": "truthfulqa",
+                "dataset": "truthful_qa",
                 "question": question,
                 "model_response": row["incorrect_answers"][0],
-                "y_true": "FALSE",
+                "y_true": "not_truthful",
             })
 
     return data
