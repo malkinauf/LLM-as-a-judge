@@ -16,6 +16,7 @@ def judge_response(prompt: str, model: str) -> dict[str, Any]:
         messages=[
             {"role": "user", "content": prompt}
         ],
+        format="json",
         options={
             "temperature": 0,
         }
