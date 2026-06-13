@@ -12,6 +12,7 @@
 \usepackage{pgfgantt}
 
 % Template setup
+\usepackage{booktabs}
 \usepackage{lipsum}
 \usepackage{iflang}
 \usepackage[framemethod=tikz]{mdframed}
@@ -265,8 +266,46 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			
 			\item \textbf{Budget für API-Nutzung:} Abdeckung der Kosten für kostenpflichtige Modellzugriffe.
 			Die zu erwartenden Kosten hängen maßgeblich von den verwendeten Datensätzen, der Anzahl der Evaluationsdurchläufe sowie dem Umfang der Judge-Prompts ab. Insbesondere sicherheitsrelevante Datensätze mit Prompt-Injection-, Jailbreak- oder anderen adversarialen Szenarien können aufgrund längerer Eingaben und komplexerer Bewertungsprozesse einen deutlich höheren Tokenverbrauch verursachen.
-			Eine erste Abschätzung wurde auf Basis der Datensätze TruthfulQA und BeaverTails durchgeführt. Unter der Annahme von etwa 100 Beispielen pro Datensatz, drei Bewertungsansätzen (Baseline, Second-Level Judging und Dynamic Prompting) sowie mehreren Wiederholungen zur Untersuchung der Stabilität ergibt sich ein erwartetes Volumen von etwa 1 bis 3 Millionen Input-Token. Bei Verwendung eines kostenpflichtigen Referenzmodells wie GPT-4o werden die API-Kosten daher voraussichtlich im Bereich von etwa ... bis ... Euro liegen.
-		\end{itemize}}}
+			Eine erste Abschätzung wurde auf Basis der Datensätze TruthfulQA und BeaverTails durchgeführt. Unter der Annahme von etwa 100 Beispielen pro Datensatz, drei Bewertungsansätzen (Baseline, Second-Level Judging und Dynamic Prompting) sowie mehreren Wiederholungen zur Untersuchung der Stabilität ergibt sich ein erwartetes Volumen von etwa 1 bis 1.5 Millionen Input-Token (Tabelle\ref{tab:token_usage}). Die daraus resultierenden API-Kosten hängen vom jeweils verwendeten Modell ab. Eine Übersicht der geschätzten Kosten für die betrachteten Judge-Modelle ist in Tabelle~\ref{tab:api_costs} dargestellt.
+		\end{itemize}}
+		\begin{table}[ht]
+		\centering
+		\caption{Abschätzung des Tokenverbrauchs für die Evaluation}
+		\label{tab:token_usage}
+		\begin{tabular}{lrrrr}
+			\toprule
+			\textbf{Prompt-Typ} & 
+			\textbf{Input-Token} & 
+			\textbf{Gesamt Input} & 
+			\textbf{Output-Token} & 
+			\textbf{Gesamt Output} \\
+			\midrule
+			Baseline      & 500  & 300\,000 & 50  & 30\,000 \\
+			Second-Level  & 700  & 420\,000 & 100 & 60\,000 \\
+			Dynamic       & 1000 & 600\,000 & 100 & 60\,000 \\
+			\midrule
+			\textbf{Summe} & -- & \textbf{1.32 M} & -- & \textbf{0.15 M} \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	\begin{table}[ht]
+		\centering
+		\caption{Geschätzte API-Kosten der betrachteten Judge-Modelle}
+		\label{tab:api_costs}
+		\begin{tabular}{lrrr}
+			\toprule
+			\textbf{Modell} & 
+			\textbf{Input-Kosten} & 
+			\textbf{Output-Kosten} & 
+			\textbf{Gesamtkosten} \\
+			\midrule
+			GPT-4o              & \$3.30 & \$1.50 & \textbf{\$4.80} \\
+			Claude Sonnet 4     & \$3.96 & \$2.25 & \textbf{\$6.21} \\
+			Gemini 2.5 Flash    & \$1.98 & \$1.35 & \textbf{\$3.33} \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+}
 {\hint{(arbitrary length)}{If applicable, a list of required hardware, licenses or other resources.}}
 
 \clearpage
