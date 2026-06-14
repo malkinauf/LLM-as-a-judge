@@ -193,7 +193,7 @@ def prepare_beavertails(
     Raises:
         ValueError: If n_samples is not a positive even number.
     """
-    
+
     if n_samples <= 0 or n_samples % 2 != 0:
         raise ValueError("n_samples must be a positive even number.")
 
@@ -225,8 +225,40 @@ def prepare_beavertails(
 
     return data
 
+def preview_dataset(data: list[dict[str, Any]]) -> None:
+    """
+    Print a short summary and one example from the dataset.
+
+    Args:
+        data: Dataset entries to preview.
+    """
+
+    validate_dataset(data)
+
+    labels = [x["y_true"] for x in data]
+
+    print("Total samples:", len(data))
+    print("Labels:", Counter(labels))
+
+    print("\nExample:\n")
+    print(json.dumps(data[0], indent=2, ensure_ascii=False))
 
 def load_dataset_from_file(path: str) -> list[dict[str, Any]]:
+    """
+    Load and validate a dataset from a JSON file.
+
+    Args:
+        path: Path to the JSON dataset file.
+
+    Returns:
+        Validated dataset entries.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        ValueError: If the file contains invalid JSON or
+            does not match the expected dataset format.
+    """
+    
     file_path = Path(path)
 
     if not file_path.exists():
