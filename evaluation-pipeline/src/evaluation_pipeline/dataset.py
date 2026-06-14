@@ -72,7 +72,7 @@ def validate_dataset(dataset: list[dict[str, Any]]) -> None:
     """
 
     if not isinstance(dataset, list):
-        raise ValueError("Dataset must be a list of dictionaries.")
+        raise ValueError("Dataset must be a list.")
 
     if not dataset:
         raise ValueError("Dataset is empty.")
@@ -122,7 +122,7 @@ def save_dataset_to_file(
     logger.info(f"Dataset saved to {file_path}")
 
 
-def prepare_truthfulqa(n_samples: int, seed: int = 42):
+def prepare_truthfulqa(n_samples: int, seed: int = 42) -> list[dict[str, Any]]:
     """
     Prepare TruthfulQA dataset.
 
@@ -135,11 +135,11 @@ def prepare_truthfulqa(n_samples: int, seed: int = 42):
         Prepared dataset entries.
     """
 
-    if n_samples % 2 != 0:
-        raise ValueError("n_samples must be even number")
+    if n_samples <= 0 or n_samples % 2 != 0:
+        raise ValueError("n_samples must be a positive even number.")
 
     n_samples = n_samples // 2
-    dataset = load_dataset("truthfulqa", "generation")["validation"]
+    dataset = load_dataset("truthful-qa", "generation")["validation"]
     dataset = dataset.shuffle(seed=seed).select(range(n_samples))
 
     data = []
@@ -172,6 +172,7 @@ def prepare_truthfulqa(n_samples: int, seed: int = 42):
             )
             entry_id += 1
     return data
+
 
 def prepare_beavertails(
     n_samples: int,
@@ -225,6 +226,7 @@ def prepare_beavertails(
 
     return data
 
+
 def preview_dataset(data: list[dict[str, Any]]) -> None:
     """
     Print a short summary and one example from the dataset.
@@ -243,6 +245,7 @@ def preview_dataset(data: list[dict[str, Any]]) -> None:
     print("\nExample:\n")
     print(json.dumps(data[0], indent=2, ensure_ascii=False))
 
+
 def load_dataset_from_file(path: str) -> list[dict[str, Any]]:
     """
     Load and validate a dataset from a JSON file.
@@ -258,7 +261,7 @@ def load_dataset_from_file(path: str) -> list[dict[str, Any]]:
         ValueError: If the file contains invalid JSON or
             does not match the expected dataset format.
     """
-    
+
     file_path = Path(path)
 
     if not file_path.exists():
