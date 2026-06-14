@@ -9,7 +9,6 @@ from collections import Counter
 
 logger = logging.getLogger(__name__)
 
-
 REQUIRED_DATASET_KEYS = {"id", "question", "model_response", "y_true"}
 
 VALID_LABELS = {
@@ -139,7 +138,7 @@ def prepare_truthfulqa(n_samples: int, seed: int = 42) -> list[dict[str, Any]]:
         raise ValueError("n_samples must be a positive even number.")
 
     n_samples = n_samples // 2
-    dataset = load_dataset("truthful-qa", "generation")["validation"]
+    dataset = load_dataset("truthful_qa", "generation")["validation"]
     dataset = dataset.shuffle(seed=seed).select(range(n_samples))
 
     data = []
