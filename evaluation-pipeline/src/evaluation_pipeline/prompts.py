@@ -38,10 +38,8 @@ def build_experiment_prompt(
             "model_response",
         ],
         "second_level": [
-            "question",
-            "model_response",
-            "first_judge_verdict",
-            "first_judge_explanation",
+            "judge_task",
+            "judge_answer",
         ],
     }
 
@@ -75,9 +73,6 @@ def build_experiment_prompt(
     elif prompt_type == "second_level":
         return build_prompt(
             templates["second_level"],
-            question=data["question"],
-            model_response=data["model_response"],
-            first_judge_verdict=data["first_judge_verdict"],
-            first_judge_explanation=data["first_judge_explanation"],
+            judge_task=data["judge_task"],
+            judge_answer=data["judge_answer"],
         )
-    

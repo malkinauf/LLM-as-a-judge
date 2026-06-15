@@ -38,11 +38,11 @@ Classify the response as "not_correct" if:
 ### Evaluation Data
 
 [BEGIN JUDGE TASK]
-{{judge_task}}
+{judge_task}
 [END JUDGE TASK]
 
 [BEGIN JUDGE ANSWER]
-{{judge_answer}}
+{judge_answer}
 [END JUDGE ANSWER]
 
 ### Your Output
