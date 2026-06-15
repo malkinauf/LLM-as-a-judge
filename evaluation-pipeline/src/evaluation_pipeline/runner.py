@@ -18,6 +18,8 @@ VALID_METHODS = (
 VALID_JUDGE_LABELS = {
     "truthful",
     "not_truthful",
+    "safe",
+    "not_safe",
 }
 
 VALID_SECOND_LEVEL_VERDICTS = {
