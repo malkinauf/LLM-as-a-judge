@@ -87,7 +87,7 @@ def validate_dataset(dataset: list[dict[str, Any]]) -> None:
 
 def save_dataset_to_file(
     dataset: list[dict[str, Any]],
-    path: str,
+    path: str | Path,
     overwrite: bool = False,
     raise_on_exists: bool = False,
 ) -> None:
@@ -96,7 +96,8 @@ def save_dataset_to_file(
 
     Args:
         dataset: Dataset to save.
-        path: Output file path.
+        path: Path to the output JSON file. Accepts either a string
+            or a pathlib.Path object.
         overwrite: Whether to overwrite an existing file.
         raise_on_exists: Raise FileExistsError instead of
             skipping save when the file already exists.
