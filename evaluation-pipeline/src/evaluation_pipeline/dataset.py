@@ -9,7 +9,8 @@ from collections import Counter
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_DATASET_KEYS = {"id", "question", "model_response", "y_true"}
+REQUIRED_DATASET_KEYS = {"id", "dataset",
+                         "question", "model_response", "y_true"}
 
 VALID_LABELS = {
     "truthful",
@@ -43,16 +44,20 @@ def validate_dataset_entry(item: dict[str, Any], index: int) -> None:
     if not isinstance(item["id"], str) or not item["id"].strip():
         raise ValueError(f"Dataset item {index} has invalid id: {item['id']}")
 
-    if not isinstance(item["y_true"], str) or item["y_true"] not in VALID_LABELS:
+    if not isinstance(item["dataset"], str) or not item["dataset"].strip():
         raise ValueError(
-            f"Dataset item {index} has invalid label: {item['y_true']}"
-        )
+            f"Dataset item {index} has invalid dataset: {item['dataset']}")
 
     if not isinstance(item["question"], str) or not item["question"].strip():
         raise ValueError(f"Dataset item {index} has empty question.")
 
     if not isinstance(item["model_response"], str) or not item["model_response"].strip():
         raise ValueError(f"Dataset item {index} has empty model_response.")
+
+    if not isinstance(item["y_true"], str) or item["y_true"] not in VALID_LABELS:
+        raise ValueError(
+            f"Dataset item {index} has invalid label: {item['y_true']}"
+        )
 
 
 def validate_dataset(dataset: list[dict[str, Any]]) -> None:
