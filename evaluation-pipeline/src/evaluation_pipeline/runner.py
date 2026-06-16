@@ -20,12 +20,29 @@ VALID_JUDGE_LABELS = {
     "not_truthful",
     "safe",
     "not_safe",
+    "attack_successful",
+    "attack_failed",
 }
 
 VALID_SECOND_LEVEL_VERDICTS = {
     "correct",
     "not_correct",
 }
+
+
+def normalize_harmbench_label(label: str | None) -> str | None:
+    if label is None:
+        return None
+
+    label = label.strip().lower()
+
+    if label == "yes":
+        return "attack_successful"
+
+    if label == "no":
+        return "attack_failed"
+
+    return label
 
 
 def run_judge_experiment(
@@ -46,9 +63,7 @@ def run_judge_experiment(
     results: list[dict[str, Any]] = []
 
     if not run_id:
-        logger.info(
-            "Experiment skipped because run_id is empty."
-        )
+        logger.info("Experiment skipped because run_id is empty.")
         return results
 
     for example in tqdm(
@@ -82,8 +97,8 @@ def run_judge_experiment(
 
             continue
 
-        first_level_label = first_judge_result.get(
-            "predicted_label"
+        first_level_label = normalize_harmbench_label(
+            first_judge_result.get("predicted_label")
         )
 
         result = {
@@ -98,13 +113,9 @@ def run_judge_experiment(
             "dataset_file": dataset_file,
 
             "first_prompt": baseline_prompt,
-            "first_raw_output": first_judge_result.get(
-                "raw_output"
-            ),
+            "first_raw_output": first_judge_result.get("raw_output"),
             "first_level_label": first_level_label,
-            "first_level_explanation": first_judge_result.get(
-                "explanation"
-            ),
+            "first_level_explanation": first_judge_result.get("explanation"),
 
             "second_level_prompt": None,
             "second_level_raw_output": None,
@@ -161,14 +172,10 @@ def run_judge_experiment(
                 results.append(result)
                 continue
 
-            second_level_verdict = second_result.get(
-                "predicted_label"
-            )
+            second_level_verdict = second_result.get("predicted_label")
 
             result["second_level_prompt"] = second_level_prompt
-            result["second_level_raw_output"] = second_result.get(
-                "raw_output"
-            )
+            result["second_level_raw_output"] = second_result.get("raw_output")
             result["second_level_verdict"] = second_level_verdict
             result["second_level_explanation"] = (
                 second_result.get("corrected_explanation")
@@ -179,8 +186,8 @@ def run_judge_experiment(
                 result["predicted_label"] = first_level_label
 
             elif second_level_verdict == "not_correct":
-                corrected_verdict = second_result.get(
-                    "corrected_verdict"
+                corrected_verdict = normalize_harmbench_label(
+                    second_result.get("corrected_verdict")
                 )
 
                 if corrected_verdict in VALID_JUDGE_LABELS:
@@ -193,8 +200,6 @@ def run_judge_experiment(
 
             results.append(result)
 
-    logger.info(
-        f"Finished. Collected {len(results)} results."
-    )
+    logger.info(f"Finished. Collected {len(results)} results.")
 
     return results

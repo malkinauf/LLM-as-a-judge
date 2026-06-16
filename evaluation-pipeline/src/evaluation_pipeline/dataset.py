@@ -1,3 +1,6 @@
+import random
+
+import requests
 import json
 import logging
 from pathlib import Path
@@ -17,6 +20,8 @@ VALID_LABELS = {
     "not_truthful",
     "safe",
     "not_safe",
+    "attack_successful",
+    "attack_failed"
 }
 
 
@@ -301,3 +306,139 @@ def load_dataset_from_file(path: str) -> list[dict[str, Any]]:
     logger.info(f"Dataset loaded from {file_path}")
 
     return dataset
+
+
+def get_harmbench_classifier_val_set(
+    path: str | Path = "data/classifier_val_sets/text_behaviors_val_set.json",
+    force_download: bool = False,
+) -> Path:
+    file_path = Path(path)
+
+    url = (
+        "https://raw.githubusercontent.com/"
+        "centerforaisafety/HarmBench/main/"
+        "data/classifier_val_sets/text_behaviors_val_set.json"
+    )
+
+    if file_path.exists() and not force_download:
+        return file_path
+
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    response = requests.get(url, timeout=60)
+    response.raise_for_status()
+
+    text = response.text.strip()
+
+    if not text.startswith("{"):
+        raise ValueError(
+            "Downloaded file does not look like JSON. "
+            f"First 200 chars:\n{text[:200]}"
+        )
+
+    file_path.write_text(text, encoding="utf-8")
+
+    return file_path
+
+
+def prepare_harmbench(
+        n_samples: int | None = None,
+        seed: int = 42,
+        include_disputed: bool = True,) -> list[dict[str, Any]]:
+    """
+    Prepare HarmBench dataset.
+
+    Args:
+        include_disputed: If False, keep only examples where
+            all human annotators agree: 0/0/0 or 1/1/1.
+
+    Returns:
+        List of prepared dataset entries with schema:
+        id, dataset, question, model_response, y_true.
+    """
+    if n_samples is not None and (n_samples <= 0 or n_samples % 2 != 0):
+        raise ValueError("n_samples must be a positive even number.")
+
+    path = get_harmbench_classifier_val_set()
+
+    with path.open("r", encoding="utf-8") as f:
+        raw_data = json.load(f)
+
+    successful = []
+    failed = []
+    entry_id = 0
+
+    for behavior_id, examples in tqdm(raw_data.items(), desc="Preparing HarmBench"):
+        if not isinstance(examples, list):
+            continue
+
+        for example in examples:
+            human_labels = [
+                example.get("human_0"),
+                example.get("human_1"),
+                example.get("human_2"),
+            ]
+
+            if any(label not in {0, 1} for label in human_labels):
+                continue
+
+            votes = sum(human_labels)
+
+            if not include_disputed and votes not in {0, 3}:
+                continue
+
+            y_true = "attack_successful" if votes >= 2 else "attack_failed"
+
+            test_case = example.get("test_case", "")
+            generation = example.get("generation", "")
+
+            if not isinstance(test_case, str) or not test_case.strip():
+                continue
+
+            if not isinstance(generation, str) or not generation.strip():
+                continue
+
+            item = {
+                "id": f"harmbench_{entry_id}",
+                "dataset": "harmbench_classifier_val",
+                "question": test_case,
+                "model_response": generation,
+                "y_true": y_true,
+            }
+
+            if y_true == "attack_successful":
+                successful.append(item)
+            else:
+                failed.append(item)
+
+            entry_id += 1
+
+    if n_samples is None:
+        data = successful + failed
+        random.Random(seed).shuffle(data)
+        validate_dataset(data)
+        return data
+
+    half = n_samples // 2
+
+    if half > len(successful) or half > len(failed):
+        raise ValueError(
+            f"Requested {n_samples} balanced samples, but available: "
+            f"{len(successful)} successful and {len(failed)} failed. "
+            f"Maximum balanced n_samples is {min(len(successful), len(failed)) * 2}."
+        )
+
+    rng = random.Random(seed)
+
+    data = (
+        rng.sample(successful, half)
+        + rng.sample(failed, half)
+    )
+
+    rng.shuffle(data)
+
+    for i, item in enumerate(data):
+        item["id"] = f"harmbench_{i}"
+
+    validate_dataset(data)
+    return data
