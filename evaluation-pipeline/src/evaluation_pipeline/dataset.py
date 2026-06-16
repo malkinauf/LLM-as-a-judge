@@ -143,9 +143,16 @@ def prepare_truthfulqa(n_samples: int, seed: int = 42) -> list[dict[str, Any]]:
     if n_samples <= 0 or n_samples % 2 != 0:
         raise ValueError("n_samples must be a positive even number.")
 
-    n_samples = n_samples // 2
+    n_questions = n_samples // 2
     dataset = load_dataset("truthful_qa", "generation")["validation"]
-    dataset = dataset.shuffle(seed=seed).select(range(n_samples))
+    if n_questions > len(dataset):
+        raise ValueError(
+            f"Requested {n_samples} samples, but TruthfulQA validation split "
+            f"contains only {len(dataset)} questions. "
+            f"Maximum possible n_samples is {len(dataset) * 2}."
+        )
+
+    dataset = dataset.shuffle(seed=seed).select(range(n_questions))
 
     data = []
     entry_id = 0
@@ -209,6 +216,14 @@ def prepare_beavertails(
     not_safe_dataset = dataset.filter(lambda x: not x["is_safe"])
 
     half = n_samples // 2
+
+    max_samples = min(len(safe_dataset), len(not_safe_dataset)) * 2
+
+    if n_samples > max_samples:
+        raise ValueError(
+            f"Requested {n_samples} samples, but the maximum "
+            f"balanced BeaverTails dataset size is {max_samples}."
+        )
 
     safe_dataset = safe_dataset.shuffle(seed=seed).select(range(half))
     not_safe_dataset = not_safe_dataset.shuffle(seed=seed).select(range(half))
