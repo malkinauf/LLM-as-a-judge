@@ -11,6 +11,15 @@ def judge_response(prompt: str, model: str) -> dict[str, Any]:
     Send a prepared prompt to the judge model and parse its JSON response.
     """
 
+    import hashlib
+    import json
+
+    print("MODEL:", model)
+    print("PROMPT_HASH:", hashlib.sha256(prompt.encode("utf-8")).hexdigest())
+    print("PROMPT_LEN:", len(prompt))
+    print("PROMPT_REPR_START:", repr(prompt[:500]))
+    print("PROMPT_REPR_END:", repr(prompt[-500:]))
+
     response = chat(
         model=model,
         messages=[

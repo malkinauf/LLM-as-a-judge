@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+import hashlib
 
 from tqdm import tqdm
 
@@ -98,6 +99,10 @@ def run_judge_experiment(
             "dataset_file": dataset_file,
 
             "first_prompt": baseline_prompt,
+            
+            "first_prompt_hash": hashlib.sha256(
+            baseline_prompt.encode("utf-8")
+            ).hexdigest(),
             "first_raw_output": first_judge_result.get(
                 "raw_output"
             ),
@@ -113,6 +118,23 @@ def run_judge_experiment(
 
             "predicted_label": None,
         }
+
+        if result["id"] in {
+        "truthfulqa_9",
+        "truthfulqa_52",
+        "truthfulqa_82",
+        "truthfulqa_83",
+        }:
+            print("=" * 80)
+            print("DEBUG FULL RUN")
+            print("ID:", result["id"])
+            print("METHOD:", method)
+            print("MODEL:", model)
+            print("FIRST_PROMPT_HASH:", result["first_prompt_hash"])
+            print("FIRST_LEVEL_LABEL:", result["first_level_label"])
+            print("FIRST_LEVEL_EXPLANATION:", result["first_level_explanation"])
+            print("FIRST_RAW_OUTPUT:", result["first_raw_output"])
+            print("=" * 80)
 
         if method == "baseline":
             if first_level_label in VALID_JUDGE_LABELS:
