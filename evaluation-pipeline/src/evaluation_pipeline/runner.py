@@ -115,12 +115,10 @@ def run_first_level_judge(
             data=example,
         )
 
-        prediction_result = judge_response(
+        prediction_response = get_raw_model_response(
             prediction_prompt,
             model,
-        )
-
-        prediction_response = prediction_result.get("raw_output")
+            )
 
         first_prompt = build_experiment_prompt(
             prompt_type="dynamic",
