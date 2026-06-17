@@ -3,7 +3,7 @@ from typing import Any
 
 from tqdm import tqdm
 
-from evaluation_pipeline.judge import judge_response
+from evaluation_pipeline.judge import get_raw_model_response, judge_response
 from evaluation_pipeline.prompts import build_experiment_prompt
 
 

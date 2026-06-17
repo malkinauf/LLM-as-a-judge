@@ -37,6 +37,36 @@ def get_raw_model_response(prompt: str, model: str) -> str:
     return response["message"]["content"]
 
 
+def get_json_model_response(prompt: str, model: str) -> str:
+    """
+    Send a judge prompt to the model and return a structured JSON response.
+
+    This function uses Ollama's JSON formatting mode to reduce
+    parsing errors for prompts that are expected to return a
+    structured judge verdict.
+
+    Args:
+        prompt: Fully formatted judge prompt sent to the model.
+        model: Ollama model name.
+
+    Returns:
+        Raw JSON-formatted model response as a string.
+    """
+
+    response = chat(
+        model=model,
+        messages=[
+            {"role": "user", "content": prompt},
+        ],
+        format="json",
+        options={
+            "temperature": 0,
+        },
+    )
+
+    return response["message"]["content"]
+
+
 def normalize_judge_output(
     parsed_output: dict[str, Any],
     raw_output: str,
@@ -81,7 +111,7 @@ def judge_response(prompt: str, model: str) -> dict[str, Any]:
         parsing_error.
     """
 
-    raw_output = get_raw_model_response(
+    raw_output = get_json_model_response(
         prompt=prompt,
         model=model,
     )
