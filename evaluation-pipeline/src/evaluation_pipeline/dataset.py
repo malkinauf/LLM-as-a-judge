@@ -17,6 +17,8 @@ VALID_LABELS = {
     "not_truthful",
     "safe",
     "not_safe",
+    "attack_successful",
+    "attack_failed"
 }
 
 
