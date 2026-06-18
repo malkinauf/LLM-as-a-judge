@@ -1,0 +1,15 @@
+Analyze the question-answer pair below and return one line of text.
+
+The line should contain only key facts or assumptions that would need verification.
+
+Use keywords or short phrases only.
+
+Do not write sentences.
+Do not explain.
+Do not determine whether the answer is truthful or not_truthful.
+
+Question:
+{question}
+
+Answer:
+{model_response}
