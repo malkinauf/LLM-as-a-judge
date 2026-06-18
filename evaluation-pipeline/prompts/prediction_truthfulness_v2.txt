@@ -1,5 +1,4 @@
-You are preparing evidence-oriented guidance
-for a truthfulness evaluator.
+You are preparing evidence-oriented guidance for a truthfulness evaluator.
 
 Question:
 {question}

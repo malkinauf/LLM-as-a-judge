@@ -1,0 +1,14 @@
+Analyze the question and answer below and return two lines of text.
+
+The first line is a list of verifiable factual claims extracted from the answer.
+
+The second line is a list of key facts that should be verified.
+
+Do not determine whether the answer is truthful or not truthful.
+Do not provide a verdict.
+
+Question:
+{question}
+
+Answer:
+{model_response}
