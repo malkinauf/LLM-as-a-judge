@@ -27,8 +27,8 @@
 
 % Kommentare abschalten
 % Disable the hints here
-\setboolean{showhints}{true}
-% \setboolean{showhints}{false}
+% \setboolean{showhints}{true}
+\setboolean{showhints}{false}
 
 
 % Front- and backmatter
@@ -59,29 +59,29 @@
     {Bereich der Arbeit}
     {Thesis Area}}
 \label{sub:introduction}
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 	Mit dem Einsatz großer Sprachmodelle (LLMs) in produktiven Systemen wird die zuverlässige Bewertung ihrer Ausgaben zu einer zentralen Herausforderung \cite{gu2026surveyjudge, han2026judge}. Fehlbewertungen können sich nicht nur auf Kosten und Ressourceneinsatz auswirken, sondern auch die Qualität realer Anwendungen beeinträchtigen, beispielsweise durch falsche oder irreführende Antworten \cite{biskupski2026evaluating}. Trotz der Vielzahl bestehender Ansätze bleibt die Entwicklung von Evaluationsverfahren, die gleichzeitig skalierbar, reproduzierbar und robust gegenüber variierenden Bedingungen sind, eine wichtige Aufgabe im Bereich der LLM-Evaluation \cite{silva2026metajudge}.
 	Vor diesem Hintergrund hat sich das Paradigma des LLM-as-a-Judge etabliert, bei dem Sprachmodelle selbst zur automatisierten Bewertung von Modellantworten eingesetzt werden \cite{gu2026surveyjudge}. Während dieser Ansatz eine effiziente Skalierung von Evaluationsprozessen ermöglicht, wirft er zugleich Fragen hinsichtlich der Zuverlässigkeit der erzeugten Bewertungen auf. Aktuelle Studien zeigen, dass die Bewertungsergebnisse von Faktoren wie Prompt-Formulierung, Modellwahl und Aufgabenstruktur beeinflusst werden können, was zu einer erhöhten Variabilität der Resultate führen kann \cite{zheng2023judging, biskupski2026evaluating, thakur2025judging}.
 	Ein Ansatz zur Verbesserung der Bewertungsqualität ist das sogenannte Second-Level Judging, bei dem eine initiale Bewertung durch einen weiteren Prüfungsschritt verifiziert wird. Dabei wird die ursprüngliche Bewertung einer zusätzlichen Analyse unterzogen, um deren Konsistenz und Nachvollziehbarkeit zu überprüfen. Die Idee einer nachgelagerten Prüfung wurde unter anderem von Russinovich et al. aufgegriffen und später auch im Kontext von LLM-as-a-Judge untersucht \cite{russinovich2025crescendo,biskupski2026evaluating}.
 	Parallel dazu nimmt das Prompt Engineering eine Schlüsselrolle ein, da es das Verhalten von Sprachmodellen maßgeblich determiniert \cite{gu2026surveyjudge}. Insbesondere adaptive Ansätze wie das Dynamic Prompting konnten in diversen Anwendungsszenarien bereits signifikante Steigerungen der Leistungsfähigkeit erzielen \cite{huynh2025dynamic}.
-}}
-{\hint{(this page)}{
+}
+{
     Start with a general description of the research field (for example, Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments), discussing characteristics and applications, including some introductory literature as appropriate.
     
     Then introduce the specific topic of the work here (e.g., security of a specific communication protocol, evaluation of patch attacks, design of a secure container) and describe the requirements and goals of the work, such as the required efficiency or achieved security goals.
-}}
+}
 
 \dots
 
 
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Motivation}
     {Motivation}}
 \label{sub:motivation}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 		Large Language Models (LLMs) haben sich zu einer zentralen Technologie entwickelt. Dadurch steigt der Bedarf an skalierbaren Evaluationsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig sind, jedoch mit erheblichem Zeit- und Kostenaufwand verbunden sind \cite{gu2026surveyjudge}.
 		
 		Ein bedeutender Forschungsbereich ist daher \textbf{LLM-as-a-Judge}, bei dem Sprachmodelle automatisch die Antworten anderer Modelle bewerten oder Systeme miteinander vergleichen. Solche Ansätze werden zunehmend für Benchmarking, Qualitätskontrolle und automatisierte Modellvergleiche genutzt. Die Qualität dieser Bewertungen hängt jedoch nicht nur vom eingesetzten Modell, sondern auch stark vom Prompt-Design ab \cite{zheng2023judging,biskupski2026evaluating}.
@@ -93,19 +93,19 @@
 		Zusätzlich zu allgemeinen Evaluationsrahmen und Benchmarks für LLM-basierte Bewertungsmodelle \cite{han2026judge} konzentriert sich diese Arbeit speziell auf den Einfluss von Prompting-Strategien innerhalb solcher Bewertungs-Setups.
 		
 		Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}.
-		}}
-{\hint{(half a page)}{Based on \autoref{sub:introduction}, describe what makes the topic worthwhile from a practical or academic point of view. The reasoning leads to the concrete problem statement in \autoref{sec:problem_statement}.}}
+		}
+{{Based on \autoref{sub:introduction}, describe what makes the topic worthwhile from a practical or academic point of view. The reasoning leads to the concrete problem statement in \autoref{sec:problem_statement}.}
 
 \dots
 
 \newpage
-\section{\iflanguage{ngerman}
+\section{
     {Verwandte Forschung}
     {State of the Art}}
 \label{sec:state_of_the_art}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
    Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet \cite{zheng2023judging, gu2026surveyjudge}. Studien belegen, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Sprachmodelle automatisiert zu validieren und dabei eine hohe Korrelation mit menschlichen Urteilen erreichen \cite{zheng2023judging}. Darauf aufbauend wurden Verfahren entwickelt, die mittels strukturierter Prompt-Strategien eine präzisere Ausrichtung an menschlichen Bewertungskriterien anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion formalisiert \cite{gu2026survey}:
   
    \begin{equation}
@@ -119,8 +119,8 @@
    Neuere Arbeiten erweitern diese Idee zum Meta-Judging, bei dem Modelle nicht nur Antworten, sondern auch bereits erzeugte Evaluationen prüfen und somit als „Richter der Richter“ fungieren. Diese Ansätze zielen darauf ab, die Konsistenz automatisierter Bewertungssysteme zu erhöhen, und zeigen in isolierten Konfigurationen bereits Leistungsgewinne. Bestehende Studien konzentrieren sich jedoch häufig auf komplexe Architekturen wie Multi-Agenten-Systeme oder präferenzbasiertes Training, während praktisch leichter umsetzbare Varianten wie das Second-Level Judging bislang unzureichend erforscht sind \cite{silva2026metajudge}.
    
    Insgesamt zeigt sich, dass zusätzliche Analyseebenen – sowohl innerhalb des Reasoning-Prozesses als auch durch separate Prüfungsschritte – die Entscheidungsqualität maßgeblich beeinflussen können, deren exakte Wirkweise jedoch noch nicht eindeutig geklärt ist. Insbesondere bleibt offen, unter welchen Bedingungen Second-Level-Ansätze die Verlässlichkeit von LLM-basierten Evaluatoren tatsächlich optimieren. Dies macht eine systematische Untersuchung verschiedener Implementierungen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Verfahren – zu einer dringlichen Forschungsaufgabe.
-}}
-{\hint{(1 page)}{
+}
+{
     Provide relevant literature~\cite{Test} on the specific topic. The literature selection is discussed beforehand with the supervisor and does not have to cover the topic completely. The literature presented should highlight problems with (or even the lack of) existing solutions for the topic of the thesis, especially those that led to the motivation for the thesis in \autoref{sub:motivation}.
     In addition, compile existing solutions to sub-problems or preliminary work that may be applicable as tools or methods.
     
@@ -128,22 +128,22 @@
     (1) is generally recognized (there are papers on similar topics),
     (2) has not yet been solved (there is no paper that deals with exactly the same question),
     and (3) that the problem is likely to be solvable (there are solutions to sub-problems, applicable tools, or methods).
-}}
+}
 
 \dots
 
-\section{\iflanguage{ngerman}
+\section{
     {Problemstellung}
     {Problem Statement}}
-\label{sec:problem_statement}
+\label{sec:problem_statement}\iflanguage{ngerman}
 
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Beitrag der Arbeit}
     {Thesis focus}}
 \label{sub:focus}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 
 Im Rahmen dieser Arbeit wird die Zuverlässigkeit automatisierter Bewertungsverfahren auf Basis des Ansatzes \textit{LLM-as-a-Judge} untersucht, wobei der Fokus insbesondere auf mehrstufigen Strategien liegt. Bestehende Studien liefern hierzu widersprüchliche Ergebnisse: Während mehrstufige Verfahren wie \textit{Dynamic Prompting} die Qualität bei Analyseaufgaben (z. B. Codeanalyse und Schwachstellenerkennung) nachweislich steigern können \cite{huynh2025dynamic}, führen analoge Ansätze im Kontext der Evaluation nicht zwangsläufig zu den erwarteten Verbesserungen \cite{biskupski2026evaluating}.
 
@@ -156,17 +156,17 @@ Zur Umsetzung wird eine experimentelle Pipeline für binäre Klassifikationsaufg
 Als Datengrundlage dienen etablierte Benchmarks, ergänzt durch einen dedizierten Satz eigener Beispiele. Zur Evaluation werden klassische Metriken (Precision, Recall, F1-Score), das Maß der Übereinstimmung (Cohen’s Kappa) sowie Stabilitätskennzahlen auf Basis der Variabilität über mehrere Iterationen eingesetzt.
 
 Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter den beobachteten Diskrepanzen zu isolieren und evidenzbasierte Empfehlungen für den Einsatz mehrstufiger Bewertungsansätze abzuleiten.
-}}
-{\hint{(0.75 pages)}{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}}
+}
+{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}
 
 \dots
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Forschungsfragen}
     {Research questions}}
 \label{sub:questions}
 
-\iflanguage{ngerman}
-{\hint{}{	Zur Erreichung dieses Ziels ergibt sich die folgende
+
+{	Zur Erreichung dieses Ziels ergibt sich die folgende
 		\textbf{Hauptfrage:}
 	
 	Wie beeinflussen mehrstufige Bewertungsansätze wie Second-Level Judging und Dynamic Prompting die Qualität, Stabilität und Effizienz von LLM-basierten Bewertungssystemen im Vergleich zu einem einstufigen Baseline-Ansatz, insbesondere bei Antworten, die durch Prompt-Injection- oder Jailbreak-Eingaben erzeugt wurden?
@@ -186,9 +186,9 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 		
 		\item Welche Auswirkungen haben Second-Level Judging und Dynamic Prompting auf die Effizienz des Bewertungssystems hinsichtlich Rechenaufwand, Laufzeit und Kosten?
 	\end{enumerate}	
-    }
+    
 }
-{\hint{(0.25 pages)}{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
+{{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
         %
         \begin{description}
             \item[Explanation:] Why is something the way it is?
@@ -201,13 +201,13 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
     }
 }
 
-\section{\iflanguage{ngerman}
+\section{
     {Vorgehensweise}
     {Approach}}
 \label{sec:approach}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 		
 		Im Rahmen dieser Arbeit wird zunächst eine Literaturrecherche zu bestehenden Ansätzen im Bereich LLM-as-a-Judge durchgeführt. Dabei werden insbesondere Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting betrachtet. Ziel ist es, den aktuellen Stand der Forschung zu analysieren, die Stärken und Schwächen der verschiedenen Ansätze zu identifizieren sowie geeignete Evaluationsmethoden und Datensätze auszuwählen.
 		
@@ -218,22 +218,22 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 		Auf Basis dieser Datensätze wird ein experimentelles Vergleichsdesign umgesetzt, in dem Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting miteinander verglichen werden. Alle Ansätze werden unter identischen Bedingungen auf denselben Daten getestet. Darüber hinaus werden verschiedene Prompt-Varianten sowie mehrere Durchläufe eingesetzt, um die Stabilität und Konsistenz der Bewertungsergebnisse zu analysieren.
 		
 		Für die Experimente werden mehrere Sprachmodelle verwendet, darunter frei verfügbare Modelle sowie eine leistungsstärkere Referenz. Dadurch kann untersucht werden, welchen Einfluss die Wahl des Modells auf die Bewertungsergebnisse hat.
-		Die Bewertung erfolgt anhand verschiedener Metriken. Zur Messung der Bewertungsqualität werden Accuracy und F1-Score herangezogen. Die Stabilität wird anhand der Variabilität der Ergebnisse über mehrere Durchläufe untersucht. Zusätzlich werden Effizienzmetriken wie Laufzeit, Anzahl der Modellaufrufe und die daraus entstehenden Kosten betrachtet. Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Evaluationsprozess automatisiert und systematisch dokumentiert.}}
+		Die Bewertung erfolgt anhand verschiedener Metriken. Zur Messung der Bewertungsqualität werden Accuracy und F1-Score herangezogen. Die Stabilität wird anhand der Variabilität der Ergebnisse über mehrere Durchläufe untersucht. Zusätzlich werden Effizienzmetriken wie Laufzeit, Anzahl der Modellaufrufe und die daraus entstehenden Kosten betrachtet. Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Evaluationsprozess automatisiert und systematisch dokumentiert.}
 
 \dots
 
-\section{\iflanguage{ngerman}
+\section{
     {Planung}
     {Planning}}
 \label{sec:planning}
 
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Eigene Vorkenntnisse}
     {Own Background}}
 \label{sub:background}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 		
 		Im Rahmen des Studiums wurden grundlegende Kenntnisse in der Programmierung mit Python erworben, die insbesondere für die Umsetzung der experimentellen Auswertung genutzt werden. Darüber hinaus bestehen erste Erfahrungen im Bereich Machine Learning, die im Rahmen von Lehrveranstaltungen und Praktika, insbesondere im Bereich Deep Learning, gesammelt wurden.
 		
@@ -241,17 +241,17 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 		
 		Für die vorliegende Arbeit sind insbesondere die Fähigkeiten zur Datenverarbeitung, zur Implementierung von Experimenten sowie zur strukturierten Auswertung von Ergebnissen relevant. Diese werden im Rahmen der Arbeit weiter angewendet und vertieft.
 		
-		Zusätzlich werden im Verlauf der Arbeit neue Kenntnisse erworben, insbesondere im Bereich der Bewertung von Large Language Models, fortgeschrittener Prompting-Strategien (z. B. Second-Level Judging und Dynamic Prompting) sowie der systematischen Durchführung und Analyse von Benchmark-Experimenten. Auch Aspekte wie die Automatisierung von Experimenten und die Analyse von Kosten und Effizienz werden dabei eine wichtige Rolle spielen.}}
+		Zusätzlich werden im Verlauf der Arbeit neue Kenntnisse erworben, insbesondere im Bereich der Bewertung von Large Language Models, fortgeschrittener Prompting-Strategien (z. B. Second-Level Judging und Dynamic Prompting) sowie der systematischen Durchführung und Analyse von Benchmark-Experimenten. Auch Aspekte wie die Automatisierung von Experimenten und die Analyse von Kosten und Effizienz werden dabei eine wichtige Rolle spielen.}
 
 \dots
 
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Benötigte Ressourcen}
     {Required Resources}}
 \label{sub:resources}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 		
 		\begin{itemize}
 			\item \textbf{Laptop:} Durchführung der Experimente sowie Datenverarbeitung und Auswertung.
@@ -306,7 +306,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 		\end{tabular}
 	\end{table}
 }
-{\hint{(arbitrary length)}{If applicable, a list of required hardware, licenses or other resources.}}
+{{If applicable, a list of required hardware, licenses or other resources.}}
 
 \clearpage
 \subsection{Zeitplanung}
@@ -388,13 +388,13 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 	}
 
 \newpage
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Risiken und Ausweichplan}
     {Contingency Plan}}
 \label{sub:contingency}
 
-\iflanguage{ngerman}
-{\hint{}{
+
+{
 		
 		\begin{itemize}
 			
@@ -426,8 +426,8 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			Risiko: Es lässt sich kein eindeutig bester Ansatz bestimmen.\\
 			Ausweichplan: Analyse von Trade-offs (Qualität, Kosten, Stabilität) sowie Ableitung praxisnaher Empfehlungen.
 			
-\end{itemize}}}
-{\hint{(0.5 pages)}{Possible risks (e.g., unavailable resources, no sufficiently efficient algorithm exists) that can already be estimated before starting the thesis, as well as possible contingency plans.}}
+\end{itemize}}
+{{Possible risks (e.g., unavailable resources, no sufficiently efficient algorithm exists) that can already be estimated before starting the thesis, as well as possible contingency plans.}}
 \newpage
 \nocite{*}
 \printbibliography
