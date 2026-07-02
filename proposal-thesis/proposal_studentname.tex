@@ -27,8 +27,8 @@
 
 % Kommentare abschalten
 % Disable the hints here
-% \setboolean{showhints}{true}
-\setboolean{showhints}{false}
+ \setboolean{showhints}{true}
+% \setboolean{showhints}{false}
 
 
 % Front- and backmatter
@@ -106,7 +106,7 @@
 
 
 {
-   Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet \cite{zheng2023judging, gu2026surveyjudge}. Studien belegen, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Sprachmodelle automatisiert zu validieren und dabei eine hohe Korrelation mit menschlichen Urteilen erreichen \cite{zheng2023judging}. Darauf aufbauend wurden Verfahren entwickelt, die mittels strukturierter Prompt-Strategien eine präzisere Ausrichtung an menschlichen Bewertungskriterien anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion formalisiert \cite{gu2026survey}:
+   Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet \cite{zheng2023judging, gu2026surveyjudge}. Studien belegen, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Sprachmodelle automatisiert zu validieren und dabei eine hohe Korrelation mit menschlichen Urteilen erreichen \cite{zheng2023judging}. Darauf aufbauend wurden Verfahren entwickelt, die mittels strukturierter Prompt-Strategien eine präzisere Ausrichtung an menschlichen Bewertungskriterien anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion formalisiert \cite{gu2026surveyjudge}:
   
    \begin{equation}
    	\mathrm{Score} = f(\mathrm{model}, \mathrm{prompt}, \mathrm{task}, \mathrm{context})
@@ -120,17 +120,6 @@
    
    Insgesamt zeigt sich, dass zusätzliche Analyseebenen – sowohl innerhalb des Reasoning-Prozesses als auch durch separate Prüfungsschritte – die Entscheidungsqualität maßgeblich beeinflussen können, deren exakte Wirkweise jedoch noch nicht eindeutig geklärt ist. Insbesondere bleibt offen, unter welchen Bedingungen Second-Level-Ansätze die Verlässlichkeit von LLM-basierten Evaluatoren tatsächlich optimieren. Dies macht eine systematische Untersuchung verschiedener Implementierungen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Verfahren – zu einer dringlichen Forschungsaufgabe.
 }
-{
-    Provide relevant literature~\cite{Test} on the specific topic. The literature selection is discussed beforehand with the supervisor and does not have to cover the topic completely. The literature presented should highlight problems with (or even the lack of) existing solutions for the topic of the thesis, especially those that led to the motivation for the thesis in \autoref{sub:motivation}.
-    In addition, compile existing solutions to sub-problems or preliminary work that may be applicable as tools or methods.
-    
-    The aim should be to show that the problem 
-    (1) is generally recognized (there are papers on similar topics),
-    (2) has not yet been solved (there is no paper that deals with exactly the same question),
-    and (3) that the problem is likely to be solvable (there are solutions to sub-problems, applicable tools, or methods).
-}
-
-\dots
 
 \section{
     {Problemstellung}
@@ -157,9 +146,9 @@ Als Datengrundlage dienen etablierte Benchmarks, ergänzt durch einen dedizierte
 
 Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter den beobachteten Diskrepanzen zu isolieren und evidenzbasierte Empfehlungen für den Einsatz mehrstufiger Bewertungsansätze abzuleiten.
 }
-{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}
 
-\dots
+
+
 \subsection{
     {Forschungsfragen}
     {Research questions}}
@@ -188,24 +177,12 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 	\end{enumerate}	
     
 }
-{{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
-        %
-        \begin{description}
-            \item[Explanation:] Why is something the way it is?
-            \item[Description:] What do different approaches look like?
-            \item[Prediction:] How will something develop?
-            \item[Assessment:] How can the described/explained be assessed?
-        \end{description}
-        
-        These questions should be written such that they can be answered within the thesis, and they should fully cover the research problem.
-    }
-}
+
 
 \section{
     {Vorgehensweise}
     {Approach}}
 \label{sec:approach}
-
 
 {
 		
@@ -243,7 +220,6 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 		
 		Zusätzlich werden im Verlauf der Arbeit neue Kenntnisse erworben, insbesondere im Bereich der Bewertung von Large Language Models, fortgeschrittener Prompting-Strategien (z. B. Second-Level Judging und Dynamic Prompting) sowie der systematischen Durchführung und Analyse von Benchmark-Experimenten. Auch Aspekte wie die Automatisierung von Experimenten und die Analyse von Kosten und Effizienz werden dabei eine wichtige Rolle spielen.}
 
-\dots
 
 \subsection{
     {Benötigte Ressourcen}
@@ -427,7 +403,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			Ausweichplan: Analyse von Trade-offs (Qualität, Kosten, Stabilität) sowie Ableitung praxisnaher Empfehlungen.
 			
 \end{itemize}}
-{{Possible risks (e.g., unavailable resources, no sufficiently efficient algorithm exists) that can already be estimated before starting the thesis, as well as possible contingency plans.}}
+
 \newpage
 \nocite{*}
 \printbibliography
