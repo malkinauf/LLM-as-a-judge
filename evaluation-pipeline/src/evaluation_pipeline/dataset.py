@@ -2,6 +2,8 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
+from urllib.request import urlopen
+
 from datasets import load_dataset, concatenate_datasets
 from tqdm import tqdm
 from collections import Counter
@@ -301,3 +303,47 @@ def load_dataset_from_file(path: str) -> list[dict[str, Any]]:
     logger.info(f"Dataset loaded from {file_path}")
 
     return dataset
+
+
+def prepare_liar(n_samples: int, seed: int = 42) -> list[dict[str, Any]]:
+    """
+    Prepare a balanced LIAR dataset for truthfulness evaluation.
+    Uses the binary UKPLab/liar mirror and maps label 0 -> truthful, 1 -> not_truthful.
+    """
+    if n_samples <= 0 or n_samples % 2 != 0:
+        raise ValueError("n_samples must be a positive even number.")
+
+    url = "https://huggingface.co/datasets/UKPLab/liar/resolve/main/train.jsonl?download=true"
+    with urlopen(url) as response:
+        dataset = [json.loads(line.decode("utf-8")) for line in response if line.strip()]
+
+    truthful_ds = [row for row in dataset if int(row["labels"]) == 0]
+    not_truthful_ds = [row for row in dataset if int(row["labels"]) == 1]
+
+    half = n_samples // 2
+    max_samples = min(len(truthful_ds), len(not_truthful_ds)) * 2
+
+    if n_samples > max_samples:
+        raise ValueError(
+            f"Requested {n_samples} samples, but maximum balanced size is {max_samples}."
+        )
+
+    import random
+
+    rng = random.Random(seed)
+    rng.shuffle(truthful_ds)
+    rng.shuffle(not_truthful_ds)
+    final_dataset = truthful_ds[:half] + not_truthful_ds[:half]
+    rng.shuffle(final_dataset)
+
+    data = []
+    for i, row in enumerate(tqdm(final_dataset, desc="Preparing LIAR")):
+        data.append({
+            "id": f"liar_{i}",
+            "dataset": "liar",
+            "question": "Is the following statement true?",
+            "model_response": row["text"],
+            "y_true": "truthful" if int(row["labels"]) == 0 else "not_truthful",
+        })
+
+    return data
