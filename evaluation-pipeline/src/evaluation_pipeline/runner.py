@@ -116,9 +116,9 @@ def run_first_level_judge(
         )
 
         prediction_response = get_raw_model_response(
-            prediction_prompt,
-            model,
-            )
+            prompt=prediction_prompt,
+            model=model,
+        )
 
         first_prompt = build_experiment_prompt(
             prompt_type="dynamic",
@@ -140,8 +140,8 @@ def run_first_level_judge(
         )
 
     first_judge_result = judge_response(
-        first_prompt,
-        model,
+        prompt=first_prompt,
+        model=model,
     )
 
     result["first_prompt"] = first_prompt
@@ -212,8 +212,8 @@ def apply_second_level_decision(
     )
 
     second_result = judge_response(
-        second_level_prompt,
-        model,
+        prompt=second_level_prompt,
+        model=model,
     )
 
     second_level_verdict = second_result.get("predicted_label")
