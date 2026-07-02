@@ -31,6 +31,8 @@ VALID_SECOND_LEVEL_VERDICTS = {
 PARSING_ERROR = "parsing_error"
 RUNTIME_ERROR = "runtime_error"
 
+NON_SECOND_LEVEL_METHODS = {"baseline", "dynamic"}
+
 
 def build_base_result(
     example: dict[str, Any],
@@ -322,7 +324,7 @@ def run_judge_experiment(
             results.append(result)
             continue
 
-        if method in {"baseline", "dynamic"}:
+        if method in NON_SECOND_LEVEL_METHODS:
             apply_baseline_decision(result)
             results.append(result)
             continue
