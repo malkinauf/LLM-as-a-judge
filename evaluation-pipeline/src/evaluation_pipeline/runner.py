@@ -28,6 +28,9 @@ VALID_SECOND_LEVEL_VERDICTS = {
     "not_correct",
 }
 
+PARSING_ERROR = "parsing_error"
+RUNTIME_ERROR = "runtime_error"
+
 
 def build_base_result(
     example: dict[str, Any],
@@ -169,7 +172,7 @@ def apply_baseline_decision(
     if first_level_label in VALID_JUDGE_LABELS:
         result["predicted_label"] = first_level_label
     else:
-        result["predicted_label"] = "parsing_error"
+        result["predicted_label"] = PARSING_ERROR
 
 
 def apply_second_level_decision(
@@ -195,7 +198,7 @@ def apply_second_level_decision(
     first_level_label = result["first_level_label"]
 
     if first_level_label not in VALID_JUDGE_LABELS:
-        result["predicted_label"] = "parsing_error"
+        result["predicted_label"] = PARSING_ERROR
         return
 
     second_level_prompt = build_experiment_prompt(
@@ -227,7 +230,7 @@ def apply_second_level_decision(
     )
 
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
-        result["predicted_label"] = "parsing_error"
+        result["predicted_label"] = PARSING_ERROR
         return
 
     if second_level_verdict == "correct":
@@ -239,7 +242,7 @@ def apply_second_level_decision(
     if corrected_verdict in VALID_JUDGE_LABELS:
         result["predicted_label"] = corrected_verdict
     else:
-        result["predicted_label"] = "parsing_error"
+        result["predicted_label"] = PARSING_ERROR
 
 
 def run_judge_experiment(
@@ -314,7 +317,7 @@ def run_judge_experiment(
                 f"{example.get('id')}: {e}"
             )
 
-            result["predicted_label"] = "runtime_error"
+            result["predicted_label"] = RUNTIME_ERROR
             result["error"] = str(e)
             results.append(result)
             continue
@@ -339,7 +342,7 @@ def run_judge_experiment(
                     f"{example.get('id')}: {e}"
                 )
 
-                result["predicted_label"] = "runtime_error"
+                result["predicted_label"] = RUNTIME_ERROR
                 result["error"] = str(e)
 
             results.append(result)
