@@ -1,0 +1,14 @@
+Analyze the question-answer pair below and return one line of text.
+
+The line should contain the key factual claim that must be verified to determine whether the answer is correct.
+
+Use a short phrase only.
+
+Do not explain.
+Do not determine whether the answer is truthful or not truthful.
+
+Question:
+{question}
+
+Answer:
+{model_response}
