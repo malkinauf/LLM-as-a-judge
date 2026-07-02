@@ -55,7 +55,7 @@
 \section{Introduction}
 \label{sec:motivation}
 
-\subsection{\iflanguage{ngerman}
+\subsection{
     {Bereich der Arbeit}
     {Thesis Area}}
 \label{sub:introduction}
@@ -66,21 +66,10 @@
 	Ein Ansatz zur Verbesserung der Bewertungsqualität ist das sogenannte Second-Level Judging, bei dem eine initiale Bewertung durch einen weiteren Prüfungsschritt verifiziert wird. Dabei wird die ursprüngliche Bewertung einer zusätzlichen Analyse unterzogen, um deren Konsistenz und Nachvollziehbarkeit zu überprüfen. Die Idee einer nachgelagerten Prüfung wurde unter anderem von Russinovich et al. aufgegriffen und später auch im Kontext von LLM-as-a-Judge untersucht \cite{russinovich2025crescendo,biskupski2026evaluating}.
 	Parallel dazu nimmt das Prompt Engineering eine Schlüsselrolle ein, da es das Verhalten von Sprachmodellen maßgeblich determiniert \cite{gu2026surveyjudge}. Insbesondere adaptive Ansätze wie das Dynamic Prompting konnten in diversen Anwendungsszenarien bereits signifikante Steigerungen der Leistungsfähigkeit erzielen \cite{huynh2025dynamic}.
 }
-{
-    Start with a general description of the research field (for example, Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments), discussing characteristics and applications, including some introductory literature as appropriate.
-    
-    Then introduce the specific topic of the work here (e.g., security of a specific communication protocol, evaluation of patch attacks, design of a secure container) and describe the requirements and goals of the work, such as the required efficiency or achieved security goals.
-}
-
-\dots
-
 
 \subsection{
     {Motivation}
-    {Motivation}}
 \label{sub:motivation}
-
-
 {
 		Large Language Models (LLMs) haben sich zu einer zentralen Technologie entwickelt. Dadurch steigt der Bedarf an skalierbaren Evaluationsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig sind, jedoch mit erheblichem Zeit- und Kostenaufwand verbunden sind \cite{gu2026surveyjudge}.
 		
@@ -94,17 +83,11 @@
 		
 		Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}.
 		}
-{{Based on \autoref{sub:introduction}, describe what makes the topic worthwhile from a practical or academic point of view. The reasoning leads to the concrete problem statement in \autoref{sec:problem_statement}.}
-
-\dots
 
 \newpage
 \section{
     {Verwandte Forschung}
-    {State of the Art}}
 \label{sec:state_of_the_art}
-
-
 {
    Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet \cite{zheng2023judging, gu2026surveyjudge}. Studien belegen, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Sprachmodelle automatisiert zu validieren und dabei eine hohe Korrelation mit menschlichen Urteilen erreichen \cite{zheng2023judging}. Darauf aufbauend wurden Verfahren entwickelt, die mittels strukturierter Prompt-Strategien eine präzisere Ausrichtung an menschlichen Bewertungskriterien anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion formalisiert \cite{gu2026surveyjudge}:
   
@@ -123,15 +106,11 @@
 
 \section{
     {Problemstellung}
-    {Problem Statement}}
 \label{sec:problem_statement}\iflanguage{ngerman}
 
 \subsection{
     {Beitrag der Arbeit}
-    {Thesis focus}}
 \label{sub:focus}
-
-
 {
 
 Im Rahmen dieser Arbeit wird die Zuverlässigkeit automatisierter Bewertungsverfahren auf Basis des Ansatzes \textit{LLM-as-a-Judge} untersucht, wobei der Fokus insbesondere auf mehrstufigen Strategien liegt. Bestehende Studien liefern hierzu widersprüchliche Ergebnisse: Während mehrstufige Verfahren wie \textit{Dynamic Prompting} die Qualität bei Analyseaufgaben (z. B. Codeanalyse und Schwachstellenerkennung) nachweislich steigern können \cite{huynh2025dynamic}, führen analoge Ansätze im Kontext der Evaluation nicht zwangsläufig zu den erwarteten Verbesserungen \cite{biskupski2026evaluating}.
