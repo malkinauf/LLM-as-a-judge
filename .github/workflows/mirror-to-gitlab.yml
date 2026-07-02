@@ -31,4 +31,5 @@ jobs:
           GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o StrictHostKeyChecking=yes
         run: |
           git remote add gitlab git@gitlab.rwu.de:stud-kleber/pr-2026-morina_malkina.git
-          git push --mirror gitlab
+          git push gitlab --all 
+          git push gitlab --tags
