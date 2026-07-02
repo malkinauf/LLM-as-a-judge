@@ -2,12 +2,12 @@ name: Mirror GitHub to GitLab
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - "**"
     tags:
       - "**"
-  delete:
 
 jobs:
   mirror:
@@ -30,6 +30,7 @@ jobs:
         env:
           GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o StrictHostKeyChecking=yes
         run: |
+          git remote remove gitlab 2>/dev/null || true
           git remote add gitlab git@gitlab.rwu.de:stud-kleber/pr-2026-morina_malkina.git
-          git push gitlab --all 
+          git push gitlab --all
           git push gitlab --tags
