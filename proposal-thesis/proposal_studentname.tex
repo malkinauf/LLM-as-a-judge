@@ -10,164 +10,111 @@
 \usepackage{hyperref}
 \usepackage[style=ieee,hyperref,natbib,backend=biber]{biblatex}
 \usepackage{pgfgantt}
-
-% Template setup
 \usepackage{booktabs}
 \usepackage{lipsum}
 \usepackage{iflang}
+\usepackage{ifthen}
 \usepackage[framemethod=tikz]{mdframed}
+
 \newboolean{showhints}
-\newcommand\hint[2]{
-    \ifthenelse{\boolean{showhints}}{
-        \begin{mdframed}[backgroundcolor=rwu-akzent-light!50, linecolor=rwu-akzent, linewidth=1pt, roundcorner=4pt]
-            #2\hfill\bfseries#1
-        \end{mdframed}
-    }{}
+\newcommand\hint[2]{%
+	\ifthenelse{\boolean{showhints}}{%
+		\begin{mdframed}[backgroundcolor=rwu-akzent-light!50, linecolor=rwu-akzent, linewidth=1pt, roundcorner=4pt]
+			#2\hfill\bfseries#1
+		\end{mdframed}%
+	}{}
 }
 
 % Kommentare abschalten
 % Disable the hints here
 \setboolean{showhints}{true}
-% \setboolean{showhints}{false}
-
+%\setboolean{showhints}{false}
 
 % Front- and backmatter
-% 
 % Title of the proposal
 \title{\IfLanguageName{ngerman}{Evaluation von Prompt-Engineering-Techniken für LLM-as-a-Judge: Second-Level Judging und Dynamic Prompting}{Title of the Thesis}}
+
 % Bachelor or Master?
-\subtitle{\IfLanguageName{ngerman}{%
-        Semesterprojekt-%
-        }{%
-        Bachelor/Master Thesis }Proposal%
-    }
+\subtitle{\IfLanguageName{ngerman}{Semesterprojekt-}{Bachelor/Master Thesis }Proposal}
+
 % First and last name
 \author{\iflanguage{ngerman}{Esmo Morina, Tatiana Malkina}{Firstname Lastname}}
 \date{\today}
-
 \bibliography{references}
 
-
-
 \begin{document}
-    \maketitle
-
-\section{Introduction}
-\label{sec:motivation}
-
-\subsection{\iflanguage{ngerman}
-    {Bereich der Arbeit}
-    {Thesis Area}}
-\label{sub:introduction}
-\iflanguage{ngerman}
-{\hint{}{
+	
+	\maketitle
+	
+	\section{Introduction}
+	\label{sec:motivation}
+	
+	\subsection{Bereich der Arbeit}
+	\label{sub:introduction}
+	
 	Mit dem Einsatz großer Sprachmodelle (LLMs) in produktiven Systemen wird die zuverlässige Bewertung ihrer Ausgaben zu einer zentralen Herausforderung \cite{gu2026surveyjudge, han2026judge}. Fehlbewertungen können sich nicht nur auf Kosten und Ressourceneinsatz auswirken, sondern auch die Qualität realer Anwendungen beeinträchtigen, beispielsweise durch falsche oder irreführende Antworten \cite{biskupski2026evaluating}. Trotz der Vielzahl bestehender Ansätze bleibt die Entwicklung von Evaluationsverfahren, die gleichzeitig skalierbar, reproduzierbar und robust gegenüber variierenden Bedingungen sind, eine wichtige Aufgabe im Bereich der LLM-Evaluation \cite{silva2026metajudge}.
+	
 	Vor diesem Hintergrund hat sich das Paradigma des LLM-as-a-Judge etabliert, bei dem Sprachmodelle selbst zur automatisierten Bewertung von Modellantworten eingesetzt werden \cite{gu2026surveyjudge}. Während dieser Ansatz eine effiziente Skalierung von Evaluationsprozessen ermöglicht, wirft er zugleich Fragen hinsichtlich der Zuverlässigkeit der erzeugten Bewertungen auf. Aktuelle Studien zeigen, dass die Bewertungsergebnisse von Faktoren wie Prompt-Formulierung, Modellwahl und Aufgabenstruktur beeinflusst werden können, was zu einer erhöhten Variabilität der Resultate führen kann \cite{zheng2023judging, biskupski2026evaluating, thakur2025judging}.
+	
 	Ein Ansatz zur Verbesserung der Bewertungsqualität ist das sogenannte Second-Level Judging, bei dem eine initiale Bewertung durch einen weiteren Prüfungsschritt verifiziert wird. Dabei wird die ursprüngliche Bewertung einer zusätzlichen Analyse unterzogen, um deren Konsistenz und Nachvollziehbarkeit zu überprüfen. Die Idee einer nachgelagerten Prüfung wurde unter anderem von Russinovich et al. aufgegriffen und später auch im Kontext von LLM-as-a-Judge untersucht \cite{russinovich2025crescendo,biskupski2026evaluating}.
+	
 	Parallel dazu nimmt das Prompt Engineering eine Schlüsselrolle ein, da es das Verhalten von Sprachmodellen maßgeblich determiniert \cite{gu2026surveyjudge}. Insbesondere adaptive Ansätze wie das Dynamic Prompting konnten in diversen Anwendungsszenarien bereits signifikante Steigerungen der Leistungsfähigkeit erzielen \cite{huynh2025dynamic}.
-}}
-{\hint{(this page)}{
-    Start with a general description of the research field (for example, Protocol Reverse Engineeing, Adversarial Machine Learning, Secure Execution Environments), discussing characteristics and applications, including some introductory literature as appropriate.
-    
-    Then introduce the specific topic of the work here (e.g., security of a specific communication protocol, evaluation of patch attacks, design of a secure container) and describe the requirements and goals of the work, such as the required efficiency or achieved security goals.
-}}
-
-\dots
-
-
-\subsection{\iflanguage{ngerman}
-    {Motivation}
-    {Motivation}}
-\label{sub:motivation}
-
-\iflanguage{ngerman}
-{\hint{}{
-		Large Language Models (LLMs) haben sich zu einer zentralen Technologie entwickelt. Dadurch steigt der Bedarf an skalierbaren Evaluationsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig sind, jedoch mit erheblichem Zeit- und Kostenaufwand verbunden sind \cite{gu2026surveyjudge}.
-		
-		Ein bedeutender Forschungsbereich ist daher \textbf{LLM-as-a-Judge}, bei dem Sprachmodelle automatisch die Antworten anderer Modelle bewerten oder Systeme miteinander vergleichen. Solche Ansätze werden zunehmend für Benchmarking, Qualitätskontrolle und automatisierte Modellvergleiche genutzt. Die Qualität dieser Bewertungen hängt jedoch nicht nur vom eingesetzten Modell, sondern auch stark vom Prompt-Design ab \cite{zheng2023judging,biskupski2026evaluating}.
-		
-		Ein aktueller Ansatz ist das \textbf{Second-Level Judging}, bei dem ein zweites Judge-Modell die Entscheidung und Begründung eines ersten Judges überprüft, um Fehler zu erkennen und die Zuverlässigkeit zu erhöhen. Erste Arbeiten berichten Verbesserungen durch diesen zweistufigen Prozess, insbesondere bei der Reduktion fehlerhafter Urteile \cite{russinovich2025crescendo}. Neuere Studien zeigen jedoch widersprüchliche Ergebnisse und kommen zu dem Schluss, dass Second-Level Judges die Gesamtleistung in vielen Fällen sogar verschlechtern können \cite{biskupski2026evaluating}.
-		
-		Parallel dazu zeigen Studien in anderen Bereichen, etwa bei der automatisierten Codefehlererkennung, dass \textbf{Dynamic Prompting} die Leistung von Sprachmodellen deutlich verbessern kann \cite{huynh2025dynamic}. Ob sich dieser Ansatz auf LLM-as-a-Judge-Systeme übertragen lässt, wurde bislang kaum untersucht.
-		
-		Zusätzlich zu allgemeinen Evaluationsrahmen und Benchmarks für LLM-basierte Bewertungsmodelle \cite{han2026judge} konzentriert sich diese Arbeit speziell auf den Einfluss von Prompting-Strategien innerhalb solcher Bewertungs-Setups.
-		
-		Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}.
-		}}
-{\hint{(half a page)}{Based on \autoref{sub:introduction}, describe what makes the topic worthwhile from a practical or academic point of view. The reasoning leads to the concrete problem statement in \autoref{sec:problem_statement}.}}
-
-\dots
-
-\newpage
-\section{\iflanguage{ngerman}
-    {Verwandte Forschung}
-    {State of the Art}}
-\label{sec:state_of_the_art}
-
-\iflanguage{ngerman}
-{\hint{}{
-   Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet \cite{zheng2023judging, gu2026surveyjudge}. Studien belegen, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Sprachmodelle automatisiert zu validieren und dabei eine hohe Korrelation mit menschlichen Urteilen erreichen \cite{zheng2023judging}. Darauf aufbauend wurden Verfahren entwickelt, die mittels strukturierter Prompt-Strategien eine präzisere Ausrichtung an menschlichen Bewertungskriterien anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion formalisiert \cite{gu2026survey}:
-  
-   \begin{equation}
-   	\mathrm{Score} = f(\mathrm{model}, \mathrm{prompt}, \mathrm{task}, \mathrm{context})
-   \end{equation}
-   
-   Die Bewertungsqualität hängt dabei maßgeblich vom gewählten Modell, dem Prompt, der spezifischen Aufgabe sowie dem Kontext ab und reagiert entsprechend sensitiv auf Variationen dieser Faktoren \cite{gu2026surveyjudge,thakur2025judging}. Parallel dazu werden Verfahren untersucht, die die Leistungsfähigkeit von Sprachmodellen durch zusätzliche Analyse- oder Verfeinerungsschritte verbessern sollen. Beispiele hierfür sind Reflexion \cite{shinn2023reflexion}, Self-Refine \cite{madaan2023selfrefine} sowie Dynamic Prompting \cite{huynh2025dynamic}. Ein prominentes Beispiel ist das Dynamic Prompting, bei dem zunächst eine Zwischenanalyse erzeugt und anschließend als zusätzlicher Kontext in den Prompt integriert wird \cite{huynh2025dynamic}. Während empirische Ergebnisse zeigen, dass dieser Ansatz die Qualität generierter Antworten verbessern kann, wurde sein Einfluss auf Aufgaben der automatisierten Evaluation (LLM-as-a-Judge) bislang nur unzureichend untersucht \cite{huynh2025dynamic}.
-   
-   Daneben existieren mehrstufige Bewertungsverfahren wie Second-Level Judging, bei dem eine Primärbewertung erneut analysiert und gegebenenfalls korrigiert wird. Ziel ist die Steigerung der Reliabilität des Urteils. Empirische Studien belegen jedoch, dass solche Verfahren keine konsistente Verbesserung garantieren und in spezifischen Modell-Prompt-Konfigurationen sogar kontraproduktive Effekte erzielen können \cite{biskupski2026evaluating}.
-   
-   Neuere Arbeiten erweitern diese Idee zum Meta-Judging, bei dem Modelle nicht nur Antworten, sondern auch bereits erzeugte Evaluationen prüfen und somit als „Richter der Richter“ fungieren. Diese Ansätze zielen darauf ab, die Konsistenz automatisierter Bewertungssysteme zu erhöhen, und zeigen in isolierten Konfigurationen bereits Leistungsgewinne. Bestehende Studien konzentrieren sich jedoch häufig auf komplexe Architekturen wie Multi-Agenten-Systeme oder präferenzbasiertes Training, während praktisch leichter umsetzbare Varianten wie das Second-Level Judging bislang unzureichend erforscht sind \cite{silva2026metajudge}.
-   
-   Insgesamt zeigt sich, dass zusätzliche Analyseebenen – sowohl innerhalb des Reasoning-Prozesses als auch durch separate Prüfungsschritte – die Entscheidungsqualität maßgeblich beeinflussen können, deren exakte Wirkweise jedoch noch nicht eindeutig geklärt ist. Insbesondere bleibt offen, unter welchen Bedingungen Second-Level-Ansätze die Verlässlichkeit von LLM-basierten Evaluatoren tatsächlich optimieren. Dies macht eine systematische Untersuchung verschiedener Implementierungen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Verfahren – zu einer dringlichen Forschungsaufgabe.
-}}
-{\hint{(1 page)}{
-    Provide relevant literature~\cite{Test} on the specific topic. The literature selection is discussed beforehand with the supervisor and does not have to cover the topic completely. The literature presented should highlight problems with (or even the lack of) existing solutions for the topic of the thesis, especially those that led to the motivation for the thesis in \autoref{sub:motivation}.
-    In addition, compile existing solutions to sub-problems or preliminary work that may be applicable as tools or methods.
-    
-    The aim should be to show that the problem 
-    (1) is generally recognized (there are papers on similar topics),
-    (2) has not yet been solved (there is no paper that deals with exactly the same question),
-    and (3) that the problem is likely to be solvable (there are solutions to sub-problems, applicable tools, or methods).
-}}
-
-\dots
-
-\section{\iflanguage{ngerman}
-    {Problemstellung}
-    {Problem Statement}}
-\label{sec:problem_statement}
-
-\subsection{\iflanguage{ngerman}
-    {Beitrag der Arbeit}
-    {Thesis focus}}
-\label{sub:focus}
-
-\iflanguage{ngerman}
-{\hint{}{
-
-Im Rahmen dieser Arbeit wird die Zuverlässigkeit automatisierter Bewertungsverfahren auf Basis des Ansatzes \textit{LLM-as-a-Judge} untersucht, wobei der Fokus insbesondere auf mehrstufigen Strategien liegt. Bestehende Studien liefern hierzu widersprüchliche Ergebnisse: Während mehrstufige Verfahren wie \textit{Dynamic Prompting} die Qualität bei Analyseaufgaben (z. B. Codeanalyse und Schwachstellenerkennung) nachweislich steigern können \cite{huynh2025dynamic}, führen analoge Ansätze im Kontext der Evaluation nicht zwangsläufig zu den erwarteten Verbesserungen \cite{biskupski2026evaluating}.
-
-Insbesondere zeigt der Ansatz des \textit{Second-Level Judging}, der eine zusätzliche Überprüfung initialer Bewertungen vorsieht, trotz seiner konzeptionellen Einfachheit häufig instabile oder sogar schlechtere Ergebnisse \cite{biskupski2026evaluating}. Im Gegensatz dazu erzielen komplexere Methoden wie das \textit{Meta-Judging} oftmals eine höhere Übereinstimmung in der Bewertung \cite{silva2026metajudge}. Dieses Spannungsfeld stellt ein in der Literatur bislang unzureichend geklärtes Problem dar.
-
-Ziel dieser Arbeit ist die systematische Untersuchung dieser Diskrepanzen sowie die Identifikation von Bedingungen, unter denen mehrstufige Ansätze die Zuverlässigkeit der Bewertung maßgeblich beeinflussen.
-
-Zur Umsetzung wird eine experimentelle Pipeline für binäre Klassifikationsaufgaben entwickelt, die den systematischen Vergleich verschiedener Konfigurationen des Bewertungsprozesses ermöglicht. Dabei werden insbesondere der Einfluss von \textit{Second-Level Judging} sowie verschiedener Prompting-Strategien – einschließlich \textit{Dynamic Prompting} – auf die Stabilität und Konsistenz der Bewertungen analysiert. Zusätzlich erfolgt ein Vergleich von Modellen unterschiedlicher Leistungsfähigkeit, um die Korrelation zwischen Bewertungsqualität und Rechenaufwand zu untersuchen.
-
-Als Datengrundlage dienen etablierte Benchmarks, ergänzt durch einen dedizierten Satz eigener Beispiele. Zur Evaluation werden klassische Metriken (Precision, Recall, F1-Score), das Maß der Übereinstimmung (Cohen’s Kappa) sowie Stabilitätskennzahlen auf Basis der Variabilität über mehrere Iterationen eingesetzt.
-
-Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter den beobachteten Diskrepanzen zu isolieren und evidenzbasierte Empfehlungen für den Einsatz mehrstufiger Bewertungsansätze abzuleiten.
-}}
-{\hint{(0.75 pages)}{Based on the Motivation (\autoref{sec:motivation}) and existing work (\ref{sec:state_of_the_art}) this section should describe the problems to be solved in this work. This should include a description of the additional ideas that will be designed (e.g., a concept, implementation, \dots) and the evaluation methodology (e.g., formal analysis, simulation, user study).}}
-
-\dots
-\subsection{\iflanguage{ngerman}
-    {Forschungsfragen}
-    {Research questions}}
-\label{sub:questions}
-
-\iflanguage{ngerman}
-{\hint{}{	Zur Erreichung dieses Ziels ergibt sich die folgende
-		\textbf{Hauptfrage:}
+	
+	\subsection{Motivation}
+	\label{sub:motivation}
+	
+	Large Language Models (LLMs) haben sich zu einer zentralen Technologie entwickelt. Dadurch steigt der Bedarf an skalierbaren Evaluationsverfahren, da menschliche Evaluationen zwar qualitativ hochwertig sind, jedoch mit erheblichem Zeit- und Kostenaufwand verbunden sind \cite{gu2026surveyjudge}.
+	
+	Ein bedeutender Forschungsbereich ist daher \textbf{LLM-as-a-Judge}, bei dem Sprachmodelle automatisch die Antworten anderer Modelle bewerten oder Systeme miteinander vergleichen. Solche Ansätze werden zunehmend für Benchmarking, Qualitätskontrolle und automatisierte Modellvergleiche genutzt. Die Qualität dieser Bewertungen hängt jedoch nicht nur vom eingesetzten Modell, sondern auch stark vom Prompt-Design ab \cite{zheng2023judging,biskupski2026evaluating}.
+	
+	Ein aktueller Ansatz ist das \textbf{Second-Level Judging}, bei dem ein zweites Judge-Modell die Entscheidung und Begründung eines ersten Judges überprüft, um Fehler zu erkennen und die Zuverlässigkeit zu erhöhen. Erste Arbeiten berichten Verbesserungen durch diesen zweistufigen Prozess, insbesondere bei der Reduktion fehlerhafter Urteile \cite{russinovich2025crescendo}. Neuere Studien zeigen jedoch widersprüchliche Ergebnisse und kommen zu dem Schluss, dass Second-Level Judges die Gesamtleistung in vielen Fällen sogar verschlechtern können \cite{biskupski2026evaluating}.
+	
+	Parallel dazu zeigen Studien in anderen Bereichen, etwa bei der automatisierten Codefehlererkennung, dass \textbf{Dynamic Prompting} die Leistung von Sprachmodellen deutlich verbessern kann \cite{huynh2025dynamic}. Ob sich dieser Ansatz auf LLM-as-a-Judge-Systeme übertragen lässt, wurde bislang kaum untersucht.
+	
+	Zusätzlich zu allgemeinen Evaluationsrahmen und Benchmarks für LLM-basierte Bewertungsmodelle \cite{han2026judge} konzentriert sich diese Arbeit speziell auf den Einfluss von Prompting-Strategien innerhalb solcher Bewertungs-Setups.
+	
+	Ziel dieser Arbeit ist es, Prompting-Techniken für \textbf{LLM-as-a-Judge-Systeme} systematisch zu vergleichen. Im Fokus stehen dabei \textbf{Second-Level Judging} und \textbf{Dynamic Prompting}.
+	
+	\newpage
+	\section{Verwandte Forschung}
+	\label{sec:state_of_the_art}
+	
+	Die Nutzung großer Sprachmodelle als Evaluatoren (LLM-as-a-Judge) wird zunehmend als skalierbare Alternative zu klassischen Bewertungsmethoden betrachtet \cite{zheng2023judging, gu2026surveyjudge}. Studien belegen, dass leistungsstarke Modelle in der Lage sind, die Ausgaben anderer Sprachmodelle automatisiert zu validieren und dabei eine hohe Korrelation mit menschlichen Urteilen erreichen \cite{zheng2023judging}. Darauf aufbauend wurden Verfahren entwickelt, die mittels strukturierter Prompt-Strategien eine präzisere Ausrichtung an menschlichen Bewertungskriterien anstreben \cite{liu2023geval}. In der Literatur wird dieser Ansatz häufig als parametrisierte Bewertungsfunktion formalisiert \cite{gu2026surveyjudge}:
+	
+	\begin{equation}
+		\mathrm{Score} = f(\mathrm{model}, \mathrm{prompt}, \mathrm{task}, \mathrm{context})
+	\end{equation}
+	
+	Die Bewertungsqualität hängt dabei maßgeblich vom gewählten Modell, dem Prompt, der spezifischen Aufgabe sowie dem Kontext ab und reagiert entsprechend sensitiv auf Variationen dieser Faktoren \cite{gu2026surveyjudge,thakur2025judging}. Parallel dazu werden Verfahren untersucht, die die Leistungsfähigkeit von Sprachmodellen durch zusätzliche Analyse- oder Verfeinerungsschritte verbessern sollen. Beispiele hierfür sind Reflexion \cite{shinn2023reflexion}, Self-Refine \cite{madaan2023selfrefine} sowie Dynamic Prompting \cite{huynh2025dynamic}. Ein prominentes Beispiel ist das Dynamic Prompting, bei dem zunächst eine Zwischenanalyse erzeugt und anschließend als zusätzlicher Kontext in den Prompt integriert wird \cite{huynh2025dynamic}. Während empirische Ergebnisse zeigen, dass dieser Ansatz die Qualität generierter Antworten verbessern kann, wurde sein Einfluss auf Aufgaben der automatisierten Evaluation (LLM-as-a-Judge) bislang nur unzureichend untersucht \cite{huynh2025dynamic}.
+	
+	Daneben existieren mehrstufige Bewertungsverfahren wie Second-Level Judging, bei dem eine Primärbewertung erneut analysiert und gegebenenfalls korrigiert wird. Ziel ist die Steigerung der Reliabilität des Urteils. Empirische Studien belegen jedoch, dass solche Verfahren keine konsistente Verbesserung garantieren und in spezifischen Modell-Prompt-Konfigurationen sogar kontraproduktive Effekte erzielen können \cite{biskupski2026evaluating}.
+	
+	Neuere Arbeiten erweitern diese Idee zum Meta-Judging, bei dem Modelle nicht nur Antworten, sondern auch bereits erzeugte Evaluationen prüfen und somit als „Richter der Richter“ fungieren. Diese Ansätze zielen darauf ab, die Konsistenz automatisierter Bewertungssysteme zu erhöhen, und zeigen in isolierten Konfigurationen bereits Leistungsgewinne. Bestehende Studien konzentrieren sich jedoch häufig auf komplexe Architekturen wie Multi-Agenten-Systeme oder präferenzbasiertes Training, während praktisch leichter umsetzbare Varianten wie das Second-Level Judging bislang unzureichend erforscht sind \cite{silva2026metajudge}.
+	
+	Insgesamt zeigt sich, dass zusätzliche Analyseebenen – sowohl innerhalb des Reasoning-Prozesses als auch durch separate Prüfungsschritte – die Entscheidungsqualität maßgeblich beeinflussen können, deren exakte Wirkweise jedoch noch nicht eindeutig geklärt ist. Insbesondere bleibt offen, unter welchen Bedingungen Second-Level-Ansätze die Verlässlichkeit von LLM-basierten Evaluatoren tatsächlich optimieren. Dies macht eine systematische Untersuchung verschiedener Implementierungen – insbesondere dynamischer Prompting-Ansätze und mehrstufiger Verfahren – zu einer dringlichen Forschungsaufgabe.
+	
+	\section{Problemstellung}
+	\label{sec:problem_statement}
+	
+	\subsection{Beitrag der Arbeit}
+	\label{sub:focus}
+	
+	Im Rahmen dieser Arbeit wird die Zuverlässigkeit automatisierter Bewertungsverfahren auf Basis des Ansatzes \textit{LLM-as-a-Judge} untersucht, wobei der Fokus insbesondere auf mehrstufigen Strategien liegt. Bestehende Studien liefern hierzu widersprüchliche Ergebnisse: Während mehrstufige Verfahren wie \textit{Dynamic Prompting} die Qualität bei Analyseaufgaben (z. B. Codeanalyse und Schwachstellenerkennung) nachweislich steigern können \cite{huynh2025dynamic}, führen analoge Ansätze im Kontext der Evaluation nicht zwangsläufig zu den erwarteten Verbesserungen \cite{biskupski2026evaluating}.
+	
+	Insbesondere zeigt der Ansatz des \textit{Second-Level Judging}, der eine zusätzliche Überprüfung initialer Bewertungen vorsieht, trotz seiner konzeptionellen Einfachheit häufig instabile oder sogar schlechtere Ergebnisse \cite{biskupski2026evaluating}. Im Gegensatz dazu erzielen komplexere Methoden wie das \textit{Meta-Judging} oftmals eine höhere Übereinstimmung in der Bewertung \cite{silva2026metajudge}. Dieses Spannungsfeld stellt ein in der Literatur bislang unzureichend geklärtes Problem dar.
+	
+	Ziel dieser Arbeit ist die systematische Untersuchung dieser Diskrepanzen sowie die Identifikation von Bedingungen, unter denen mehrstufige Ansätze die Zuverlässigkeit der Bewertung maßgeblich beeinflussen.
+	
+	Zur Umsetzung wird eine experimentelle Pipeline für binäre Klassifikationsaufgaben entwickelt, die den systematischen Vergleich verschiedener Konfigurationen des Bewertungsprozesses ermöglicht. Dabei werden insbesondere der Einfluss von \textit{Second-Level Judging} sowie verschiedener Prompting-Strategien – einschließlich \textit{Dynamic Prompting} – auf die Stabilität und Konsistenz der Bewertungen analysiert. Zusätzlich erfolgt ein Vergleich von Modellen unterschiedlicher Leistungsfähigkeit, um die Korrelation zwischen Bewertungsqualität und Rechenaufwand zu untersuchen.
+	
+	Als Datengrundlage dienen etablierte Benchmarks, ergänzt durch einen dedizierten Satz eigener Beispiele. Zur Evaluation werden klassische Metriken (Precision, Recall, F1-Score), das Maß der Übereinstimmung (Cohen’s Kappa) sowie Stabilitätskennzahlen auf Basis der Variabilität über mehrere Iterationen eingesetzt.
+	
+	Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter den beobachteten Diskrepanzen zu isolieren und evidenzbasierte Empfehlungen für den Einsatz mehrstufiger Bewertungsansätze abzuleiten.
+	
+	\subsection{Forschungsfragen}
+	\label{sub:questions}
+	
+	Zur Erreichung dieses Ziels ergibt sich die folgende \textbf{Hauptfrage:}
 	
 	Wie beeinflussen mehrstufige Bewertungsansätze wie Second-Level Judging und Dynamic Prompting die Qualität, Stabilität und Effizienz von LLM-basierten Bewertungssystemen im Vergleich zu einem einstufigen Baseline-Ansatz, insbesondere bei Antworten, die durch Prompt-Injection- oder Jailbreak-Eingaben erzeugt wurden?
 	
@@ -178,106 +125,67 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 	\begin{enumerate}
 		\item Wie unterscheiden sich \textit{Second-Level Judging} und \textit{Dynamic Prompting} im Vergleich zu einem einstufigen Baseline-Ansatz hinsichtlich der Stabilität und Konsistenz der Bewertungsergebnisse?
 		\item In welchem Ausmaß verbessern \textit{Second-Level Judging} und \textit{Dynamic Prompting} die Bewertungsqualität bei Antworten, die durch Prompt-Injection- oder Jailbreak-Eingaben erzeugt wurden?
-		
 		\item Welcher der untersuchten Ansätze erzielt die höchste Übereinstimmung mit den Ground-Truth-Labels sicherheitsrelevanter Datensätze?
-		
-		
 		\item Inwiefern beeinflussen Variationen in der Prompt-Formulierung die Bewertungsergebnisse von \textit{Second-Level Judging}?
-		
 		\item Welche Auswirkungen haben Second-Level Judging und Dynamic Prompting auf die Effizienz des Bewertungssystems hinsichtlich Rechenaufwand, Laufzeit und Kosten?
-	\end{enumerate}	
-    }
-}
-{\hint{(0.25 pages)}{Research questions describe one or several main questions of the thesis, as well as several sub-questions agreed upon with the supervisor. Research questions can be split in several types and are typically W-questions (why, what, how, \dots).\footnote{based on \url{http://www.studieren.at/uni-abc/forschungsfrage-welche-fragetypen-gibt-es} (German).}
-        %
-        \begin{description}
-            \item[Explanation:] Why is something the way it is?
-            \item[Description:] What do different approaches look like?
-            \item[Prediction:] How will something develop?
-            \item[Assessment:] How can the described/explained be assessed?
-        \end{description}
-        
-        These questions should be written such that they can be answered within the thesis, and they should fully cover the research problem.
-    }
-}
-
-\section{\iflanguage{ngerman}
-    {Vorgehensweise}
-    {Approach}}
-\label{sec:approach}
-
-\iflanguage{ngerman}
-{\hint{}{
+	\end{enumerate}
+	
+	\section{Vorgehensweise}
+	\label{sec:approach}
+	
+	Im Rahmen dieser Arbeit wird zunächst eine Literaturrecherche zu bestehenden Ansätzen im Bereich LLM-as-a-Judge durchgeführt. Dabei werden insbesondere Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting betrachtet. Ziel ist es, den aktuellen Stand der Forschung zu analysieren, die Stärken und Schwächen der verschiedenen Ansätze zu identifizieren sowie geeignete Evaluationsmethoden und Datensätze auszuwählen.
+	
+	Die Literatur zeigt, dass LLM-basierte Bewertungssysteme zwar eine skalierbare Alternative zu menschlichen Bewertungen darstellen \cite{zheng2023judging}, ihre Zuverlässigkeit, Konsistenz und Stabilität jedoch weiterhin Herausforderungen darstellen \cite{gu2026surveyjudge, biskupski2026evaluating,thakur2025judging}. Darüber hinaus fehlen bislang systematische Vergleiche von Second-Level Judging und Dynamic Prompting unter einheitlichen Evaluationsbedingungen, insbesondere im Kontext sicherheitsrelevanter Aufgaben. Ausgehend von dieser Forschungslücke werden geeignete Benchmarks ausgewählt, um die verschiedenen Bewertungsansätze unter vergleichbaren Bedingungen zu untersuchen.
+	
+	Der Fokus liegt dabei auf sicherheitsrelevanten Klassifikationsaufgaben. Hierzu werden Datensätze verwendet, die beispielsweise die Unterscheidung zwischen sicheren und unsicheren Antworten oder zwischen korrekten und inkorrekten Inhalten ermöglichen. Zusätzlich werden Datensätze berücksichtigt, die Antworten enthalten, welche durch Prompt-Injection- oder Jailbreak-Eingaben beeinflusst wurden.
+	
+	Auf Basis dieser Datensätze wird ein experimentelles Vergleichsdesign umgesetzt, in dem Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting miteinander verglichen werden. Alle Ansätze werden unter identischen Bedingungen auf denselben Daten getestet. Darüber hinaus werden verschiedene Prompt-Varianten sowie mehrere Durchläufe eingesetzt, um die Stabilität und Konsistenz der Bewertungsergebnisse zu analysieren.
+	
+	Für die Experimente werden mehrere Sprachmodelle verwendet, darunter frei verfügbare Modelle sowie eine leistungsstärkere Referenz. Dadurch kann untersucht werden, welchen Einfluss die Wahl des Modells auf die Bewertungsergebnisse hat.
+	
+	Die Bewertung erfolgt anhand verschiedener Metriken. Zur Messung der Bewertungsqualität werden Accuracy und F1-Score herangezogen. Die Stabilität wird anhand der Variabilität der Ergebnisse über mehrere Durchläufe untersucht. Zusätzlich werden Effizienzmetriken wie Laufzeit, Anzahl der Modellaufrufe und die daraus entstehenden Kosten betrachtet. Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Evaluationsprozess automatisiert und systematisch dokumentiert.
+	
+	\section{Planung}
+	\label{sec:planning}
+	
+	\subsection{Eigene Vorkenntnisse}
+	\label{sub:background}
+	
+	Im Rahmen des Studiums wurden grundlegende Kenntnisse in der Programmierung mit Python erworben, die insbesondere für die Umsetzung der experimentellen Auswertung genutzt werden. Darüber hinaus bestehen erste Erfahrungen im Bereich Machine Learning, die im Rahmen von Lehrveranstaltungen und Praktika, insbesondere im Bereich Deep Learning, gesammelt wurden.
+	
+	Diese Vorkenntnisse umfassen grundlegende Konzepte wie das Training und die Evaluation von Modellen sowie den Umgang mit Datensätzen. Zudem wurden erste Erfahrungen im Umgang mit Schnittstellen (APIs) im Rahmen von Programmieraufgaben, unter anderem in Java, gesammelt.
+	
+	Für die vorliegende Arbeit sind insbesondere die Fähigkeiten zur Datenverarbeitung, zur Implementierung von Experimenten sowie zur strukturierten Auswertung von Ergebnissen relevant. Diese werden im Rahmen der Arbeit weiter angewendet und vertieft.
+	
+	Zusätzlich werden im Verlauf der Arbeit neue Kenntnisse erworben, insbesondere im Bereich der Bewertung von Large Language Models, fortgeschrittener Prompting-Strategien (z. B. Second-Level Judging und Dynamic Prompting) sowie der systematischen Durchführung und Analyse von Benchmark-Experimenten. Auch Aspekte wie die Automatisierung von Experimenten und die Analyse von Kosten und Effizienz werden dabei eine wichtige Rolle spielen.
+	
+	\subsection{Benötigte Ressourcen}
+	\label{sub:resources}
+	
+	\begin{itemize}
+		\item \textbf{Laptop:} Durchführung der Experimente sowie Datenverarbeitung und Auswertung.
 		
-		Im Rahmen dieser Arbeit wird zunächst eine Literaturrecherche zu bestehenden Ansätzen im Bereich LLM-as-a-Judge durchgeführt. Dabei werden insbesondere Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting betrachtet. Ziel ist es, den aktuellen Stand der Forschung zu analysieren, die Stärken und Schwächen der verschiedenen Ansätze zu identifizieren sowie geeignete Evaluationsmethoden und Datensätze auszuwählen.
+		\item \textbf{Python und Bibliotheken:} Implementierung der Experimente, Verarbeitung der Daten und Analyse der Ergebnisse.
 		
-		Die Literatur zeigt, dass LLM-basierte Bewertungssysteme zwar eine skalierbare Alternative zu menschlichen Bewertungen darstellen \cite{zheng2023judging}, ihre Zuverlässigkeit, Konsistenz und Stabilität jedoch weiterhin Herausforderungen darstellen \cite{gu2026surveyjudge, biskupski2026evaluating,thakur2025judging}. Darüber hinaus fehlen bislang systematische Vergleiche von Second-Level Judging und Dynamic Prompting unter einheitlichen Evaluationsbedingungen, insbesondere im Kontext sicherheitsrelevanter Aufgaben. Ausgehend von dieser Forschungslücke werden geeignete Benchmarks ausgewählt, um die verschiedenen Bewertungsansätze unter vergleichbaren Bedingungen zu untersuchen.
+		\item \textbf{Zugriff auf Large Language Models:}: Geplant ist die Nutzung von GPT-4o als Referenzmodell sowie ausgewählter Open-Source-Modelle wie Qwen und Llama. Diese Modelle zählen zu den am häufigsten verwendeten Judge-Modellen in aktuellen Arbeiten zu LLM-as-a-Judge \cite{gu2026surveyjudge} und ermöglichen einen Vergleich zwischen kommerziellen und frei verfügbaren Modellfamilien. Sollte der Einsatz kostenpflichtiger APIs aufgrund von Ressourcen- oder Budgetbeschränkungen nur eingeschränkt möglich sein, können einzelne Experimente durch leistungsfähige Open-Source-Modelle ergänzt oder ersetzt werden.
 		
-		Der Fokus liegt dabei auf sicherheitsrelevanten Klassifikationsaufgaben. Hierzu werden Datensätze verwendet, die beispielsweise die Unterscheidung zwischen sicheren und unsicheren Antworten oder zwischen korrekten und inkorrekten Inhalten ermöglichen. Zusätzlich werden Datensätze berücksichtigt, die Antworten enthalten, welche durch Prompt-Injection- oder Jailbreak-Eingaben beeinflusst wurden.
+		\item \textbf{Öffentliche Datensätze:} Grundlage für die Durchführung der Benchmark-Experimente.
 		
-		Auf Basis dieser Datensätze wird ein experimentelles Vergleichsdesign umgesetzt, in dem Single-Prompt Baselines, Second-Level Judging und Dynamic Prompting miteinander verglichen werden. Alle Ansätze werden unter identischen Bedingungen auf denselben Daten getestet. Darüber hinaus werden verschiedene Prompt-Varianten sowie mehrere Durchläufe eingesetzt, um die Stabilität und Konsistenz der Bewertungsergebnisse zu analysieren.
+		\item \textbf{Eigener Benchmark:} Ergänzende Datensätze zur Untersuchung spezifischer Fragestellungen.
 		
-		Für die Experimente werden mehrere Sprachmodelle verwendet, darunter frei verfügbare Modelle sowie eine leistungsstärkere Referenz. Dadurch kann untersucht werden, welchen Einfluss die Wahl des Modells auf die Bewertungsergebnisse hat.
-		Die Bewertung erfolgt anhand verschiedener Metriken. Zur Messung der Bewertungsqualität werden Accuracy und F1-Score herangezogen. Die Stabilität wird anhand der Variabilität der Ergebnisse über mehrere Durchläufe untersucht. Zusätzlich werden Effizienzmetriken wie Laufzeit, Anzahl der Modellaufrufe und die daraus entstehenden Kosten betrachtet. Um die Reproduzierbarkeit sicherzustellen, wird der gesamte Evaluationsprozess automatisiert und systematisch dokumentiert.}}
-
-\dots
-
-\section{\iflanguage{ngerman}
-    {Planung}
-    {Planning}}
-\label{sec:planning}
-
-\subsection{\iflanguage{ngerman}
-    {Eigene Vorkenntnisse}
-    {Own Background}}
-\label{sub:background}
-
-\iflanguage{ngerman}
-{\hint{}{
-		
-		Im Rahmen des Studiums wurden grundlegende Kenntnisse in der Programmierung mit Python erworben, die insbesondere für die Umsetzung der experimentellen Auswertung genutzt werden. Darüber hinaus bestehen erste Erfahrungen im Bereich Machine Learning, die im Rahmen von Lehrveranstaltungen und Praktika, insbesondere im Bereich Deep Learning, gesammelt wurden.
-		
-		Diese Vorkenntnisse umfassen grundlegende Konzepte wie das Training und die Evaluation von Modellen sowie den Umgang mit Datensätzen. Zudem wurden erste Erfahrungen im Umgang mit Schnittstellen (APIs) im Rahmen von Programmieraufgaben, unter anderem in Java, gesammelt.
-		
-		Für die vorliegende Arbeit sind insbesondere die Fähigkeiten zur Datenverarbeitung, zur Implementierung von Experimenten sowie zur strukturierten Auswertung von Ergebnissen relevant. Diese werden im Rahmen der Arbeit weiter angewendet und vertieft.
-		
-		Zusätzlich werden im Verlauf der Arbeit neue Kenntnisse erworben, insbesondere im Bereich der Bewertung von Large Language Models, fortgeschrittener Prompting-Strategien (z. B. Second-Level Judging und Dynamic Prompting) sowie der systematischen Durchführung und Analyse von Benchmark-Experimenten. Auch Aspekte wie die Automatisierung von Experimenten und die Analyse von Kosten und Effizienz werden dabei eine wichtige Rolle spielen.}}
-
-\dots
-
-\subsection{\iflanguage{ngerman}
-    {Benötigte Ressourcen}
-    {Required Resources}}
-\label{sub:resources}
-
-\iflanguage{ngerman}
-{\hint{}{
-		
-		\begin{itemize}
-			\item \textbf{Laptop:} Durchführung der Experimente sowie Datenverarbeitung und Auswertung.
-			
-			\item \textbf{Python und Bibliotheken:} Implementierung der Experimente, Verarbeitung der Daten und Analyse der Ergebnisse.
-			
-			\item \textbf{Zugriff auf Large Language Models:}: Geplant ist die Nutzung von GPT-4o als Referenzmodell sowie ausgewählter Open-Source-Modelle wie Qwen und Llama. Diese Modelle zählen zu den am häufigsten verwendeten Judge-Modellen in aktuellen Arbeiten zu LLM-as-a-Judge \cite{gu2026surveyjudge} und ermöglichen einen Vergleich zwischen kommerziellen und frei verfügbaren Modellfamilien. Sollte der Einsatz kostenpflichtiger APIs aufgrund von Ressourcen- oder Budgetbeschränkungen nur eingeschränkt möglich sein, können einzelne Experimente durch leistungsfähige Open-Source-Modelle ergänzt oder ersetzt werden.
-			
-			\item \textbf{Öffentliche Datensätze:} Grundlage für die Durchführung der Benchmark-Experimente.
-			
-			\item \textbf{Eigener Benchmark:} Ergänzende Datensätze zur Untersuchung spezifischer Fragestellungen.
-			
-			\item \textbf{Budget für API-Nutzung:} Abdeckung der Kosten für kostenpflichtige Modellzugriffe.
-			Die zu erwartenden Kosten hängen maßgeblich von den verwendeten Datensätzen, der Anzahl der Evaluationsdurchläufe sowie dem Umfang der Judge-Prompts ab. Insbesondere sicherheitsrelevante Datensätze mit Prompt-Injection-, Jailbreak- oder anderen adversarialen Szenarien können aufgrund längerer Eingaben und komplexerer Bewertungsprozesse einen deutlich höheren Tokenverbrauch verursachen.
-			Eine erste Abschätzung wurde auf Basis der Datensätze TruthfulQA und BeaverTails durchgeführt. Unter der Annahme von etwa 100 Beispielen pro Datensatz, drei Bewertungsansätzen (Baseline, Second-Level Judging und Dynamic Prompting) sowie mehreren Wiederholungen zur Untersuchung der Stabilität ergibt sich ein erwartetes Volumen von etwa 1 bis 1.5 Millionen Input-Token (Tabelle\ref{tab:token_usage}). Die daraus resultierenden API-Kosten hängen vom jeweils verwendeten Modell ab. Eine Übersicht der geschätzten Kosten für die betrachteten Judge-Modelle ist in Tabelle~\ref{tab:api_costs} dargestellt.
-		\end{itemize}}
-		\begin{table}[ht]
+		\item \textbf{Budget für API-Nutzung:} Abdeckung der Kosten für kostenpflichtige Modellzugriffe. Die zu erwartenden Kosten hängen maßgeblich von den verwendeten Datensätzen, der Anzahl der Evaluationsdurchläufe sowie dem Umfang der Judge-Prompts ab. Insbesondere sicherheitsrelevante Datensätze mit Prompt-Injection-, Jailbreak- oder anderen adversarialen Szenarien können aufgrund längerer Eingaben und komplexerer Bewertungsprozesse einen deutlich höheren Tokenverbrauch verursachen. Eine erste Abschätzung wurde auf Basis der Datensätze TruthfulQA und BeaverTails durchgeführt. Unter der Annahme von etwa 100 Beispielen pro Datensatz, drei Bewertungsansätzen (Baseline, Second-Level Judging und Dynamic Prompting) sowie mehreren Wiederholungen zur Untersuchung der Stabilität ergibt sich ein erwartetes Volumen von etwa 1 bis 1.5 Millionen Input-Token (Tabelle\ref{tab:token_usage}). Die daraus resultierenden API-Kosten hängen vom jeweils verwendeten Modell ab. Eine Übersicht der geschätzten Kosten für die betrachteten Judge-Modelle ist in Tabelle~\ref{tab:api_costs} dargestellt.
+	\end{itemize}
+	
+	\begin{table}[ht]
 		\centering
 		\caption{Abschätzung des Tokenverbrauchs für die Evaluation}
 		\label{tab:token_usage}
 		\begin{tabular}{lrrrr}
 			\toprule
-			\textbf{Prompt-Typ} & 
-			\textbf{Input-Token} & 
-			\textbf{Gesamt Input} & 
-			\textbf{Output-Token} & 
+			\textbf{Prompt-Typ} &
+			\textbf{Input-Token} &
+			\textbf{Gesamt Input} &
+			\textbf{Output-Token} &
 			\textbf{Gesamt Output} \\
 			\midrule
 			Baseline      & 500  & 300\,000 & 50  & 30\,000 \\
@@ -288,15 +196,16 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			\bottomrule
 		\end{tabular}
 	\end{table}
+	
 	\begin{table}[ht]
 		\centering
 		\caption{Geschätzte API-Kosten der betrachteten Judge-Modelle}
 		\label{tab:api_costs}
 		\begin{tabular}{lrrr}
 			\toprule
-			\textbf{Modell} & 
-			\textbf{Input-Kosten} & 
-			\textbf{Output-Kosten} & 
+			\textbf{Modell} &
+			\textbf{Input-Kosten} &
+			\textbf{Output-Kosten} &
 			\textbf{Gesamtkosten} \\
 			\midrule
 			GPT-4o              & \$3.30 & \$1.50 & \textbf{\$4.80} \\
@@ -305,14 +214,13 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			\bottomrule
 		\end{tabular}
 	\end{table}
-}
-{\hint{(arbitrary length)}{If applicable, a list of required hardware, licenses or other resources.}}
-
-\clearpage
-\subsection{Zeitplanung}
-\label{sub:wp}
-
+	
+	\clearpage
+	\subsection{Zeitplanung}
+	\label{sub:wp}
+	
 	\sffamily
+	
 	% Farben für Gantt-Diagramm
 	\definecolor{phasepurple}{RGB}{95,75,160}
 	\definecolor{implblue}{RGB}{55,110,170}
@@ -320,7 +228,7 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 	\definecolor{writebrown}{RGB}{150,70,80}
 	\definecolor{linkred}{RGB}{180,80,80}
 	
-	\resizebox{\textwidth}{!}{
+	\resizebox{\textwidth}{!}{%
 		\begin{ganttchart}[
 			canvas/.append style={fill=none, draw=black!30, line width=.75pt},
 			hgrid style/.style={draw=black!10, line width=.5pt},
@@ -347,33 +255,29 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			]{1}{25}
 			\gantttitle{Wochen}{25} \\
 			\gantttitlelist{1,...,25}{1} \\
-			% Vorbereitung
 			\ganttgroup[group/.append style={fill=phasepurple}]{Vorbereitung}{1}{4} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=lit]{Literaturrecherche}{1}{4} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=bench]{Benchmark- und Datensatzauswahl}{2}{4} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=model]{Modellauswahl}{3}{3} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=forschungsfragen]{Forschungsfragen finalisieren}{3}{4} \\
 			\ganttmilestone[name=m1]{Forschungsfragen und Methodik festgelegt}{4} \\
-			% Implementierung
 			\ganttgroup[group/.append style={fill=phasepurple}]{Implementierung}{5}{14} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=design]{Evaluationsdesign}{5}{6} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=data]{Daten- und Promptvorbereitung}{5}{7} \\
-			\ganttbar[bar/.append style={fill=implblue}, name=debug]{Evaluationspipeline}{7}{13} \\
+			\ganttbar[bar/.append style={fill=implblue}, name=debugpipe]{Evaluationspipeline}{7}{13} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=base]{Baseline (Single-Prompt)}{7}{8} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=second]{Second-Level Judging}{9}{10} \\
 			\ganttbar[bar/.append style={fill=implblue}, name=dynamic]{Dynamic Prompting}{11}{12} \\
-			\ganttbar[bar/.append style={fill=implblue}, name=debug]{Tests und Debugging}{8}{8} \\
+			\ganttbar[bar/.append style={fill=implblue}, name=debugtests]{Tests und Debugging}{8}{8} \\
 			\ganttbar[bar label text={}, bar/.append style={fill=implblue}]{ }{10}{10} \\
 			\ganttbar[bar label text={}, bar/.append style={fill=implblue}]{ }{12}{14} \\
 			\ganttmilestone[name=m2]{Funktionsfähige Evaluationspipeline}{14} \\
-			% Evaluation
 			\ganttgroup[group/.append style={fill=phasepurple}]{Evaluation}{15}{20} \\
 			\ganttbar[bar/.append style={fill=evalgreen}, name=evalsetup]{Evaluationssetup finalisieren}{15}{15} \\
 			\ganttbar[bar/.append style={fill=evalgreen}, name=experiments]{Experimente durchführen}{16}{19} \\
 			\ganttbar[bar/.append style={fill=evalgreen}, name=collect]{Ergebnisse sammeln}{17}{19} \\
 			\ganttbar[bar/.append style={fill=evalgreen}, name=analyse]{Ergebnisse analysieren}{18}{20} \\
 			\ganttmilestone[name=m3]{Experimente abgeschlossen}{20} \\
-			% Schriftliche Ausarbeitung
 			\ganttgroup[group/.append style={fill=phasepurple}]{Schriftliche Ausarbeitung}{2}{25} \\
 			\ganttbar[bar/.append style={fill=writebrown}, name=related]{Verwandte Arbeiten}{2}{5} \\
 			\ganttbar[bar/.append style={fill=writebrown}, name=methodik]{Methodik}{5}{7} \\
@@ -384,53 +288,45 @@ Die Ergebnisse der Arbeit sollen dazu beitragen, die Kausalmechanismen hinter de
 			\ganttbar[bar/.append style={fill=writebrown}, name=proof]{Korrekturlesen und Überarbeitung}{23}{24} \\
 			\ganttbar[bar/.append style={fill=writebrown}, name=submission]{Abgabe}{25}{25} \\
 			\ganttmilestone[name=m4]{Projekt abgeschlossen}{25}
-		\end{ganttchart}
+		\end{ganttchart}%
 	}
-
-\newpage
-\subsection{\iflanguage{ngerman}
-    {Risiken und Ausweichplan}
-    {Contingency Plan}}
-\label{sub:contingency}
-
-\iflanguage{ngerman}
-{\hint{}{
+	
+	\newpage
+	\subsection{Risiken und Ausweichplan}
+	\label{sub:contingency}
+	
+	\begin{itemize}
+		\item \textbf{Nicht verfügbare oder eingeschränkt nutzbare Ressourcen (LLM-APIs)}\\
+		Risiko: Budgetüberschreitungen, Rate Limits oder eingeschränkter Zugriff auf Modelle.\\
+		Ausweichplan: Nutzung kostengünstiger oder frei verfügbarer Modelle, Reduktion der Stichprobengröße sowie Caching von Ergebnissen.
 		
-		\begin{itemize}
-			
-			\item \textbf{Nicht verfügbare oder eingeschränkt nutzbare Ressourcen (LLM-APIs)}\\
-			Risiko: Budgetüberschreitungen, Rate Limits oder eingeschränkter Zugriff auf Modelle.\\
-			Ausweichplan: Nutzung kostengünstiger oder frei verfügbarer Modelle, Reduktion der Stichprobengröße sowie Caching von Ergebnissen.
-			
-			\item \textbf{Instabilität und geringe Reproduzierbarkeit von LLM-Ergebnissen}\\
-			Risiko: Hohe Varianz durch nicht-deterministisches Verhalten der Modelle.\\
-			Ausweichplan: Durchführung mehrerer Durchläufe, Fixierung von Parametern (z.\,B. Temperature) sowie Einsatz geeigneter Stabilitätsmetriken.
-			
-			\item \textbf{Keine signifikanten Verbesserungen durch mehrstufige Ansätze}\\
-			Risiko: Second-Level Judging und Dynamic Prompting liefern keine besseren Ergebnisse als die Baseline.\\
-			Ausweichplan: Analyse der Einflussfaktoren, Erweiterung der Evaluation um zusätzliche Metriken (z.\,B. Effizienz und Kosten) sowie qualitative Fallanalysen.
-			
-			\item \textbf{Verschlechterung der Ergebnisse durch Second-Level Judging}\\
-			Risiko: Zusätzliche Bewertungsschritte können zu inkonsistenten oder schlechteren Resultaten führen.\\
-			Ausweichplan: Anpassung der Prompt-Strategien, Vergleich mit einfacheren Methoden sowie Analyse der Ursachen für Verschlechterungen.
-			
-			\item \textbf{Hoher Implementierungsaufwand der Experiment-Pipeline}\\
-			Risiko: Verzögerungen durch technische Komplexität.\\
-			Ausweichplan: Iterative Entwicklung, modularer Aufbau sowie Nutzung bestehender Frameworks.
-			
-			\item \textbf{Ungeeignete oder nicht ausreichende Datensätze}\\
-			Risiko: Benchmarks decken die Forschungsfragen nicht ausreichend ab.\\
-			Ausweichplan: Kombination mehrerer Datensätze sowie Ergänzung durch einen eigenen Benchmark.
-			
-			\item \textbf{Kein klar überlegener Prompting-Ansatz identifizierbar}\\
-			Risiko: Es lässt sich kein eindeutig bester Ansatz bestimmen.\\
-			Ausweichplan: Analyse von Trade-offs (Qualität, Kosten, Stabilität) sowie Ableitung praxisnaher Empfehlungen.
-			
-\end{itemize}}}
-{\hint{(0.5 pages)}{Possible risks (e.g., unavailable resources, no sufficiently efficient algorithm exists) that can already be estimated before starting the thesis, as well as possible contingency plans.}}
-\newpage
-\nocite{*}
-\printbibliography
-
-    
+		\item \textbf{Instabilität und geringe Reproduzierbarkeit von LLM-Ergebnissen}\\
+		Risiko: Hohe Varianz durch nicht-deterministisches Verhalten der Modelle.\\
+		Ausweichplan: Durchführung mehrerer Durchläufe, Fixierung von Parametern (z.\,B. Temperature) sowie Einsatz geeigneter Stabilitätsmetriken.
+		
+		\item \textbf{Keine signifikanten Verbesserungen durch mehrstufige Ansätze}\\
+		Risiko: Second-Level Judging und Dynamic Prompting liefern keine besseren Ergebnisse als die Baseline.\\
+		Ausweichplan: Analyse der Einflussfaktoren, Erweiterung der Evaluation um zusätzliche Metriken (z.\,B. Effizienz und Kosten) sowie qualitative Fallanalysen.
+		
+		\item \textbf{Verschlechterung der Ergebnisse durch Second-Level Judging}\\
+		Risiko: Zusätzliche Bewertungsschritte können zu inkonsistenten oder schlechteren Resultaten führen.\\
+		Ausweichplan: Anpassung der Prompt-Strategien, Vergleich mit einfacheren Methoden sowie Analyse der Ursachen für Verschlechterungen.
+		
+		\item \textbf{Hoher Implementierungsaufwand der Experiment-Pipeline}\\
+		Risiko: Verzögerungen durch technische Komplexität.\\
+		Ausweichplan: Iterative Entwicklung, modularer Aufbau sowie Nutzung bestehender Frameworks.
+		
+		\item \textbf{Ungeeignete oder nicht ausreichende Datensätze}\\
+		Risiko: Benchmarks decken die Forschungsfragen nicht ausreichend ab.\\
+		Ausweichplan: Kombination mehrerer Datensätze sowie Ergänzung durch einen eigenen Benchmark.
+		
+		\item \textbf{Kein klar überlegener Prompting-Ansatz identifizierbar}\\
+		Risiko: Es lässt sich kein eindeutig bester Ansatz bestimmen.\\
+		Ausweichplan: Analyse von Trade-offs (Qualität, Kosten, Stabilität) sowie Ableitung praxisnaher Empfehlungen.
+	\end{itemize}
+	
+	\newpage
+	\nocite{*}
+	\printbibliography
+	
 \end{document}
