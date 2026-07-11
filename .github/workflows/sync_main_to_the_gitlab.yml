@@ -5,9 +5,7 @@ on:
 
   push:
     branches:
-      - "**"
-    tags:
-      - "**"
+      - main
 
 jobs:
   mirror:
@@ -26,11 +24,10 @@ jobs:
           chmod 600 ~/.ssh/gitlab_mirror
           ssh-keyscan gitlab.rwu.de >> ~/.ssh/known_hosts
 
-      - name: Mirror repository to GitLab
+      - name: Push main to GitLab
         env:
           GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o StrictHostKeyChecking=yes
         run: |
           git remote remove gitlab 2>/dev/null || true
           git remote add gitlab git@gitlab.rwu.de:stud-kleber/pr-2026-morina_malkina.git
-          git push gitlab --all
-          git push gitlab --tags
+          git push gitlab HEAD:refs/heads/main
