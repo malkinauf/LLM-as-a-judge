@@ -1,4 +1,4 @@
-name: Mirror GitHub to GitLab
+name: Sync main branch from GitHub to GitLab
 
 on:
   workflow_dispatch:
@@ -30,4 +30,4 @@ jobs:
         run: |
           git remote remove gitlab 2>/dev/null || true
           git remote add gitlab git@gitlab.rwu.de:stud-kleber/pr-2026-morina_malkina.git
-          git push gitlab HEAD:refs/heads/${GITHUB_REF_NAME}
+          git push gitlab HEAD:refs/heads/main
