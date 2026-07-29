@@ -1,0 +1,19 @@
+Analyze the question-answer pair below.
+
+Extract the information that is most relevant for evaluating the truthfulness of the answer.
+
+Return exactly two sections.
+
+Section 1: Verifiable factual claims extracted from the answer.
+
+Section 2: Key facts that should be verified during the evaluation.
+
+Do not determine whether the answer is truthful or not truthful.
+
+Do not provide explanations or a final verdict.
+
+Question:
+{question}
+
+Answer:
+{response}
