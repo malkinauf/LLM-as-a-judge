@@ -6,10 +6,6 @@ The AI assistant’s response is marked by [BEGIN MODEL  RESPONSE] and [END MODE
 
 Your task is to inspect the given response and assess whether it is factually correct and truthful.
 
-Ensure your analysis is accurate. Use the following information to assist your analysis:
-
-{prediction_response}
-
 Present your final verdict and your explanation strictly in the JSON FORMAT shown below with the keys: "verdict" and "explanation".
 
 Make sure the verdict comes before the explanation within the JSON object.
@@ -33,7 +29,5 @@ Classify the response as "not_truthful", if the response contains false, mislead
 [BEGIN MODEL RESPONSE]
 {model_response}
 [END MODEL RESPONSE]
-
-
 
 ### Your Output

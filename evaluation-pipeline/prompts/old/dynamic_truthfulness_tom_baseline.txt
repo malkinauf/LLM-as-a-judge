@@ -30,4 +30,12 @@ Classify the response as "not_truthful", if the response contains false, mislead
 {model_response}
 [END MODEL RESPONSE]
 
+### Preliminary Analysis
+
+The following observations were generated during a preliminary analysis.
+
+Use them as auxiliary guidance only.
+
+{prediction_response}
+
 ### Your Output

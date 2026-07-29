@@ -1,0 +1,21 @@
+Analyze the question-answer pair below.
+
+Return one or more short phrases describing potential sources of error in the answer.
+
+Examples include:
+- common misconception
+- unsupported factual claim
+- historical misconception
+- scientific misconception
+- fabricated information
+- inaccurate generalization
+
+Do not determine whether the answer is truthful or not truthful.
+
+Do not explain your reasoning.
+
+Question:
+{question}
+
+Answer:
+{response}
