@@ -73,19 +73,19 @@ def normalize_judge_output(
 ) -> dict[str, Any]:
     """
     Convert parsed model JSON into the normalized judge result format.
-
-    Args:
-        parsed_output: Parsed JSON object returned by the model.
-        raw_output: Original raw model response.
-
-    Returns:
-        Normalized judge result dictionary.
     """
 
+    predicted_label = (
+        parsed_output.get("verdict")
+        or parsed_output.get("second_level_decision")
+    )
+
     return {
-        "predicted_label": parsed_output.get("verdict"),
+        "predicted_label": predicted_label,
         "explanation": parsed_output.get("explanation"),
-        "corrected_verdict": parsed_output.get("corrected_verdict"),
+        "corrected_verdict": parsed_output.get(
+            "corrected_verdict"
+        ),
         "corrected_explanation": parsed_output.get(
             "corrected_explanation"
         ),

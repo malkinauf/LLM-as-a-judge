@@ -11,10 +11,8 @@ PROMPT_TYPE_CONFIG = {
     "second_level": {
         "template": "second_level",
         "fields": [
-            "question",
-            "model_response",
-            "first_judge_verdict",
-            "first_judge_explanation",
+            "judge_task",
+            "judge_answer",
         ],
     },
     "prediction": {

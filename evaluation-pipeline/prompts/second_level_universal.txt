@@ -42,7 +42,7 @@ If the assessment is not correct, return only:
 {{
   "second_level_decision": "not_correct",
   "corrected_explanation": "Provide a corrected explanation (maximum 50 words).",
-  "corrected_answer": "Provide the corrected verdict."
+  "corrected_verdict": "Provide the corrected verdict."
 }}
 
 Do not include any additional text outside the JSON object.

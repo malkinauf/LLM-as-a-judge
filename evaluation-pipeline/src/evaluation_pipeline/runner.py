@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from unittest import result
 
 from tqdm import tqdm
 
@@ -175,7 +176,6 @@ def apply_baseline_decision(
 
 
 def apply_second_level_decision(
-    example: dict[str, Any],
     model: str,
     templates: dict[str, str],
     result: dict[str, Any],
@@ -188,7 +188,6 @@ def apply_second_level_decision(
     the final prediction.
 
     Args:
-        example: Dataset example being evaluated.
         model: Judge model name.
         templates: Loaded prompt templates.
         result: Result dictionary updated in place.
@@ -200,16 +199,25 @@ def apply_second_level_decision(
         result["predicted_label"] = "parsing_error"
         return
 
+    first_prompt = result.get("first_prompt")
+    first_raw_output = result.get("first_raw_output")
+
+    if not first_prompt:
+        result["predicted_label"] = "runtime_error"
+        result["error"] = "Missing rendered first-level prompt."
+        return
+
+    if not first_raw_output:
+        result["predicted_label"] = "runtime_error"
+        result["error"] = "Missing raw first-level output."
+        return
+
     second_level_prompt = build_experiment_prompt(
         prompt_type="second_level",
         templates=templates,
         data={
-            "question": example["question"],
-            "model_response": example["model_response"],
-            "first_judge_verdict": first_level_label,
-            "first_judge_explanation": result[
-                "first_level_explanation"
-            ],
+            "judge_task": first_prompt,
+            "judge_answer": first_raw_output,
         },
     )
 
@@ -329,7 +337,6 @@ def run_judge_experiment(
         if method == "second_level":
             try:
                 apply_second_level_decision(
-                    example=example,
                     model=model,
                     templates=templates,
                     result=result,
