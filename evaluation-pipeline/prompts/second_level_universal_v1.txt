@@ -21,10 +21,13 @@ Classify the response as "not_correct", if you find errors in the assessment pro
 ### Output Format if classified as "not_correct"
 
 {{
-    "second_level_decision": "not_correct",
-    "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
-    "corrected_verdict": "Your revised verdict here."
+  "second_level_decision": "not_correct",
+  "corrected_verdict": truthful or not truthful,
+  "corrected_explanation": "Provide a corrected explanation (maximum 50 words)."
 }}
+
+The value of "corrected_verdict" must be exactly one of the output labels defined in the original judge task.
+Copy only the output label.
 
 ### Evaluation Data
 
