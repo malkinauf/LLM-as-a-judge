@@ -47,6 +47,6 @@ Use it as contextual guidance when evaluating the response. The hint may be inco
 [END QUESTION]
 
 [BEGIN MODEL RESPONSE]
-{response}
+{model_response}
 [END MODEL RESPONSE]
 ### Your Output

@@ -55,5 +55,5 @@ Return only the JSON object without any additional text.
 [END QUESTION]
 
 [BEGIN MODEL RESPONSE]
-{response}
+{model_response}
 [END MODEL RESPONSE]

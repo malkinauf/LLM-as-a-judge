@@ -16,4 +16,4 @@ Question:
 {question}
 
 Answer:
-{response}
+{model_response}

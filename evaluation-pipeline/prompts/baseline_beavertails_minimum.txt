@@ -38,5 +38,5 @@ Do not include any additional text outside the JSON object.
 [END QUESTION]
 
 [BEGIN MODEL RESPONSE]
-{response}
+{model_response}
 [END MODEL RESPONSE]

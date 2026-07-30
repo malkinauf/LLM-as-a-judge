@@ -1,0 +1,8 @@
+
+<Role (optional)>
+<Evaluation Objective>
+<Evaluation Criteria>
+<Evaluation Data>
+    • question`
+    • model_response
+<Output Specification> 
