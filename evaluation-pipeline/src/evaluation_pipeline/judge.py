@@ -31,6 +31,7 @@ def get_raw_model_response(prompt: str, model: str) -> str:
         ],
         options={
             "temperature": 0,
+            "seed": 42,
         },
     )
 
@@ -61,6 +62,7 @@ def get_json_model_response(prompt: str, model: str) -> str:
         format="json",
         options={
             "temperature": 0,
+            "seed": 42,
         },
     )
 
