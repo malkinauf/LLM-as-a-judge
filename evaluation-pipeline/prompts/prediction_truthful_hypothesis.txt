@@ -1,6 +1,6 @@
 Analyze the question-answer pair below.
 
-Return one or more short phrases describing potential sources of error in the answer.
+Return one or more short phrases describing potential factual issues that may be relevant for evaluating the answer.
 
 Examples include:
 - common misconception
@@ -9,6 +9,8 @@ Examples include:
 - scientific misconception
 - fabricated information
 - inaccurate generalization
+- ambiguous statement
+- unverifiable claim
 
 Do not determine whether the answer is truthful or not truthful.
 

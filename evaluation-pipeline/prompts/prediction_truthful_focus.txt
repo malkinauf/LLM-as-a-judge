@@ -1,19 +1,15 @@
 Analyze the question-answer pair below.
 
-Identify the parts of the answer that are most relevant for evaluating its truthfulness.
+Identify the parts of the answer that are most likely to influence the final truthfulness judgment.
 
 Return exactly two sections.
 
-Section 1: Key statements requiring careful evaluation.
+Section 1:
+Statements that are critical for determining the final verdict.
 
-Section 2: Aspects that deserve particular attention during the evaluation.
+Section 2:
+Potential sources of uncertainty, ambiguity, or factual risk that require particular attention.
 
 Do not determine whether the answer is truthful or not truthful.
 
 Do not provide explanations or a final verdict.
-
-Question:
-{question}
-
-Answer:
-{model_response}
