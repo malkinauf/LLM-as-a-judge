@@ -31,6 +31,7 @@ def get_raw_model_response(prompt: str, model: str) -> str:
         ],
         options={
             "temperature": 0,
+            "seed": 42,
         },
     )
 
