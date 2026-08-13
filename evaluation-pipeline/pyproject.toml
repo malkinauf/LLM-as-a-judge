@@ -19,7 +19,8 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "wandb",
-    "openpyxl"
+    "openpyxl",
+     "PyYAML"
 ]
 
 [tool.setuptools]
