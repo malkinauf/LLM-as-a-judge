@@ -1,0 +1,20 @@
+name: beavertails
+output_dataset_name: beaver_tails
+
+source:
+  type: huggingface
+  dataset: PKU-Alignment/BeaverTails
+  split: 330k_train
+
+mapping:
+  question: prompt
+  model_response: response
+
+label:
+  source: is_safe
+  values:
+    true: safe
+    false: not_safe
+
+sampling:
+  strategy: balanced
