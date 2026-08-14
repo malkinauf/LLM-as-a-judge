@@ -1,7 +1,10 @@
+import json
 import random
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
+import requests
 from datasets import load_dataset
 
 from evaluation_pipeline.datasets.config_loader import (
@@ -17,8 +20,7 @@ def load_source(
     """
     Load a raw dataset from the configured source.
 
-    The source type determines how the dataset is loaded.
-    Currently, Hugging Face datasets are supported.
+    Currently supports Hugging Face datasets and JSON files.
 
     Args:
         source_config: Source configuration containing the
@@ -28,7 +30,10 @@ def load_source(
         The loaded raw dataset.
 
     Raises:
-        ValueError: If the configured source type is not supported.
+        FileNotFoundError: If a local JSON source does not exist
+            and no download URL is provided.
+        ValueError: If the configured source type or JSON structure
+            is not supported.
     """
     source_type = source_config["type"]
 
@@ -43,9 +48,91 @@ def load_source(
             split=split,
         )
 
+    if source_type == "json":
+        path = Path(source_config["path"])
+        url = source_config.get("url")
+
+        if not path.exists():
+            if url is None:
+                raise FileNotFoundError(
+                    f"Dataset source not found: {path}"
+                )
+
+            path.parent.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            response = requests.get(
+                url,
+                timeout=60,
+            )
+            response.raise_for_status()
+
+            path.write_bytes(
+                response.content
+            )
+
+        with path.open(
+            "r",
+            encoding="utf-8",
+        ) as f:
+            data = json.load(f)
+
+        if not isinstance(data, dict):
+            raise ValueError(
+                "JSON dataset must contain a mapping "
+                "of groups to dataset entries."
+            )
+
+        rows = []
+
+        for entries in data.values():
+            if not isinstance(entries, list):
+                raise ValueError(
+                    "Each JSON dataset group must contain "
+                    "a list of entries."
+                )
+
+            rows.extend(entries)
+
+        return rows
+
     raise ValueError(
         f"Unsupported dataset source type: '{source_type}'"
     )
+
+
+def _has_agreement(
+    row: dict[str, Any],
+    fields: list[str],
+) -> bool:
+    """
+    Check whether all configured fields contain the same value.
+
+    Args:
+        row: Raw dataset row.
+        fields: Fields whose values must agree.
+
+    Returns:
+        True if all configured values are identical,
+        otherwise False.
+
+    Raises:
+        ValueError: If no agreement fields are configured.
+        KeyError: If a configured field is missing from the row.
+    """
+    if not fields:
+        raise ValueError(
+            "Agreement fields must not be empty."
+        )
+
+    values = [
+        row[field]
+        for field in fields
+    ]
+
+    return len(set(values)) == 1
 
 
 def _balanced_sample(
@@ -56,8 +143,8 @@ def _balanced_sample(
     """
     Create a balanced random sample from a binary dataset.
 
-    Samples are selected randomly across the complete dataset,
-    with an equal number of entries from each label.
+    Samples are selected randomly across the complete candidate
+    dataset, with an equal number of entries from each label.
 
     Args:
         dataset: Canonical dataset samples.
@@ -65,30 +152,36 @@ def _balanced_sample(
         seed: Random seed for reproducible sampling.
 
     Returns:
-        A shuffled dataset containing an equal number of
-        samples from each label.
+        A shuffled dataset containing an equal number of samples
+        from both labels.
 
     Raises:
-        ValueError: If n_samples is not even, the dataset does
-            not contain exactly two labels, or a label does not
-            contain enough samples.
+        ValueError: If n_samples is invalid, the dataset does not
+            contain exactly two labels, or one label contains too
+            few samples.
     """
     if n_samples <= 0:
-        raise ValueError("n_samples must be positive.")
+        raise ValueError(
+            "n_samples must be positive."
+        )
 
     if n_samples % 2 != 0:
         raise ValueError(
-            "Balanced binary sampling requires an even n_samples."
+            "Balanced binary sampling requires "
+            "an even n_samples."
         )
 
     groups = defaultdict(list)
 
     for sample in dataset:
-        groups[sample["y_true"]].append(sample)
+        groups[sample["y_true"]].append(
+            sample
+        )
 
     if len(groups) != 2:
         raise ValueError(
-            "Balanced binary sampling requires exactly two labels."
+            "Balanced binary sampling requires "
+            "exactly two labels."
         )
 
     samples_per_label = n_samples // 2
@@ -124,9 +217,10 @@ def build_dataset(
     """
     Build a dataset in the canonical evaluation format.
 
-    Loads the configured source dataset, maps all raw rows to
-    canonical samples, applies the configured sampling strategy,
-    assigns sample metadata, and validates the final dataset.
+    The function loads the configured raw dataset, optionally
+    filters rows by agreement, maps raw rows to canonical samples,
+    applies the configured sampling strategy, assigns metadata,
+    and validates the final dataset.
 
     Args:
         name: Name of the dataset configuration.
@@ -138,13 +232,18 @@ def build_dataset(
         evaluation format.
 
     Raises:
-        ValueError: If n_samples is invalid or the requested
-            sampling strategy cannot be applied.
+        ValueError: If n_samples is invalid, not enough candidate
+            samples are available, or the configured sampling
+            strategy cannot be applied.
     """
     if n_samples <= 0:
-        raise ValueError("n_samples must be positive.")
+        raise ValueError(
+            "n_samples must be positive."
+        )
 
-    config = load_dataset_config(name)
+    config = load_dataset_config(
+        name
+    )
 
     raw_dataset = load_source(
         config["source"]
@@ -152,13 +251,26 @@ def build_dataset(
 
     candidates = []
 
+    agreement = config.get(
+        "agreement"
+    )
+
     for row in raw_dataset:
+        if agreement is not None:
+            if not _has_agreement(
+                row=row,
+                fields=agreement["fields"],
+            ):
+                continue
+
         mapped_samples = map_entry(
             row=row,
             config=config,
         )
 
-        candidates.extend(mapped_samples)
+        candidates.extend(
+            mapped_samples
+        )
 
     if n_samples > len(candidates):
         raise ValueError(
@@ -166,8 +278,15 @@ def build_dataset(
             f"{len(candidates)} samples are available."
         )
 
-    sampling = config.get("sampling", {})
-    strategy = sampling.get("strategy", "random")
+    sampling = config.get(
+        "sampling",
+        {},
+    )
+
+    strategy = sampling.get(
+        "strategy",
+        "random",
+    )
 
     if strategy == "balanced":
         result = _balanced_sample(
@@ -186,18 +305,25 @@ def build_dataset(
 
     else:
         raise ValueError(
-            f"Unsupported sampling strategy: '{strategy}'"
+            f"Unsupported sampling strategy: "
+            f"'{strategy}'"
         )
 
     result = [
         {
             "id": f"{config['name']}_{i}",
-            "dataset": config["output_dataset_name"],
+            "dataset": config[
+                "output_dataset_name"
+            ],
             **sample,
         }
-        for i, sample in enumerate(result)
+        for i, sample in enumerate(
+            result
+        )
     ]
 
-    validate_dataset(result)
+    validate_dataset(
+        result
+    )
 
     return result
