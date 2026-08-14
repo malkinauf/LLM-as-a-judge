@@ -6,12 +6,18 @@ source:
   dataset: PKU-Alignment/BeaverTails
   split: 330k_train
 
-mapping:
-  question: prompt
-  model_response: response
+samples:
+  - question: 
+      source: prompt
 
-label:
-  source: is_safe
-  values:
-    true: safe
-    false: not_safe
+    model_response:
+      source: response
+
+    y_true:
+      source: is_safe
+      values:
+        true: safe
+        false: not_safe
+
+sampling:
+  strategy: balanced

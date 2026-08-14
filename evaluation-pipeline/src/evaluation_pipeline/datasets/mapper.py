@@ -1,108 +1,89 @@
 from typing import Any
 
 
-def map_fields(
+def _resolve_value(
     row: dict[str, Any],
-    mapping: dict[str, str],
-) -> dict[str, Any]:
+    field_config: dict[str, Any],
+) -> Any:
     """
-    Map source dataset fields to the canonical dataset schema.
+    Resolve a value from a sample field configuration.
 
-    Args:
-        row:
-            Original dataset row.
-        mapping:
-            Mapping from canonical field names to source field names.
-
-            Example:
-            {
-                "question": "prompt",
-                "model_response": "response",
-            }
-
-    Returns:
-        Dictionary containing mapped canonical fields.
+    Supported forms:
+    - source: read value from the raw dataset row
+    - value: use a static value
+    - take: first -> take the first element from a list
     """
 
-    mapped = {}
+    if "source" in field_config:
+        source_field = field_config["source"]
 
-    for target_field, source_field in mapping.items():
         if source_field not in row:
             raise ValueError(
                 f"Source field '{source_field}' "
-                f"not found in dataset row."
+                "not found in dataset row."
             )
 
-        mapped[target_field] = row[source_field]
+        value = row[source_field]
 
-    return mapped
+    elif "value" in field_config:
+        value = field_config["value"]
 
-
-def map_label(
-    row: dict[str, Any],
-    label_config: dict[str, Any],
-) -> str:
-    """
-    Map a source dataset label to the canonical y_true label.
-
-    Args:
-        row:
-            Original dataset row.
-        label_config:
-            Label mapping configuration.
-
-            Example:
-            {
-                "source": "is_safe",
-                "values": {
-                    True: "safe",
-                    False: "not_safe",
-                },
-            }
-
-    Returns:
-        Canonical label.
-    """
-
-    source_field = label_config["source"]
-
-    if source_field not in row:
+    else:
         raise ValueError(
-            f"Label source field '{source_field}' "
-            f"not found in dataset row."
+            "Field config must define 'source' or 'value'."
         )
 
-    raw_label = row[source_field]
-    label_values = label_config["values"]
+    if field_config.get("take") == "first":
+        if not value:
+            raise ValueError(
+                "Cannot take first element from an empty value."
+            )
 
-    if raw_label not in label_values:
-        raise ValueError(
-            f"Unknown label value '{raw_label}' "
-            f"for source field '{source_field}'."
-        )
+        value = value[0]
 
-    return label_values[raw_label]
+    if "values" in field_config:
+        value_mapping = field_config["values"]
+
+        if value not in value_mapping:
+            raise ValueError(
+                f"Value '{value}' not found in value mapping."
+            )
+
+        value = value_mapping[value]
+
+    return value
 
 
 def map_entry(
     row: dict[str, Any],
     config: dict[str, Any],
-) -> dict[str, Any]:
+) -> list[dict[str, Any]]:
     """
-    Convert one source dataset row into canonical fields.
+    Convert one raw dataset row into one or more
+    canonical dataset samples.
 
-    The returned entry does not yet contain generated fields
-    such as id or dataset name.
+    The number of returned samples is determined by
+    the number of rules defined in config['samples'].
     """
 
-    mapped = map_fields(
-        row=row,
-        mapping=config["mapping"],
-    )
+    mapped_samples = []
 
-    mapped["y_true"] = map_label(
-        row=row,
-        label_config=config["label"],
-    )
+    for sample_config in config["samples"]:
+        mapped_sample = {
+            "question": _resolve_value(
+                row=row,
+                field_config=sample_config["question"],
+            ),
+            "model_response": _resolve_value(
+                row=row,
+                field_config=sample_config["model_response"],
+            ),
+            "y_true": _resolve_value(
+                row=row,
+                field_config=sample_config["y_true"],
+            ),
+        }
 
-    return mapped
+        mapped_samples.append(mapped_sample)
+
+    return mapped_samples

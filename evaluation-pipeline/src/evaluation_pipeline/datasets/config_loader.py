@@ -11,13 +11,15 @@ REQUIRED_CONFIG_KEYS = {
     "name",
     "output_dataset_name",
     "source",
-    "mapping",
-    "label",
-    #"sampling",
+    "samples",
 }
 
 
 def validate_dataset_config(config: dict[str, Any]) -> None:
+    """
+    Validate the structure of a dataset configuration.
+    """
+
     missing_keys = REQUIRED_CONFIG_KEYS - set(config.keys())
 
     if missing_keys:
@@ -26,41 +28,60 @@ def validate_dataset_config(config: dict[str, Any]) -> None:
             f"{sorted(missing_keys)}"
         )
 
+    # Validate source
     source = config["source"]
 
     if not isinstance(source, dict):
         raise ValueError("'source' must be a mapping.")
 
-    for key in ("type", "dataset", "split"):
-        if key not in source:
+    if "type" not in source:
+        raise ValueError(
+            "Dataset config source is missing 'type'."
+        )
+
+    # Validate samples
+    samples = config["samples"]
+
+    if not isinstance(samples, list) or not samples:
+        raise ValueError(
+            "'samples' must be a non-empty list."
+        )
+
+    for i, sample in enumerate(samples):
+        if not isinstance(sample, dict):
             raise ValueError(
-                f"Dataset config source is missing '{key}'."
+                f"Sample rule {i} must be a mapping."
             )
 
-    mapping = config["mapping"]
+        for field in ("question", "model_response", "y_true"):
+            if field not in sample:
+                raise ValueError(
+                    f"Sample rule {i} is missing '{field}'."
+                )
 
-    if not isinstance(mapping, dict):
-        raise ValueError("'mapping' must be a mapping.")
+            field_config = sample[field]
 
-    for key in ("question", "model_response"):
-        if key not in mapping:
-            raise ValueError(
-                f"Dataset config mapping is missing '{key}'."
-            )
+            if not isinstance(field_config, dict):
+                raise ValueError(
+                    f"'{field}' in sample rule {i} "
+                    "must be a mapping."
+                )
 
-    label = config["label"]
-
-    if not isinstance(label, dict):
-        raise ValueError("'label' must be a mapping.")
-
-    for key in ("source", "values"):
-        if key not in label:
-            raise ValueError(
-                f"Dataset config label is missing '{key}'."
-            )
+            if (
+                "source" not in field_config
+                and "value" not in field_config
+            ):
+                raise ValueError(
+                    f"'{field}' in sample rule {i} must define "
+                    "'source' or 'value'."
+                )
 
 
 def load_dataset_config(name: str) -> dict[str, Any]:
+    """
+    Load and validate a dataset configuration.
+    """
+
     config_path = CONFIG_DIR / f"{name}.yaml"
 
     if not config_path.exists():
