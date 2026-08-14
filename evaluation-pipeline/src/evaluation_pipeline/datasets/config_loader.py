@@ -13,7 +13,7 @@ REQUIRED_CONFIG_KEYS = {
     "source",
     "mapping",
     "label",
-    "sampling",
+    #"sampling",
 }
 
 
