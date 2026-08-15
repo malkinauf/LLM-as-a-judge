@@ -3,8 +3,9 @@ from typing import Any
 
 from tqdm import tqdm
 
+from evaluation_pipeline.prompts.builder import build_baseline_prompt
+from evaluation_pipeline.prompts_utils import build_experiment_prompt
 from evaluation_pipeline.judge import get_raw_model_response, judge_response
-from evaluation_pipeline.prompts import build_experiment_prompt
 
 
 logger = logging.getLogger(__name__)
@@ -93,24 +94,24 @@ def run_first_level_judge(
     method: str,
     templates: dict[str, str],
     result: dict[str, Any],
+    baseline_criterion: str,
+    baseline_criterion_detail: str,
 ) -> None:
     """
-    Run the first-level judge for baseline, second-level, or dynamic methods.
+    Run the first-level judge for one dataset example.
 
-    For baseline and second-level methods, the first-level judge uses
-    the baseline prompt. For the dynamic method, the function first
-    generates a prediction response and then injects it into the
-    dynamic prompt.
+    Baseline and second-level methods use the generated baseline
+    prompt. Dynamic prompting uses the prediction and dynamic
+    prompt templates.
 
     Args:
         example: Dataset example being evaluated.
         model: Judge model name.
         method: Evaluation method.
-        templates: Loaded prompt templates.
-        result: Result dictionary updated with prompts and outputs.
-
-    Raises:
-        Exception: If the judge call fails.
+        templates: Prompt templates required by non-baseline methods.
+        result: Result dictionary updated in place.
+        baseline_criterion: Criterion used for the baseline prompt.
+        baseline_criterion_detail: Detail level of the baseline criterion.
     """
 
     if method == "dynamic":
@@ -138,10 +139,11 @@ def run_first_level_judge(
         result["prediction_raw_output"] = prediction_response
 
     else:
-        first_prompt = build_experiment_prompt(
-            prompt_type="baseline",
-            templates=templates,
-            data=example,
+        first_prompt = build_baseline_prompt(
+            criterion=baseline_criterion,
+            criterion_detail=baseline_criterion_detail,
+            question=example["question"],
+            model_response=example["model_response"],
         )
 
     first_judge_result = judge_response(
@@ -254,28 +256,27 @@ def run_judge_experiment(
     method: str,
     templates: dict[str, str],
     dataset_file: str,
+    baseline_criterion: str,
+    baseline_criterion_detail: str,
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a dataset.
 
-    Supported methods are baseline, second_level, and dynamic.
-    The dynamic method follows a two-step prompting scheme:
-    prediction prompt first, then dynamic judge prompt with the
-    prediction response inserted as auxiliary guidance.
-
     Args:
-        dataset: List of prepared dataset examples.
-        run_id: Identifier of the current experiment run.
+        dataset: Prepared dataset examples.
+        run_id: Identifier of the experiment run.
         model: Judge model name.
-        method: Evaluation method to run.
-        templates: Loaded prompt templates.
+        method: Evaluation method.
+        templates: Prompt templates required by the selected method.
         dataset_file: Source dataset file name.
+        baseline_criterion: Criterion used by the first-level judge.
+        baseline_criterion_detail: Detail level of the baseline criterion.
 
     Returns:
-        List of result dictionaries, one per evaluated example.
+        Evaluation results for all dataset examples.
 
     Raises:
-        ValueError: If the selected method is not supported.
+        ValueError: If the evaluation method is unsupported.
     """
 
     if method not in VALID_METHODS:
@@ -311,6 +312,8 @@ def run_judge_experiment(
                 method=method,
                 templates=templates,
                 result=result,
+                baseline_criterion=baseline_criterion,
+                baseline_criterion_detail=baseline_criterion_detail,
             )
 
         except Exception as e:
