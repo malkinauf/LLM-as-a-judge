@@ -20,7 +20,12 @@ dependencies = [
     "matplotlib",
     "wandb",
     "openpyxl",
-     "PyYAML"
+    "PyYAML"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
 ]
 
 [tool.setuptools]
