@@ -11,13 +11,28 @@ REQUIRED_CONFIG_KEYS = {
     "name",
     "output_dataset_name",
     "source",
-    "samples",
+    "mapping",
 }
 
 
-def validate_dataset_config(config: dict[str, Any]) -> None:
+SUPPORTED_MAPPING_TYPES = {
+    "single",
+    "multi",
+    "aligned",
+}
+
+
+def validate_dataset_config(
+    config: dict[str, Any],
+) -> None:
     """
-    Validate the structure of a dataset configuration.
+    Validate the basic dataset configuration structure.
+
+    Args:
+        config: Parsed dataset configuration.
+
+    Raises:
+        ValueError: If required fields are missing or invalid.
     """
 
     missing_keys = REQUIRED_CONFIG_KEYS - set(config.keys())
@@ -28,58 +43,48 @@ def validate_dataset_config(config: dict[str, Any]) -> None:
             f"{sorted(missing_keys)}"
         )
 
-    # Validate source
     source = config["source"]
 
     if not isinstance(source, dict):
-        raise ValueError("'source' must be a mapping.")
+        raise ValueError(
+            "'source' must be a mapping."
+        )
 
     if "type" not in source:
         raise ValueError(
             "Dataset config source is missing 'type'."
         )
 
-    # Validate samples
-    samples = config["samples"]
+    mapping = config["mapping"]
 
-    if not isinstance(samples, list) or not samples:
+    if not isinstance(mapping, dict):
         raise ValueError(
-            "'samples' must be a non-empty list."
+            "'mapping' must be a mapping."
         )
 
-    for i, sample in enumerate(samples):
-        if not isinstance(sample, dict):
-            raise ValueError(
-                f"Sample rule {i} must be a mapping."
-            )
+    mapping_type = mapping.get("type")
 
-        for field in ("question", "model_response", "y_true"):
-            if field not in sample:
-                raise ValueError(
-                    f"Sample rule {i} is missing '{field}'."
-                )
-
-            field_config = sample[field]
-
-            if not isinstance(field_config, dict):
-                raise ValueError(
-                    f"'{field}' in sample rule {i} "
-                    "must be a mapping."
-                )
-
-            if (
-                "source" not in field_config
-                and "value" not in field_config
-            ):
-                raise ValueError(
-                    f"'{field}' in sample rule {i} must define "
-                    "'source' or 'value'."
-                )
+    if mapping_type not in SUPPORTED_MAPPING_TYPES:
+        raise ValueError(
+            f"Unsupported mapping type: '{mapping_type}'."
+        )
 
 
-def load_dataset_config(name: str) -> dict[str, Any]:
+def load_dataset_config(
+    name: str,
+) -> dict[str, Any]:
     """
-    Load and validate a dataset configuration.
+    Load and validate a dataset configuration from YAML.
+
+    Args:
+        name: Config filename without the .yaml extension.
+
+    Returns:
+        Parsed and validated dataset configuration.
+
+    Raises:
+        FileNotFoundError: If the config file does not exist.
+        ValueError: If the config structure is invalid.
     """
 
     config_path = CONFIG_DIR / f"{name}.yaml"
@@ -89,12 +94,16 @@ def load_dataset_config(name: str) -> dict[str, Any]:
             f"Dataset config not found: {config_path}"
         )
 
-    with config_path.open("r", encoding="utf-8") as f:
+    with config_path.open(
+        "r",
+        encoding="utf-8",
+    ) as f:
         config = yaml.safe_load(f)
 
     if not isinstance(config, dict):
         raise ValueError(
-            f"Dataset config must be a YAML object: {config_path}"
+            f"Dataset config must be a YAML object: "
+            f"{config_path}"
         )
 
     validate_dataset_config(config)

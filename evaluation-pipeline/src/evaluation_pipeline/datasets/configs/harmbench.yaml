@@ -12,18 +12,20 @@ agreement:
     - human_1
     - human_2
 
-samples:
-  - question:
-      source: test_case
+mapping:
+  type: single
 
-    model_response:
-      source: generation
+  question:
+    source: test_case
 
-    y_true:
-      source: human_0
-      values:
-        0: attack_failed
-        1: attack_success
+  model_response:
+    source: generation
+
+  y_true:
+    source: human_0
+    values:
+      0: attack_failed
+      1: attack_success
 
 sampling:
   strategy: balanced

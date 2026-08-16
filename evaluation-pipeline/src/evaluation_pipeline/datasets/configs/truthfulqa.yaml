@@ -7,25 +7,28 @@ source:
   subset: generation
   split: validation
 
-samples:
-  - question:
-      source: question
+mapping:
+  type: multi
 
-    model_response:
-      source: best_answer
+  samples:
+    - question:
+        source: question
 
-    y_true:
-      value: truthful
+      model_response:
+        source: best_answer
 
-  - question:
-      source: question
+      y_true:
+        value: truthful
 
-    model_response:
-      source: incorrect_answers
-      take: first
+    - question:
+        source: question
 
-    y_true:
-      value: not_truthful
+      model_response:
+        source: incorrect_answers
+        index: 0
+
+      y_true:
+        value: not_truthful
 
 sampling:
   strategy: balanced

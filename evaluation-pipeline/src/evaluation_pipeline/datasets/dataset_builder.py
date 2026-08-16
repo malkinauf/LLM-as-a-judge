@@ -10,8 +10,12 @@ from datasets import load_dataset
 from evaluation_pipeline.datasets.config_loader import (
     load_dataset_config,
 )
-from evaluation_pipeline.datasets.mapper import map_entry
-from evaluation_pipeline.datasets.schema import validate_dataset
+from evaluation_pipeline.datasets.mapping_strategies import (
+    get_mapping_strategy,
+)
+from evaluation_pipeline.datasets.schema import (
+    validate_dataset,
+)
 
 
 def load_source(
@@ -20,20 +24,7 @@ def load_source(
     """
     Load a raw dataset from the configured source.
 
-    Currently supports Hugging Face datasets and JSON files.
-
-    Args:
-        source_config: Source configuration containing the
-            source type and source-specific parameters.
-
-    Returns:
-        The loaded raw dataset.
-
-    Raises:
-        FileNotFoundError: If a local JSON source does not exist
-            and no download URL is provided.
-        ValueError: If the configured source type or JSON structure
-            is not supported.
+    Supports Hugging Face datasets and JSON files.
     """
     source_type = source_config["type"]
 
@@ -109,18 +100,6 @@ def _has_agreement(
 ) -> bool:
     """
     Check whether all configured fields contain the same value.
-
-    Args:
-        row: Raw dataset row.
-        fields: Fields whose values must agree.
-
-    Returns:
-        True if all configured values are identical,
-        otherwise False.
-
-    Raises:
-        ValueError: If no agreement fields are configured.
-        KeyError: If a configured field is missing from the row.
     """
     if not fields:
         raise ValueError(
@@ -141,24 +120,7 @@ def _balanced_sample(
     seed: int,
 ) -> list[dict[str, Any]]:
     """
-    Create a balanced random sample from a binary dataset.
-
-    Samples are selected randomly across the complete candidate
-    dataset, with an equal number of entries from each label.
-
-    Args:
-        dataset: Canonical dataset samples.
-        n_samples: Total number of samples to select.
-        seed: Random seed for reproducible sampling.
-
-    Returns:
-        A shuffled dataset containing an equal number of samples
-        from both labels.
-
-    Raises:
-        ValueError: If n_samples is invalid, the dataset does not
-            contain exactly two labels, or one label contains too
-            few samples.
+    Create a balanced sample from a binary dataset.
     """
     if n_samples <= 0:
         raise ValueError(
@@ -209,6 +171,72 @@ def _balanced_sample(
     return selected
 
 
+def _paired_sample(
+    dataset: list[dict[str, Any]],
+    n_samples: int,
+    seed: int,
+) -> list[dict[str, Any]]:
+    """
+    Select one sample per label for each chosen question.
+    """
+    if n_samples <= 0:
+        raise ValueError(
+            "n_samples must be positive."
+        )
+
+    if n_samples % 2 != 0:
+        raise ValueError(
+            "Paired sampling requires an even n_samples."
+        )
+
+    by_question = defaultdict(
+        lambda: defaultdict(list)
+    )
+
+    for sample in dataset:
+        by_question[
+            sample["question"]
+        ][
+            sample["y_true"]
+        ].append(sample)
+
+    valid_questions = [
+        question
+        for question, groups in by_question.items()
+        if len(groups) == 2
+    ]
+
+    questions_needed = n_samples // 2
+
+    if len(valid_questions) < questions_needed:
+        raise ValueError(
+            f"Not enough questions with both labels. "
+            f"Required {questions_needed}, "
+            f"available {len(valid_questions)}."
+        )
+
+    rng = random.Random(seed)
+
+    selected_questions = rng.sample(
+        valid_questions,
+        questions_needed,
+    )
+
+    selected = []
+
+    for question in selected_questions:
+        groups = by_question[question]
+
+        for samples in groups.values():
+            selected.append(
+                rng.choice(samples)
+            )
+
+    rng.shuffle(selected)
+
+    return selected
+
+
 def build_dataset(
     name: str,
     n_samples: int,
@@ -217,24 +245,9 @@ def build_dataset(
     """
     Build a dataset in the canonical evaluation format.
 
-    The function loads the configured raw dataset, optionally
-    filters rows by agreement, maps raw rows to canonical samples,
-    applies the configured sampling strategy, assigns metadata,
-    and validates the final dataset.
-
-    Args:
-        name: Name of the dataset configuration.
-        n_samples: Number of output samples.
-        seed: Random seed for reproducible sampling.
-
-    Returns:
-        A validated list of dataset samples in the canonical
-        evaluation format.
-
-    Raises:
-        ValueError: If n_samples is invalid, not enough candidate
-            samples are available, or the configured sampling
-            strategy cannot be applied.
+    Loads the raw dataset, applies optional agreement filtering,
+    maps rows using the configured mapping strategy, samples the
+    resulting candidates, adds metadata, and validates the result.
     """
     if n_samples <= 0:
         raise ValueError(
@@ -247,6 +260,12 @@ def build_dataset(
 
     raw_dataset = load_source(
         config["source"]
+    )
+
+    mapping_config = config["mapping"]
+
+    mapping_strategy = get_mapping_strategy(
+        mapping_config["type"]
     )
 
     candidates = []
@@ -263,9 +282,9 @@ def build_dataset(
             ):
                 continue
 
-        mapped_samples = map_entry(
+        mapped_samples = mapping_strategy.map(
             row=row,
-            config=config,
+            config=mapping_config,
         )
 
         candidates.extend(
@@ -290,6 +309,13 @@ def build_dataset(
 
     if strategy == "balanced":
         result = _balanced_sample(
+            dataset=candidates,
+            n_samples=n_samples,
+            seed=seed,
+        )
+
+    elif strategy == "paired":
+        result = _paired_sample(
             dataset=candidates,
             n_samples=n_samples,
             seed=seed,
