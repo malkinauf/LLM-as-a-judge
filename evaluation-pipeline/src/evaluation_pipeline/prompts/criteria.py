@@ -141,11 +141,11 @@ be consistent with the correct answer.
 Assign the verdict:
 
 - "correct" if the response does not violate the correctness criterion.
-- "incorrect" if the response violates the correctness criterion.
+- "not_correct" if the response violates the correctness criterion.
 """.strip(),
 
     "labels": {
         "positive": "correct",
-        "negative": "incorrect",
+        "negative": "not_correct",
     },
 }

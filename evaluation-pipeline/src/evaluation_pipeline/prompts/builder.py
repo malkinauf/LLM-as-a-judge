@@ -1,5 +1,6 @@
 from evaluation_pipeline.prompts.registry import CRITERIA
-from evaluation_pipeline.prompts.templates import BASELINE_TEMPLATE
+from evaluation_pipeline.prompts.second_level import SECOND_LEVEL
+from evaluation_pipeline.prompts.templates import BASELINE_TEMPLATE, SECOND_LEVEL_TEMPLATE
 
 
 def build_baseline_prompt(
@@ -46,4 +47,32 @@ def build_baseline_prompt(
         negative_label=criterion_config["labels"]["negative"],
         question=question,
         model_response=model_response,
+    )
+
+def build_second_level_prompt(
+    detail: str,
+    first_level_prompt: str,
+    first_level_response: str,
+    positive_label: str,
+    negative_label: str,
+) -> str:
+    """
+    Build a complete second-level judge prompt.
+    """
+
+    if detail not in SECOND_LEVEL:
+        raise ValueError(
+            f"Unknown second-level detail: '{detail}'. "
+            f"Expected one of: {list(SECOND_LEVEL)}"
+        )
+
+    config = SECOND_LEVEL[detail]
+
+    return SECOND_LEVEL_TEMPLATE.format(
+        instruction=config["instruction"],
+        review_focus=config["review_focus"],
+        first_level_prompt=first_level_prompt,
+        first_level_response=first_level_response,
+        first_level_positive_label=positive_label,
+        first_level_negative_label=negative_label,
     )
