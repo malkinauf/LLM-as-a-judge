@@ -21,7 +21,7 @@ mapping:
     source: scores
     values:
       true: correct
-      false: not_correct
+      false: incorrect
 
 sampling:
   strategy: paired
