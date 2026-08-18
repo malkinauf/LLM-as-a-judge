@@ -108,8 +108,8 @@ def test_aligned_mapping():
             "Option three",
             "Option four",
         ],
-        "response_1": "The answer is A.",
         "response_2": "The answer is C.",
+        "response_1": "The answer is A.",
         "scores": [
             False,
             True,
