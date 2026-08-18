@@ -106,6 +106,13 @@ def _has_agreement(
             "Agreement fields must not be empty."
         )
 
+    for field in fields:
+        if field not in row:
+            raise ValueError(
+                f"Agreement field '{field}' "
+                "not found in dataset row."
+            )
+
     values = [
         row[field]
         for field in fields
