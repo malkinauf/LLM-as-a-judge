@@ -19,7 +19,13 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "wandb",
-    "openpyxl"
+    "openpyxl",
+    "PyYAML"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
 ]
 
 [tool.setuptools]

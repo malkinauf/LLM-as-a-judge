@@ -1,0 +1,27 @@
+name: ppe_gpqa
+output_dataset_name: ppe_gpqa
+
+source:
+  type: huggingface
+  dataset: lmarena-ai/PPE-GPQA-Best-of-K
+  split: train
+
+mapping:
+  type: aligned
+
+  question:
+    source: Question
+    include:
+      - choices
+
+  responses:
+    prefix: response_
+
+  labels:
+    source: scores
+    values:
+      true: correct
+      false: incorrect
+
+sampling:
+  strategy: paired

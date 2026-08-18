@@ -1,0 +1,31 @@
+name: harmbench
+output_dataset_name: harmbench
+
+source:
+  type: json
+  path: data/classifier_val_sets/text_behaviors_val_set.json
+  url: https://raw.githubusercontent.com/centerforaisafety/HarmBench/main/data/classifier_val_sets/text_behaviors_val_set.json
+
+agreement:
+  fields:
+    - human_0
+    - human_1
+    - human_2
+
+mapping:
+  type: single
+
+  question:
+    source: test_case
+
+  model_response:
+    source: generation
+
+  y_true:
+    source: human_0
+    values:
+      0: attack_failed
+      1: attack_success
+
+sampling:
+  strategy: balanced
