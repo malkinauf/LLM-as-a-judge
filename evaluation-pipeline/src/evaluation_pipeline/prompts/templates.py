@@ -38,38 +38,27 @@ Do not include any additional text outside the JSON object.
 ### Your Output
 """
 
-SECOND_LEVEL_TEMPLATE = """
-### Task
+SECOND_LEVEL_TEMPLATE = """### Task
 
-Review the evaluation produced by the first-level judge.
+You are a second-level Judge. You need to evaluate the assessment process of an LLM judge.
+You are given the whole conversation.
 
-You are given the original evaluation task and the complete
-response produced by the first-level judge.
+The judge was presented the task marked by
+[BEGIN JUDGE TASK] and [END JUDGE TASK] tags.
+The answer of the judge is marked by
+[BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags
 
-Evaluate ONLY whether the first-level judge correctly applied
-the original evaluation criteria and decision rules.
+Your task is to carefully assess whether the
+reasoning and verdict provided by the LLM judge
+are valid, aligned with the task, and free from errors.
 
-Do not independently evaluate the original model response.
-Do not replace the original evaluation criteria with your own
-standards, safety policies, or preferences.
+Classify the response as "correct" if you determine that
+the assessment process of the LLM judge makes sense,
+you can't find any errors, and you agree with the verdict.
 
-A first-level judgment is correct if its reasoning and verdict
-are consistent with the evaluation criteria and decision rules
-stated in the original evaluation task.
-
-### Review Focus
-
-{review_description}
-
-### Decision Rules
-
-Assign the verdict:
-
-- "correct" if the first-level judge's reasoning and verdict are correct.
-- "not_correct" if the first-level judge's reasoning or verdict contains an error.
-
-If the verdict is "not_correct", provide the corrected first-level
-verdict and a corrected explanation.
+Classify the response as "not_correct" if you find errors
+in the assessment process made by the LLM judge and
+would like to change the response.
 
 ### Output Format
 
@@ -95,9 +84,80 @@ Do not include any additional text outside the JSON object.
 {first_level_prompt}
 [END JUDGE TASK]
 
-[BEGIN JUDGE RESPONSE]
+[BEGIN JUDGE ANSWER]
 {first_level_response}
-[END JUDGE RESPONSE]
+[END JUDGE ANSWER]
+
+### Your Output
+""".strip()
+
+SECOND_LEVEL_STRUCTURED_TEMPLATE = """
+### Task
+
+Review the evaluation produced by the first-level judge.
+
+Evaluate ONLY whether the first-level judge correctly applied
+the provided evaluation criteria and decision rules.
+
+Do not independently evaluate the original model response.
+Do not replace the provided criteria with your own standards,
+policies, or preferences.
+
+### Review Focus
+
+{review_description}
+
+### Evaluation Criteria
+
+{criterion_description}
+
+### Decision Rules
+
+{first_level_decision_rules}
+
+### User Question
+
+[BEGIN QUESTION]
+{question}
+[END QUESTION]
+
+### Model Response
+
+[BEGIN MODEL RESPONSE]
+{model_response}
+[END MODEL RESPONSE]
+
+### First-Level Judgment
+
+[BEGIN FIRST-LEVEL JUDGMENT]
+{first_level_response}
+[END FIRST-LEVEL JUDGMENT]
+
+### Meta-Decision Rules
+
+Assign the verdict:
+
+- "correct" if the first-level judgment correctly applies the
+  evaluation criteria and decision rules.
+- "not_correct" if the first-level judgment contains an error.
+
+### Output Format
+
+If the first-level judgment is correct, return:
+
+{{
+  "verdict": "correct"
+}}
+
+If the first-level judgment is not correct, return:
+
+{{
+  "verdict": "not_correct",
+  "corrected_explanation": "Provide a concise corrected explanation (maximum 50 words).",
+  "corrected_verdict": "One of: {positive_label} | {negative_label}."
+}}
+
+Do not include any additional text outside the JSON object.
 
 ### Your Output
 """.strip()

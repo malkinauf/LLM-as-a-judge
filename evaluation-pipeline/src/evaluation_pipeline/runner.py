@@ -3,14 +3,16 @@ from typing import Any
 
 from tqdm import tqdm
 
-from evaluation_pipeline.prompts.builder import build_baseline_prompt
-from evaluation_pipeline.prompts_utils import build_experiment_prompt
-from evaluation_pipeline.judge import get_raw_model_response, judge_response
+from evaluation_pipeline.judge import (
+    get_raw_model_response,
+    judge_response,
+)
 from evaluation_pipeline.prompts.builder import (
     build_baseline_prompt,
     build_second_level_prompt,
 )
-from evaluation_pipeline.prompts.registry import CRITERIA
+from evaluation_pipeline.prompts_utils import build_experiment_prompt
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +28,10 @@ VALID_JUDGE_LABELS = {
     "not_truthful",
     "safe",
     "not_safe",
-    "attack_failed",
     "attack_success",
+    "attack_failed",
     "correct",
-    "not_correct",
-
+    "incorrect",
 }
 
 VALID_SECOND_LEVEL_VERDICTS = {
@@ -41,7 +42,10 @@ VALID_SECOND_LEVEL_VERDICTS = {
 PARSING_ERROR = "parsing_error"
 RUNTIME_ERROR = "runtime_error"
 
-NON_SECOND_LEVEL_METHODS = {"baseline", "dynamic"}
+NON_SECOND_LEVEL_METHODS = {
+    "baseline",
+    "dynamic",
+}
 
 
 def build_base_result(
@@ -117,7 +121,7 @@ def run_first_level_judge(
         example: Dataset example being evaluated.
         model: Judge model name.
         method: Evaluation method.
-        templates: Prompt templates required by non-baseline methods.
+        templates: Prompt templates required by dynamic prompting.
         result: Result dictionary updated in place.
         baseline_criterion: Criterion used for the baseline prompt.
         baseline_criterion_detail: Detail level of the baseline criterion.
@@ -192,21 +196,32 @@ def apply_second_level_decision(
     model: str,
     result: dict[str, Any],
     second_level_detail: str,
+    second_level_input: str,
     baseline_criterion: str,
+    baseline_criterion_detail: str,
 ) -> None:
     """
     Run the second-level judge and update the final prediction.
 
     The second-level judge reviews whether the first-level judge
     correctly applied the original evaluation criteria and decision
-    rules. If the first-level judgment is correct, its verdict is kept.
-    Otherwise, the corrected verdict is used as the final prediction.
+    rules.
+
+    The second-level prompt can use either the complete first-level
+    prompt or a structured representation of the first-level task.
+
+    If the first-level judgment is correct, its verdict is kept.
+    Otherwise, the corrected verdict returned by the second-level
+    judge is used as the final prediction.
 
     Args:
         model: Judge model name.
         result: Result dictionary updated in place.
         second_level_detail: Detail level of the second-level review.
+        second_level_input: Input representation used by the second-level
+            judge, such as "full" or "structured".
         baseline_criterion: Criterion used by the first-level judge.
+        baseline_criterion_detail: Detail level of the first-level criterion.
     """
 
     first_level_label = result["first_level_label"]
@@ -217,7 +232,11 @@ def apply_second_level_decision(
 
     second_level_prompt = build_second_level_prompt(
         detail=second_level_detail,
+        input_mode=second_level_input,
         criterion=baseline_criterion,
+        first_level_criterion_detail=baseline_criterion_detail,
+        question=result["question"],
+        model_response=result["model_response"],
         first_level_prompt=result["first_prompt"],
         first_level_response=result["first_raw_output"],
     )
@@ -230,7 +249,9 @@ def apply_second_level_decision(
     second_level_verdict = second_result.get("predicted_label")
 
     result["second_level_prompt"] = second_level_prompt
-    result["second_level_raw_output"] = second_result.get("raw_output")
+    result["second_level_raw_output"] = second_result.get(
+        "raw_output"
+    )
     result["second_level_verdict"] = second_level_verdict
     result["second_level_explanation"] = (
         second_result.get("corrected_explanation")
@@ -263,6 +284,7 @@ def run_judge_experiment(
     baseline_criterion: str,
     baseline_criterion_detail: str,
     second_level_detail: str,
+    second_level_input: str,
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a prepared dataset.
@@ -270,7 +292,8 @@ def run_judge_experiment(
     The selected evaluation method is applied to each dataset example.
     Baseline and second-level methods use the configured first-level
     criterion. The second-level method additionally reviews the
-    first-level judgment using the selected review detail.
+    first-level judgment using the configured review detail and
+    input representation.
 
     Args:
         dataset: Prepared dataset examples to evaluate.
@@ -278,11 +301,13 @@ def run_judge_experiment(
         model: Judge model name.
         method: Evaluation method to run.
         templates: Prompt templates required by methods that still use
-            template files, such as dynamic prompting.
+            file-based templates, currently dynamic prompting.
         dataset_file: Source dataset file name.
         baseline_criterion: Criterion used by the first-level judge.
         baseline_criterion_detail: Detail level of the first-level criterion.
         second_level_detail: Detail level of the second-level review.
+        second_level_input: Input representation used by the second-level
+            judge, such as "full" or "structured".
 
     Returns:
         List of result dictionaries, one for each evaluated example.
@@ -350,7 +375,11 @@ def run_judge_experiment(
                     model=model,
                     result=result,
                     second_level_detail=second_level_detail,
+                    second_level_input=second_level_input,
                     baseline_criterion=baseline_criterion,
+                    baseline_criterion_detail=(
+                        baseline_criterion_detail
+                    ),
                 )
 
             except Exception as e:
