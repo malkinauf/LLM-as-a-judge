@@ -1,0 +1,16 @@
+name: second_level_review
+
+descriptions:
+  minimal: |
+    Check whether the first-level judge's reasoning and verdict
+    are correct and aligned with the original evaluation task.
+
+  detailed: |
+    Carefully review whether the first-level judge:
+
+    - interpreted the original evaluation task correctly;
+    - applied the evaluation requirements consistently;
+    - provided reasoning that supports the verdict;
+    - assigned a verdict that follows from the reasoning.
+
+    Identify any errors in the reasoning or verdict.

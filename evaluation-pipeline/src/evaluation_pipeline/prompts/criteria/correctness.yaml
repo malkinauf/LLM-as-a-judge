@@ -1,0 +1,24 @@
+name: correctness
+
+descriptions:
+  minimal: |
+    A response violates the correctness criterion if it gives
+    an incorrect answer to the user question.
+
+  detailed: |
+    A response violates the correctness criterion if the answer
+    given to the user question is incorrect.
+
+    For multiple-choice questions, assess whether the response
+    selects or supports the correct answer choice. The final
+    conclusion must be consistent with the correct answer.
+
+decision_rules: |
+  Assign the verdict:
+
+  - "correct" if the response does not violate the correctness criterion.
+  - "incorrect" if the response violates the correctness criterion.
+
+labels:
+  positive: correct
+  negative: incorrect

@@ -1,4 +1,4 @@
-from evaluation_pipeline.prompts.registry import CRITERIA
+from evaluation_pipeline.prompts.registry import CRITERIA, SECOND_LEVEL_REVIEW
 from evaluation_pipeline.prompts.second_level import SECOND_LEVEL
 from evaluation_pipeline.prompts.templates import BASELINE_TEMPLATE, SECOND_LEVEL_TEMPLATE
 
@@ -51,28 +51,47 @@ def build_baseline_prompt(
 
 def build_second_level_prompt(
     detail: str,
+    criterion: str,
     first_level_prompt: str,
     first_level_response: str,
-    positive_label: str,
-    negative_label: str,
 ) -> str:
     """
-    Build a complete second-level judge prompt.
+    Build the second-level meta-judge prompt.
+
+    Args:
+        detail: Second-level review detail level.
+        criterion: First-level evaluation criterion.
+        first_level_prompt: Complete prompt given to the first-level judge.
+        first_level_response: Complete response produced by the first-level judge.
+
+    Returns:
+        Fully formatted second-level judge prompt.
+
+    Raises:
+        ValueError: If the detail level or criterion is unknown.
     """
 
-    if detail not in SECOND_LEVEL:
+    if detail not in SECOND_LEVEL_REVIEW["descriptions"]:
         raise ValueError(
-            f"Unknown second-level detail: '{detail}'. "
-            f"Expected one of: {list(SECOND_LEVEL)}"
+            f"Unknown second-level detail: '{detail}'."
         )
 
-    config = SECOND_LEVEL[detail]
+    if criterion not in CRITERIA:
+        raise ValueError(
+            f"Unknown criterion: '{criterion}'."
+        )
+
+    review_description = SECOND_LEVEL_REVIEW["descriptions"][detail]
+
+    criterion_config = CRITERIA[criterion]
+
+    positive_label = criterion_config["labels"]["positive"]
+    negative_label = criterion_config["labels"]["negative"]
 
     return SECOND_LEVEL_TEMPLATE.format(
-        instruction=config["instruction"],
-        review_focus=config["review_focus"],
+        review_description=review_description,
+        positive_label=positive_label,
+        negative_label=negative_label,
         first_level_prompt=first_level_prompt,
         first_level_response=first_level_response,
-        first_level_positive_label=positive_label,
-        first_level_negative_label=negative_label,
     )

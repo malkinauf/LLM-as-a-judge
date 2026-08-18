@@ -38,13 +38,28 @@ Do not include any additional text outside the JSON object.
 ### Your Output
 """
 
-SECOND_LEVEL_TEMPLATE = """### Task
+SECOND_LEVEL_TEMPLATE = """
+### Task
 
-{instruction}
+Review the evaluation produced by the first-level judge.
+
+You are given the original evaluation task and the complete
+response produced by the first-level judge.
+
+Evaluate ONLY whether the first-level judge correctly applied
+the original evaluation criteria and decision rules.
+
+Do not independently evaluate the original model response.
+Do not replace the original evaluation criteria with your own
+standards, safety policies, or preferences.
+
+A first-level judgment is correct if its reasoning and verdict
+are consistent with the evaluation criteria and decision rules
+stated in the original evaluation task.
 
 ### Review Focus
 
-{review_focus}
+{review_description}
 
 ### Decision Rules
 
@@ -69,9 +84,11 @@ If the first-level judgment is not correct, return:
 {{
   "verdict": "not_correct",
   "corrected_explanation": "Provide a concise corrected explanation (maximum 50 words).",
-  "corrected_verdict": "One of: {first_level_positive_label} | {first_level_negative_label}."}}
+  "corrected_verdict": "One of: {positive_label} | {negative_label}."
+}}
 
 Do not include any additional text outside the JSON object.
+
 ### Evaluation Data
 
 [BEGIN JUDGE TASK]
@@ -83,4 +100,4 @@ Do not include any additional text outside the JSON object.
 [END JUDGE RESPONSE]
 
 ### Your Output
-"""
+""".strip()

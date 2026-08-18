@@ -197,9 +197,10 @@ def apply_second_level_decision(
     """
     Run the second-level judge and update the final prediction.
 
-    The second-level judge reviews the first-level evaluation.
-    If the first-level judgment is correct, its verdict is kept.
-    Otherwise, the corrected verdict is used.
+    The second-level judge reviews whether the first-level judge
+    correctly applied the original evaluation criteria and decision
+    rules. If the first-level judgment is correct, its verdict is kept.
+    Otherwise, the corrected verdict is used as the final prediction.
 
     Args:
         model: Judge model name.
@@ -214,14 +215,11 @@ def apply_second_level_decision(
         result["predicted_label"] = PARSING_ERROR
         return
 
-    criterion_config = CRITERIA[baseline_criterion]
-
     second_level_prompt = build_second_level_prompt(
         detail=second_level_detail,
+        criterion=baseline_criterion,
         first_level_prompt=result["first_prompt"],
         first_level_response=result["first_raw_output"],
-        positive_label=criterion_config["labels"]["positive"],
-        negative_label=criterion_config["labels"]["negative"],
     )
 
     second_result = judge_response(
@@ -269,10 +267,10 @@ def run_judge_experiment(
     """
     Run a judge experiment over a prepared dataset.
 
-    The function runs the selected evaluation method for each dataset
-    example. Baseline and second-level methods use the configured
-    first-level criterion, while the second-level method additionally
-    reviews the first-level judgment using the selected review detail.
+    The selected evaluation method is applied to each dataset example.
+    Baseline and second-level methods use the configured first-level
+    criterion. The second-level method additionally reviews the
+    first-level judgment using the selected review detail.
 
     Args:
         dataset: Prepared dataset examples to evaluate.
