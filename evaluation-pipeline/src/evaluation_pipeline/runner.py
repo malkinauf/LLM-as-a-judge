@@ -195,33 +195,23 @@ def apply_baseline_decision(
 def apply_second_level_decision(
     model: str,
     result: dict[str, Any],
-    second_level_detail: str,
-    second_level_input: str,
     baseline_criterion: str,
-    baseline_criterion_detail: str,
 ) -> None:
     """
-    Run the second-level judge and update the final prediction.
+    Run the fixed second-level judge and update the final prediction.
 
-    The second-level judge reviews whether the first-level judge
-    correctly applied the original evaluation criteria and decision
-    rules.
+    The second-level judge receives the complete first-level judge
+    prompt and the complete first-level judge response.
 
-    The second-level prompt can use either the complete first-level
-    prompt or a structured representation of the first-level task.
-
-    If the first-level judgment is correct, its verdict is kept.
-    Otherwise, the corrected verdict returned by the second-level
-    judge is used as the final prediction.
+    If the second-level judge classifies the first-level judgment as
+    correct, the original first-level verdict is retained. Otherwise,
+    the corrected verdict returned by the second-level judge is used
+    as the final prediction.
 
     Args:
         model: Judge model name.
         result: Result dictionary updated in place.
-        second_level_detail: Detail level of the second-level review.
-        second_level_input: Input representation used by the second-level
-            judge, such as "full" or "structured".
         baseline_criterion: Criterion used by the first-level judge.
-        baseline_criterion_detail: Detail level of the first-level criterion.
     """
 
     first_level_label = result["first_level_label"]
@@ -231,12 +221,7 @@ def apply_second_level_decision(
         return
 
     second_level_prompt = build_second_level_prompt(
-        detail=second_level_detail,
-        input_mode=second_level_input,
         criterion=baseline_criterion,
-        first_level_criterion_detail=baseline_criterion_detail,
-        question=result["question"],
-        model_response=result["model_response"],
         first_level_prompt=result["first_prompt"],
         first_level_response=result["first_raw_output"],
     )
@@ -283,8 +268,6 @@ def run_judge_experiment(
     dataset_file: str,
     baseline_criterion: str,
     baseline_criterion_detail: str,
-    second_level_detail: str,
-    second_level_input: str,
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a prepared dataset.
@@ -292,8 +275,8 @@ def run_judge_experiment(
     The selected evaluation method is applied to each dataset example.
     Baseline and second-level methods use the configured first-level
     criterion. The second-level method additionally reviews the
-    first-level judgment using the configured review detail and
-    input representation.
+    complete first-level judge prompt and response using the fixed
+    second-level judge prompt.
 
     Args:
         dataset: Prepared dataset examples to evaluate.
@@ -305,9 +288,6 @@ def run_judge_experiment(
         dataset_file: Source dataset file name.
         baseline_criterion: Criterion used by the first-level judge.
         baseline_criterion_detail: Detail level of the first-level criterion.
-        second_level_detail: Detail level of the second-level review.
-        second_level_input: Input representation used by the second-level
-            judge, such as "full" or "structured".
 
     Returns:
         List of result dictionaries, one for each evaluated example.
@@ -374,12 +354,7 @@ def run_judge_experiment(
                 apply_second_level_decision(
                     model=model,
                     result=result,
-                    second_level_detail=second_level_detail,
-                    second_level_input=second_level_input,
                     baseline_criterion=baseline_criterion,
-                    baseline_criterion_detail=(
-                        baseline_criterion_detail
-                    ),
                 )
 
             except Exception as e:
