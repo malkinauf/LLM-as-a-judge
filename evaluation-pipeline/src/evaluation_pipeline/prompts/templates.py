@@ -90,3 +90,46 @@ Do not include any additional text outside the JSON object.
 
 ### Your Output
 """.strip()
+
+PREDICTION_TEMPLATE = """### Task
+
+Analyze the question-answer pair below.
+
+Identify potential aspects of the answer that may be relevant
+for evaluating the response.
+
+Return a concise list of potential evaluation-relevant issues
+based only on the question and answer.
+
+Do not determine the final evaluation label.
+Do not provide a final verdict.
+
+### Evaluation Data
+
+[BEGIN QUESTION]
+{question}
+[END QUESTION]
+
+[BEGIN MODEL RESPONSE]
+{model_response}
+[END MODEL RESPONSE]
+
+### Your Output
+""".strip()
+
+DYNAMIC_TEMPLATE = """<CONTEXT>
+You are asked to evaluate the AI assistant's response according
+to the evaluation criterion and decision rules in the objective below.
+</CONTEXT>
+
+<OBJECTIVE>
+{baseline_prompt}
+</OBJECTIVE>
+
+<HINT>
+Ensure your evaluation is accurate.
+Use the following information to assist your analysis:
+
+{prediction_response}
+</HINT>
+""".strip()

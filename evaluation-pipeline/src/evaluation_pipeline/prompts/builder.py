@@ -3,6 +3,8 @@ from evaluation_pipeline.prompts.registry import CRITERIA
 from evaluation_pipeline.prompts.templates import (
     BASELINE_TEMPLATE,
     SECOND_LEVEL_TEMPLATE,
+    PREDICTION_TEMPLATE,
+    DYNAMIC_TEMPLATE,
 )
 
 
@@ -92,4 +94,51 @@ def build_second_level_prompt(
         first_level_response=first_level_response,
         positive_label=criterion_config["labels"]["positive"],
         negative_label=criterion_config["labels"]["negative"],
+    )
+
+def build_prediction_prompt(
+    question: str,
+    model_response: str,
+) -> str:
+    """
+    Build the preliminary prediction prompt used by
+    the dynamic prompting method.
+
+    Args:
+        question: Original user question.
+        model_response: Model response being evaluated.
+
+    Returns:
+        Complete prediction prompt.
+    """
+
+    return PREDICTION_TEMPLATE.format(
+        question=question,
+        model_response=model_response,
+    )
+
+
+def build_dynamic_prompt(
+    baseline_prompt: str,
+    prediction_response: str,
+) -> str:
+    """
+    Build the final dynamic judge prompt.
+
+    The dynamic prompt contains the complete baseline judge
+    prompt and the preliminary prediction generated in the
+    first step.
+
+    Args:
+        baseline_prompt: Complete baseline judge prompt.
+        prediction_response: Preliminary analysis generated
+            by the prediction step.
+
+    Returns:
+        Complete dynamic judge prompt.
+    """
+
+    return DYNAMIC_TEMPLATE.format(
+        baseline_prompt=baseline_prompt,
+        prediction_response=prediction_response,
     )
