@@ -39,7 +39,7 @@ def build_base_result(
     run_id: str,
     model: str,
     method: str,
-    dataset_file: str,
+    dataset_id: str,
 ) -> dict[str, Any]:
     """
     Create the default result record for one evaluated example.
@@ -52,7 +52,7 @@ def build_base_result(
         run_id: Identifier of the current experiment run.
         model: Judge model name.
         method: Evaluation method.
-        dataset_file: Source dataset file name.
+        dataset_id: ID of the dataset to use.
 
     Returns:
         Initialized result dictionary.
@@ -67,7 +67,7 @@ def build_base_result(
         "model": model,
         "method": method,
         "run_id": run_id,
-        "dataset_file": dataset_file,
+        "dataset_id": dataset_id,
 
         "prediction_prompt": None,
         "prediction_raw_output": None,
@@ -253,7 +253,7 @@ def run_judge_experiment(
     model: str,
     method: str,
     templates: dict[str, str],
-    dataset_file: str,
+    dataset_id: str,
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a dataset.
@@ -269,7 +269,7 @@ def run_judge_experiment(
         model: Judge model name.
         method: Evaluation method to run.
         templates: Loaded prompt templates.
-        dataset_file: Source dataset file name.
+        dataset_id: ID of the dataset to use.
 
     Returns:
         List of result dictionaries, one per evaluated example.
@@ -301,7 +301,7 @@ def run_judge_experiment(
             run_id=run_id,
             model=model,
             method=method,
-            dataset_file=dataset_file,
+            dataset_id=dataset_id,
         )
 
         try:
