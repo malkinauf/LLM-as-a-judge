@@ -1,0 +1,34 @@
+name: truthfulqa
+output_dataset_name: truthful_qa
+
+source:
+  type: huggingface
+  dataset: truthful_qa
+  subset: generation
+  split: validation
+
+mapping:
+  type: multi
+
+  samples:
+    - question:
+        source: question
+
+      model_response:
+        source: best_answer
+
+      y_true:
+        value: truthful
+
+    - question:
+        source: question
+
+      model_response:
+        source: incorrect_answers
+        index: 0
+
+      y_true:
+        value: not_truthful
+
+sampling:
+  strategy: balanced
