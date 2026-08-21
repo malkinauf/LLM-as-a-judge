@@ -9,6 +9,19 @@ from evaluation_pipeline.datasets.schema import validate_dataset
 
 logger = logging.getLogger(__name__)
 
+def _get_project_root() -> Path:
+    """
+    Find the project root containing pyproject.toml.
+    """
+    current = Path(__file__).resolve().parent
+
+    for path in (current, *current.parents):
+        if (path / "pyproject.toml").is_file():
+            return path
+
+    raise FileNotFoundError(
+        "Could not find project root."
+    )
 
 def save_dataset_to_file(
     dataset: list[dict[str, Any]],
@@ -47,6 +60,27 @@ def save_dataset_to_file(
 
     logger.info(f"Dataset saved to {file_path}")
 
+def load_prepared_dataset(
+    dataset_id: str,
+) -> list[dict[str, Any]]:
+    """
+    Load a prepared dataset by its dataset ID.
+    """
+    if Path(dataset_id).name != dataset_id:
+        raise ValueError(
+            "dataset_id must be a dataset name, not a path."
+        )
+
+    file_path = (
+        _get_project_root()
+        / "datasets"
+        / "prepared"
+        / f"{dataset_id}.json"
+    )
+
+    return load_dataset_from_file(
+        file_path
+    )
 
 def load_dataset_from_file(
     path: str | Path,
