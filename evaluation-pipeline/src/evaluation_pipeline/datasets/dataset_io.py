@@ -23,6 +23,17 @@ def _get_project_root() -> Path:
         "Could not find project root."
     )
 
+def get_prepared_dataset_path(
+    dataset_id: str,
+    n_samples: int 
+) -> Path:
+    return (
+        _get_project_root()
+        / "datasets"
+        / "prepared"
+        / f"{dataset_id}_{n_samples}.json"
+    )
+
 def save_dataset_to_file(
     dataset: list[dict[str, Any]],
     path: str | Path,

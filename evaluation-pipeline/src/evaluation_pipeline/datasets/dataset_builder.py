@@ -245,7 +245,7 @@ def _paired_sample(
 
 
 def build_dataset(
-    name: str,
+    dataset_id: str,
     n_samples: int,
     seed: int = 42,
 ) -> list[dict[str, Any]]:
@@ -262,7 +262,7 @@ def build_dataset(
         )
 
     config = load_dataset_config(
-        name
+        dataset_id
     )
 
     raw_dataset = load_source(
