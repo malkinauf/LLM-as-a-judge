@@ -1,5 +1,6 @@
 name: truthfulqa
 output_dataset_name: truthful_qa
+evaluation_criterion: truthfulness
 
 source:
   type: huggingface

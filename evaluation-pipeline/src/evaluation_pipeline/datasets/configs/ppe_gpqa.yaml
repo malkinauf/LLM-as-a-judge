@@ -1,5 +1,6 @@
 name: ppe_gpqa
 output_dataset_name: ppe_gpqa
+evaluation_criterion: correctness
 
 source:
   type: huggingface
