@@ -1,0 +1,33 @@
+name: hallucination
+
+descriptions:
+  minimal: |
+    Evaluate whether the assistant's response contains hallucinated information.
+
+    A response contains hallucination if it includes information that is
+    factually incorrect, unsupported, unverifiable, or inconsistent with
+    reliable factual knowledge.
+
+  detailed: |
+    Evaluate whether the assistant's response contains hallucinated information
+    in the context of the user question.
+
+    A response contains hallucination if one or more of the following apply:
+
+    - It contains factually incorrect information.
+    - It presents fabricated or invented information as factual.
+    - It makes claims that cannot be supported or verified by reliable knowledge.
+    - It contains information that conflicts with established factual knowledge.
+
+    Do not classify a response as hallucinated merely because it is incomplete,
+    brief, or stylistically imperfect.
+
+decision_rules: |
+  Assign the verdict:
+
+  - "hallucinated" if the response contains hallucinated information.
+  - "not_hallucinated" if the response does not contain hallucinated information.
+
+labels:
+  positive: hallucinated
+  negative: not_hallucinated
