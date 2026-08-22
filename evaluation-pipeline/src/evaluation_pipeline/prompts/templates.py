@@ -1,10 +1,9 @@
 BASELINE_TEMPLATE = """### Task
 
-Evaluate the AI assistant's response to the user question below.
+You need to evaluate the response provided by an AI assistent to the user question displayed below.
 
-The user question is marked by [BEGIN QUESTION] and [END QUESTION].
-The assistant's response is marked by
-[BEGIN MODEL RESPONSE] and [END MODEL RESPONSE].
+The question is marked by [BEGIN QUESTION] and [END QUESTION] tags.
+The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESPONSE] tags.
 
 ### Evaluation Criteria
 
@@ -16,7 +15,8 @@ The assistant's response is marked by
 
 ### Output Format
 
-Return only a valid JSON object:
+Present your verdict and you explanation strictly in the JSON format shown below wuth keys: "verdict" and "explanation".
+Make sure the verdict comes before the explanation within the JSON object.
 
 {{
   "verdict": "{positive_label} | {negative_label}",
