@@ -3,240 +3,280 @@
     "id": "liar_0",
     "question": "Is the following statement true? Gail Collins says Louie Gohmert of Texas blamed the mass shooting at a movie theater in Colorado on the ongoing attacks on Judeo-Christian beliefs.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_1",
     "question": "Is the following statement true? Dannel Malloy says Air travelers can't get on a plane in the United States without someone doing a background check on them.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_2",
     "question": "Is the following statement true? Jim Rubens says in Jeanne Shaheen, New Hampshire has a Senator who was the deciding vote to pass Obamacare.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_3",
     "question": "Is the following statement true? John Loughlin says we have one of the most expensive General Assemblies, per capita, in the entire country.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_4",
     "question": "Is the following statement true? John Bolton Super PAC says Deborah Ross supports the Iran nuclear deal and the ransom it paid for hostages.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_5",
     "question": "Is the following statement true? Mike Pence says the Democrats propose a government-controlled health care plan that will deprive roughly 120 million Americans of their current health care coverage.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_6",
     "question": "Is the following statement true? No Casinos says Nevada is No. 1 in unemployment, violent crime, car theft, divorce, robberies and foreclosures.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_7",
     "question": "Is the following statement true? Crossroads GPS says President Obama has added $4 billion in debt every day.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_8",
     "question": "Is the following statement true? Ellyn Bogdanoff says Florida is considered the fourth-largest gambling state in the nation.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_9",
     "question": "Is the following statement true? Evan Longoria says his barehanded catch posted on YouTube is real.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_10",
     "question": "Is the following statement true? Ted Cruz says President Barack Obama has been presiding over our jobs going overseas for seven years.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_11",
     "question": "Is the following statement true? Sid Miller says that since lawmakers acted, we have 130 new businesses across Texas doing helicopter hog hunts.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_12",
     "question": "Is the following statement true? Charlie Crist says on oil drilling off Florida's coast.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_13",
     "question": "Is the following statement true? Sarah Palin says grocery prices have risen significantly over the past year or so.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_14",
     "question": "Is the following statement true? Charlie Hales says I worked with our Mayor and other commissioners to help save the school year when a budget crisis in Salem threatened to cut four weeks of the school year, including negotiating with teachers to work for free.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_15",
     "question": "Is the following statement true? Barack Obama says we supported the first new nuclear power plant in three decades.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_16",
     "question": "Is the following statement true? Arianna Huffington says Halliburton defrauded American taxpayers of hundreds of millions of dollars in Iraq.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_17",
     "question": "Is the following statement true? Donald Trump says President Obama's grandmother in Kenya said he was born in Kenya and she was there and witnessed the birth.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_18",
     "question": "Is the following statement true? Al Roker says Birmingham, Ala. is the cradle of the civil rights movement.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_19",
     "question": "Is the following statement true? Howard Dean says there's a tremendous other number of public officials who have done the same thing as Hillary Clinton with a private email server.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_20",
     "question": "Is the following statement true? Tommy Thompson says when he was governor, most of the Democrats voted for his billion-dollar property-tax cuts, but U.S. Senate rival Tammy Baldwin voted against it.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_21",
     "question": "Is the following statement true? Hank Johnson says in the last two years, super PACs raised more than $180 million -- with roughly half of it coming from fewer than 200 super-rich people and roughly 20 percent from corporations.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_22",
     "question": "Is the following statement true? Mike Schaufler says Jeff Reardon cut elementary school music classes, art instruction, teaching positions, basketball and volleyball programs, and he voted to raise school lunch prices.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_23",
     "question": "Is the following statement true? Education Action Group says Portland Schools spend $500K to deem PBJ sandwiches racist.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_24",
     "question": "Is the following statement true? Mt Hood Community College says Mt. Hood Community College is No. 1 on average and top faculty pay and benefits.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_25",
     "question": "Is the following statement true? Workers Voice says Josh Mandel's campaign is under FBI investigation.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_26",
     "question": "Is the following statement true? Peter Palumbo says in Cranston, it costs $5,000 to $6,000 to send out community notifications on just one Level 3 sex offender.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_27",
     "question": "Is the following statement true? Chain Email says John McCain will keep the estate tax at 0 percent, the same as it is now.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_28",
     "question": "Is the following statement true? Allan Fung says Ken Block supports Obamacare.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_29",
     "question": "Is the following statement true? David Alameel says he lived in a colonia while working as a farm worker.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_30",
     "question": "Is the following statement true? Karl Rove says Hillary Clinton spent 30 days in the hospital in 2012 and appeared wearing glasses that are only for people who have traumatic brain injury.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_31",
     "question": "Is the following statement true? Harry Houck says the law says when a police officer stops you, do whatever he says and then deal with it later.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_32",
     "question": "Is the following statement true? Ron Wyden says \"We had bipartisan legislation that got through the Senate\" that would have prevented bonuses like AIG's \"and then somehow mysteriously disappeared.\"",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_33",
     "question": "Is the following statement true? Jon Stewart says the American slave trade caused 5 million deaths or more.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_34",
     "question": "Is the following statement true? Republican Party Texas says Bill White has presided over the construction of what may be the world's largest abortion clinic.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_35",
     "question": "Is the following statement true? Waco Tea Party says the federal government threatened to impose a no-fly zone in Texas if state legislators bar airport security officials from performing pat-downs.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_36",
     "question": "Is the following statement true? Elizabeth Warren says the average family not in the top 10 percent makes less money today than they were making a generation ago.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_37",
     "question": "Is the following statement true? Joe Atkins says Minnesota is kicking butt relative to Wisconsin on everything from employment and job creation to school test scores, educated work force and a host of other factors and rankings.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_38",
     "question": "Is the following statement true? Adam Hasner says George LeMieux falsely attacked Marco Rubio.",
     "model_response": "This statement is true.",
-    "y_true": "truthful"
+    "y_true": "truthful",
+    "dataset": "liar"
   },
   {
     "id": "liar_39",
     "question": "Is the following statement true? John Raese says under the new health care law, the first person (a) patient has to go to is a bureaucrat. That is called a panel.",
     "model_response": "This statement is false.",
-    "y_true": "not_truthful"
+    "y_true": "not_truthful",
+    "dataset": "liar"
   }
 ]
