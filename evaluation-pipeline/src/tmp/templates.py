@@ -48,48 +48,44 @@ The judge was presented the task marked by
 The answer of the judge is marked by
 [BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags.
 
-Your task is to carefully assess whether the reasoning and verdict
-provided by the LLM judge are valid and aligned with the original task.
+Your task is to carefully assess whether the
+reasoning and verdict provided by the LLM judge
+are valid, aligned with the task, and free from errors.
 
-Classify the response as "correct" if you agree with the final verdict.
+Classify the response as "correct" if you determine that
+the assessment process of the LLM judge makes sense,
+you can't find any errors, and you agree with the verdict.
 
-Classify the response as "not_correct" only if the final verdict
-is incorrect and should be changed.
-
-Do not change a correct verdict only because the explanation could
-be improved or phrased differently.
-
-If you are uncertain whether the verdict should be changed,
-keep the original verdict.
+Classify the response as "not_correct" if you find errors
+in the assessment process made by the LLM judge and
+would like to change the response.
 
 ### Output Format
 
-If the first-level verdict is correct, return:
+If the first-level judgment is correct, return:
 
 {{
   "verdict": "correct"
 }}
 
-If the first-level verdict is incorrect, return:
+If the first-level judgment is not correct, return:
 
 {{
   "verdict": "not_correct",
   "corrected_explanation": "Provide a concise corrected explanation (maximum 50 words).",
-  "corrected_verdict": "one of: {positive_label} | {negative_label}"
+  "corrected_verdict": "One of: {positive_label} | {negative_label}."
 }}
 
-Do not include any text outside the JSON object.
+Do not include any additional text outside the JSON object.
+
+### Evaluation Data
 
 [BEGIN JUDGE TASK]
-
 {first_level_prompt}
-
 [END JUDGE TASK]
 
 [BEGIN JUDGE ANSWER]
-
 {first_level_response}
-
 [END JUDGE ANSWER]
 
 ### Your Output
@@ -137,4 +133,4 @@ Use the following information to assist your analysis:
 
 {prediction_response}
 </HINT>
-""".strip()
+"""
