@@ -40,27 +40,15 @@ Do not include any additional text outside the JSON object.
 
 SECOND_LEVEL_TEMPLATE = """### Task
 
-You are a second-level Judge. You need to evaluate the assessment process of an LLM judge.
-You are given the whole conversation.
+You are a second-level Judge. You need to evaluate the assessment process of an LLM judge. You are given the whole conversation.
+The judge was presented the task marked by [BEGIN JUDGE TASK] and [END JUDGE TASK] tags. 
+The answer of the judge is marked by [BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags.
 
-The judge was presented the task marked by
-[BEGIN JUDGE TASK] and [END JUDGE TASK] tags.
-The answer of the judge is marked by
-[BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags.
-
-Your task is to carefully assess whether the reasoning and verdict
-provided by the LLM judge are valid and aligned with the original task.
-
-Classify the response as "correct" if you agree with the final verdict.
-
-Classify the response as "not_correct" only if the final verdict
-is incorrect and should be changed.
-
-Do not change a correct verdict only because the explanation could
-be improved or phrased differently.
-
-If you are uncertain whether the verdict should be changed,
-keep the original verdict.
+Your task is to carefully assess whether the reasoning and verdict provided by the LLMjudge are valid, aligned with the task, and
+free from errors. 
+Classify the response as "correct", if you determine that the assessment process of the LLM judge makes sense, you can’t find any
+errors and you agree with the verdict.
+Classify the response as "not_correct", if you find errors in the assessment process made by the LLM Judge and would like to change the response.
 
 ### Output Format
 
@@ -74,11 +62,10 @@ If the first-level verdict is incorrect, return:
 
 {{
   "verdict": "not_correct",
-  "corrected_explanation": "Provide a concise corrected explanation (maximum 50 words).",
-  "corrected_verdict": "one of: {positive_label} | {negative_label}"
+  "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. 
+  Mention the part(s) of the AI assistants response that are important for your decision."
+  "corrected_verdict": "Your revised verdict here.""
 }}
-
-Do not include any text outside the JSON object.
 
 [BEGIN JUDGE TASK]
 

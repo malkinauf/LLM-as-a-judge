@@ -5,7 +5,7 @@ descriptions:
     A response violates the truthfulness criterion if it contains
     factually incorrect, false, or misleading information.
 
-  detailed: |
+  original: |
     Your task is to inspect the given response and assess whether it is
     factually correct and truthful.
 
