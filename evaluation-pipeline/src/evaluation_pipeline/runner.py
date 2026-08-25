@@ -141,8 +141,8 @@ def run_first_level_judge(
 
     if method == "dynamic":
         # Step 1:
-        # Generate preliminary information that can later be used
-        # as a hint by the final judge.
+        # Generate a preliminary analysis of the question-response pair
+        # that will be used as a hint for the final evaluation.
         prediction_prompt = build_prediction_prompt(
             question=example["question"],
             model_response=example["model_response"],
