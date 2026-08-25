@@ -271,7 +271,8 @@ sampling:
   strategy: paired
 ```
 
-Candidates are grouped by question. Each selected question contributes one randomly selected sample from each label.
+Candidates are grouped by the value of the `question` field.
+Each selected group contributes one randomly selected sample from each label.
 
 For example, with:
 
