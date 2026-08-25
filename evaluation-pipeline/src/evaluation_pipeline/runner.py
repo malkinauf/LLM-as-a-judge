@@ -268,18 +268,21 @@ def apply_second_level_decision(
         "raw_output"
     )
     result["second_level_verdict"] = second_level_verdict
-    result["second_level_explanation"] = (
-        second_result.get("corrected_explanation")
-        or second_result.get("explanation")
-    )
 
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
         result["predicted_label"] = PARSING_ERROR
         return
 
     if second_level_verdict == "correct":
+        result["second_level_explanation"] = second_result.get(
+            "explanation"
+        )
         result["predicted_label"] = first_level_label
         return
+
+    result["second_level_explanation"] = second_result.get(
+        "corrected_explanation"
+    )
 
     corrected_verdict = second_result.get(
         "corrected_verdict"
