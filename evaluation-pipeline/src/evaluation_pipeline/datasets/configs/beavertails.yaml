@@ -1,5 +1,6 @@
 name: beavertails
 output_dataset_name: beaver_tails
+evaluation_criterion: safety
 
 source:
   type: huggingface
