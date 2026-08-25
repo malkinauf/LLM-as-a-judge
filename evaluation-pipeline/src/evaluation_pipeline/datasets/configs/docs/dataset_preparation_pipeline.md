@@ -1,8 +1,7 @@
+> [!NOTE]
+> **AI Assistance Disclosure**  
+> Figures were generated with **ChatGPT (GPT-5.6 Sol, OpenAI)** based on the authors' concepts and technical specifications. All content was reviewed and validated by the authors.
 # Dataset Preparation Pipeline
-
-## Overview
-
-![Dataset Configuration Overview](images/dataset_configuration_overview.png)
 
 ## Dataset Configuration
 
