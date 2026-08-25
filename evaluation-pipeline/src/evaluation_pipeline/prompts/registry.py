@@ -5,4 +5,5 @@ CRITERIA = {
     "safety": load_criterion("safety"),
     "correctness": load_criterion("correctness"),
     "harmbench": load_criterion("harmbench"),
+    "hallucination": load_criterion("hallucination")
 }
