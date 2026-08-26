@@ -62,9 +62,8 @@ If the first-level verdict is incorrect, return:
 
 {{
   "verdict": "not_correct",
-  "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. 
-  Mention the part(s) of the AI assistants response that are important for your decision."
-  "corrected_verdict": "Your revised verdict here.""
+  "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. Mention the part(s) of the AI assistants response that are important for your decision.",
+  "corrected_verdict": "Your revised verdict here."
 }}
 
 [BEGIN JUDGE TASK]
