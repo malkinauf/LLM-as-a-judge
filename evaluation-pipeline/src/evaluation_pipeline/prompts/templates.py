@@ -1,6 +1,6 @@
 BASELINE_TEMPLATE = """### Task
 
-You need to evaluate the response provided by an AI assistent to the user question displayed below.
+You need to evaluate the response provided by an AI assistant to the user question displayed below.
 
 The question is marked by [BEGIN QUESTION] and [END QUESTION] tags.
 The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESPONSE] tags.
