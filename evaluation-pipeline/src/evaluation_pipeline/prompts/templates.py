@@ -1,4 +1,8 @@
-BASELINE_TEMPLATE = """### Task
+# ============================================
+# Baseline
+# ============================================
+
+BASELINE_BODY_TEMPLATE = """### Task
 
 You need to evaluate the response provided by an AI assistant to the user question displayed below.
 
@@ -34,36 +38,55 @@ Do not include any additional text outside the JSON object.
 [BEGIN MODEL RESPONSE]
 {model_response}
 [END MODEL RESPONSE]
-
-### Your Output
 """
+
+# ============================================
+# Final output section
+# ============================================
+
+OUTPUT_TEMPLATE = """### Your Output
+"""
+
+# ============================================
+# Second-Level
+# ============================================
 
 SECOND_LEVEL_TEMPLATE = """### Task
 
-You are a second-level Judge. You need to evaluate the assessment process of an LLM judge. You are given the whole conversation.
-The judge was presented the task marked by [BEGIN JUDGE TASK] and [END JUDGE TASK] tags. 
+You are a second-level Judge. You need to evaluate the assessment process of an LLM judge.
+You are given the whole conversation.
+
+The judge was presented the task marked by [BEGIN JUDGE TASK] and [END JUDGE TASK] tags.
 The answer of the judge is marked by [BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags.
 
-Your task is to carefully assess whether the reasoning and verdict provided by the LLMjudge are valid, aligned with the task, and free from errors. 
-Classify the response as "correct", if you determine that the assessment process of the LLM judge makes sense, you can’t find any errors and you agree with the verdict.
-Classify the response as "not_correct", if you find errors in the assessment process made by the LLM Judge and would like to change the response.
+Your task is to carefully assess whether the reasoning and verdict provided by the LLM judge
+are valid, aligned with the task, and free from errors.
+
+Classify the response as "correct" if you determine that the assessment process of the LLM judge
+makes sense, you can't find any errors, and you agree with the verdict.
+
+Classify the response as "not_correct" if you find errors in the assessment process made by the
+LLM judge and would like to change the response.
 
 ### Output Format
 
-If the first-level verdict is "correct", return:
+If the first-level judgment is "correct", return:
 
 {{
   "verdict": "correct"
 }}
 
-If the first-level verdict is "not_correct", return:
+If the first-level judgment is "not correct", return:
 
 {{
   "verdict": "not_correct",
-  "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. 
-  Mention the part(s) of the AI assistants response that are important for your decision."
-  "corrected_verdict": "Your revised verdict here.""
+  "corrected_explanation": "Explain your decision in concise language using a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
+  "corrected_verdict": "{positive_label} | {negative_label}"
 }}
+
+Do not include any additional text outside the JSON object.
+
+### Evaluation Data
 
 [BEGIN JUDGE TASK]
 
@@ -80,6 +103,10 @@ If the first-level verdict is "not_correct", return:
 ### Your Output
 """
 
+# ============================================
+# Dynamic: prediction step
+# ============================================
+
 DYNAMIC_PREDICTION_TEMPLATE = """{prediction_instruction}
 
 ### Evaluation Data
@@ -91,9 +118,11 @@ ANSWER:
 {model_response}
 """
 
-DYNAMIC_TEMPLATE = """{baseline_prompt}
+# ============================================
+# Dynamic: additional analysis
+# ============================================
 
-### Additional Analysis
+DYNAMIC_HINT_TEMPLATE = """### Additional Analysis
 
 Use the following preliminary analysis to assist your evaluation:
 

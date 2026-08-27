@@ -128,8 +128,8 @@ def run_first_level_judge(
     For the dynamic method, the model is called twice. The first
     call generates a preliminary analysis of the question-response
     pair using the selected prediction instruction variant. The
-    second call evaluates the response using the standard baseline
-    task augmented with the preliminary analysis as a hint.
+    second call evaluates the response using the same baseline
+    prompt body augmented with the preliminary analysis as a hint.
 
     Args:
         example: Dataset example being evaluated.
@@ -145,8 +145,7 @@ def run_first_level_judge(
 
     if method == "dynamic":
         # Step 1:
-        # Generate a preliminary analysis of the question-response
-        # pair that will later be used as a hint.
+        # Generate the preliminary analysis.
         prediction_prompt = build_prediction_prompt(
             criterion=baseline_criterion,
             prediction_variant=dynamic_prediction_variant,
@@ -160,18 +159,13 @@ def run_first_level_judge(
         )
 
         # Step 2:
-        # Build exactly the same evaluation task used by baseline.
-        baseline_prompt = build_baseline_prompt(
+        # Build the final dynamic judge prompt from the shared
+        # baseline body + dynamic hint + output section.
+        first_prompt = build_dynamic_prompt(
             criterion=baseline_criterion,
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
-        )
-
-        # Step 3:
-        # Add the preliminary analysis as a hint.
-        first_prompt = build_dynamic_prompt(
-            baseline_prompt=baseline_prompt,
             prediction_response=prediction_response,
         )
 
@@ -187,7 +181,7 @@ def run_first_level_judge(
             model_response=example["model_response"],
         )
 
-    # Run the actual first-level classification.
+    # Run the first-level classification.
     first_judge_result = judge_response(
         prompt=first_prompt,
         model=model,
@@ -387,10 +381,10 @@ def run_judge_experiment(
                 baseline_criterion=baseline_criterion,
                 baseline_criterion_detail=(
                     baseline_criterion_detail
-                    ),
-                    dynamic_prediction_variant=(
-                        dynamic_prediction_variant
-                        ),
+                ),
+                dynamic_prediction_variant=(
+                    dynamic_prediction_variant
+                ),
             )
 
         except Exception as e:
