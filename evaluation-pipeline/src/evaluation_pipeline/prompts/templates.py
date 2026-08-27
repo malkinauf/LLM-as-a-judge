@@ -44,21 +44,19 @@ You are a second-level Judge. You need to evaluate the assessment process of an 
 The judge was presented the task marked by [BEGIN JUDGE TASK] and [END JUDGE TASK] tags. 
 The answer of the judge is marked by [BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags.
 
-Your task is to carefully assess whether the reasoning and verdict provided by the LLMjudge are valid, aligned with the task, and
-free from errors. 
-Classify the response as "correct", if you determine that the assessment process of the LLM judge makes sense, you can’t find any
-errors and you agree with the verdict.
+Your task is to carefully assess whether the reasoning and verdict provided by the LLMjudge are valid, aligned with the task, and free from errors. 
+Classify the response as "correct", if you determine that the assessment process of the LLM judge makes sense, you can’t find any errors and you agree with the verdict.
 Classify the response as "not_correct", if you find errors in the assessment process made by the LLM Judge and would like to change the response.
 
 ### Output Format
 
-If the first-level verdict is correct, return:
+If the first-level verdict is "correct", return:
 
 {{
   "verdict": "correct"
 }}
 
-If the first-level verdict is incorrect, return:
+If the first-level verdict is "not_correct", return:
 
 {{
   "verdict": "not_correct",
