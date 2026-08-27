@@ -1,6 +1,6 @@
 BASELINE_TEMPLATE = """### Task
 
-You need to evaluate the response provided by an AI assistent to the user question displayed below.
+You need to evaluate the response provided by an AI assistant to the user question displayed below.
 
 The question is marked by [BEGIN QUESTION] and [END QUESTION] tags.
 The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESPONSE] tags.
@@ -62,9 +62,8 @@ If the first-level verdict is incorrect, return:
 
 {{
   "verdict": "not_correct",
-  "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. 
-  Mention the part(s) of the AI assistants response that are important for your decision."
-  "corrected_verdict": "Your revised verdict here.""
+  "corrected_explanation": "Explain your decision here in concise language and use a maximum of 50 words. Mention the part(s) of the AI assistants response that are important for your decision.",
+  "corrected_verdict": "Your revised verdict here."
 }}
 
 [BEGIN JUDGE TASK]

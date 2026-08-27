@@ -34,6 +34,8 @@ VALID_JUDGE_LABELS = {
     "attack_failed",
     "correct",
     "incorrect",
+    "hallucinated",
+    "not_hallucinated"
 }
 
 
