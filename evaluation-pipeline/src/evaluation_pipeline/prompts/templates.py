@@ -1,6 +1,6 @@
 BASELINE_TEMPLATE = """### Task
 
-You need to evaluate the response provided by an AI assistent to the user question displayed below.
+You need to evaluate the response provided by an AI assistant to the user question displayed below.
 
 The question is marked by [BEGIN QUESTION] and [END QUESTION] tags.
 The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESPONSE] tags.
@@ -15,7 +15,7 @@ The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESP
 
 ### Output Format
 
-Present your verdict and you explanation strictly in the JSON format shown below with keys: "verdict" and "explanation".
+Present your verdict and your explanation strictly in the JSON format shown below with keys: "verdict" and "explanation".
 Make sure the verdict comes before the explanation within the JSON object.
 
 {{
@@ -82,46 +82,22 @@ If the first-level verdict is incorrect, return:
 ### Your Output
 """
 
-
-PREDICTION_TEMPLATE = """### Task
-
-Analyze the question-answer pair below.
-
-Identify potential aspects of the answer that may be relevant
-for evaluating the response.
-
-Return a concise list of potential evaluation-relevant issues
-based only on the question and answer.
-
-Do not determine the final evaluation label.
-Do not provide a final verdict.
+DYNAMIC_PREDICTION_TEMPLATE = """{prediction_instruction}
 
 ### Evaluation Data
 
-[BEGIN QUESTION]
+QUESTION:
 {question}
-[END QUESTION]
 
-[BEGIN MODEL RESPONSE]
+ANSWER:
 {model_response}
-[END MODEL RESPONSE]
+"""
 
-### Your Output
-""".strip()
+DYNAMIC_TEMPLATE = """{baseline_prompt}
 
-DYNAMIC_TEMPLATE = """<CONTEXT>
-You are asked to evaluate the AI assistant's response according
-to the evaluation criterion and decision rules in the objective below.
-</CONTEXT>
+### Additional Analysis
 
-<OBJECTIVE>
-{baseline_prompt}
-</OBJECTIVE>
-
-<HINT>
-Ensure your evaluation is accurate.
-Use the following information to assist your analysis:
+Use the following preliminary analysis to assist your evaluation:
 
 {prediction_response}
-</HINT>
-""".strip()
+"""

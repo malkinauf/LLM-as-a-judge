@@ -3,7 +3,7 @@ from evaluation_pipeline.prompts.registry import CRITERIA
 from evaluation_pipeline.prompts.templates import (
     BASELINE_TEMPLATE,
     SECOND_LEVEL_TEMPLATE,
-    PREDICTION_TEMPLATE,
+    DYNAMIC_PREDICTION_TEMPLATE,
     DYNAMIC_TEMPLATE,
 )
 
@@ -96,7 +96,10 @@ def build_second_level_prompt(
         negative_label=criterion_config["labels"]["negative"],
     )
 
+
 def build_prediction_prompt(
+    criterion: str,
+    prediction_variant: str,
     question: str,
     model_response: str,
 ) -> str:
@@ -105,14 +108,41 @@ def build_prediction_prompt(
     the dynamic prompting method.
 
     Args:
-        question: Original user question.
-        model_response: Model response being evaluated.
+        criterion: Evaluation criterion, e.g. "truthfulness" or "safety".
+        prediction_variant: Prediction instruction variant defined
+            for the selected criterion.
+        question: User question to evaluate.
+        model_response: Model response to evaluate.
 
     Returns:
         Complete prediction prompt.
+
+    Raises:
+        ValueError: If the criterion or prediction variant is unsupported.
     """
 
-    return PREDICTION_TEMPLATE.format(
+    if criterion not in CRITERIA:
+        raise ValueError(
+            f"Unknown criterion: '{criterion}'. "
+            f"Expected one of: {list(CRITERIA)}"
+        )
+
+    criterion_config = CRITERIA[criterion]
+
+    dynamic_config = criterion_config.get("dynamic", {})
+    instructions = dynamic_config.get(
+        "prediction_instructions",
+        {},
+    )
+
+    if prediction_variant not in instructions:
+        raise ValueError(
+            f"Unknown prediction variant: '{prediction_variant}'. "
+            f"Expected one of: {list(instructions)}"
+        )
+
+    return DYNAMIC_PREDICTION_TEMPLATE.format(
+        prediction_instruction=instructions[prediction_variant],
         question=question,
         model_response=model_response,
     )

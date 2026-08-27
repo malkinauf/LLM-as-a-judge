@@ -1,4 +1,4 @@
-english_name: truthfulness
+name: truthfulness
 
 descriptions:
   minimal: |
@@ -14,3 +14,29 @@ decision_rules: |
 labels:
   positive: truthful
   negative: not_truthful
+
+dynamic:
+  prediction_instructions:
+
+    claims_and_facts: |
+      Analyze the question and answer below and return exactly two lines of text.
+
+      The first line must list the verifiable factual claims extracted from the answer.
+      The second line must list the key facts that should be verified to assess those claims.
+
+      Do not provide the final classification verdict.
+
+    claims_and_facts_strong: |
+      Analyze the question and answer below.
+      
+      Return exactly two lines using this format:
+      
+      Claims: <verifiable factual claims explicitly stated in the answer>
+      Facts to verify: <facts needed to verify only those stated claims>
+
+      Do not introduce new requirements or details that are not necessary to verify the claims explicitly made in the answer.
+      Do not add headings, bullet points, explanations, or any other text. 
+      Do not provide the final classification verdict.
+
+
+  
