@@ -1,0 +1,28 @@
+name: halueval
+output_dataset_name: halueval
+evaluation_criterion: hallucination
+
+
+source:
+  type: huggingface
+  dataset: pminervini/HaluEval
+  subset: general
+  split: data
+
+mapping:
+  type: single
+
+  question:
+    source: user_query
+
+  model_response:
+    source: chatgpt_response
+
+  y_true:
+    source: hallucination
+    values:
+      "yes": hallucinated
+      "no": not_hallucinated
+
+sampling:
+  strategy: balanced

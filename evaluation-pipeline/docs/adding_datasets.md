@@ -1,3 +1,4 @@
+
 # Adding a Dataset
 
 Datasets are integrated through YAML configuration files and converted to a common evaluation format:
@@ -15,8 +16,19 @@ Dataset-specific logic should be described in the configuration whenever possibl
 The pipeline supports three mapping strategies:
 
 - `single` — one source row produces one evaluation sample
-- `multi` — one source row produces multiple evaluation samples
+- `multi` — one source row produces multiple explicitly configured evaluation samples
 - `aligned` — multiple responses in a source row are aligned with corresponding labels
+
+## Before You Start
+
+Inspect the source dataset and verify that it provides:
+
+- [ ] a question or input
+- [ ] one or more model responses
+- [ ] a reliable ground-truth label
+- [ ] labels that can be mapped to the intended evaluation criterion
+
+Then choose the mapping strategy that matches the structure of the source dataset.
 
 ## 1. Create a Configuration
 
@@ -142,7 +154,7 @@ mapping:
 
 ### Multi Mapping
 
-Use `multi` when one source row should produce multiple evaluation samples:
+Use `multi` when one source row should produce multiple explicitly configured evaluation samples:
 
 ```yaml
 mapping:
@@ -191,10 +203,10 @@ mapping:
     source: scores
     values:
       true: correct
-      false: not_correct
+      false: incorrect
 ```
 
-Responses matching the configured prefix are aligned with the corresponding entries in the label list.
+Responses matching the configured prefix are aligned with the corresponding entries in the label list by position.
 
 For example:
 
@@ -204,7 +216,7 @@ response_2 ↔ scores[1]
 response_3 ↔ scores[2]
 ```
 
-Each response-label pair becomes a separate evaluation sample.
+Each response-label pair becomes a separate evaluation sample. The mapping step does not select which samples are kept; that is handled by the sampling strategy.
 
 ## 4. Optional Filtering
 
@@ -224,6 +236,8 @@ Only rows with identical values in all specified fields are used.
 
 ## 5. Sampling Strategies
 
+Sampling is applied after mapping and determines which mapped candidates are included in the final prepared dataset.
+
 ### Random Sampling
 
 For standard random sampling:
@@ -233,9 +247,11 @@ sampling:
   strategy: random
 ```
 
+Samples are selected randomly from all mapped candidates.
+
 ### Balanced Sampling
 
-For an equal number of samples from two labels:
+Use balanced sampling for an equal number of samples from two labels:
 
 ```yaml
 sampling:
@@ -243,6 +259,8 @@ sampling:
 ```
 
 For example, `n_samples=100` produces 50 randomly selected samples from each label.
+
+Balanced sampling requires exactly two labels, an even `n_samples`, and enough samples from each label.
 
 ### Paired Sampling
 
@@ -253,18 +271,19 @@ sampling:
   strategy: paired
 ```
 
-Each selected question contributes one randomly selected sample from each label.
+Candidates are grouped by the value of the `question` field.
+Each selected group contributes one randomly selected sample from each label.
 
 For example, with:
 
 ```text
 correct
-not_correct
+incorrect
 ```
 
-each selected question contributes one `correct` and one `not_correct` response.
+each selected question contributes one `correct` and one `incorrect` response.
 
-`n_samples` must therefore be even.
+`n_samples` must therefore be even. There must also be enough questions containing both labels.
 
 ## 6. Supported Sources
 
@@ -310,6 +329,18 @@ The pipeline automatically:
 5. adds `id` and `dataset`,
 6. validates the canonical dataset structure.
 
+The resulting dataset follows the canonical format:
+
+```json
+{
+  "id": "my_dataset_0",
+  "dataset": "my_dataset",
+  "question": "...",
+  "model_response": "...",
+  "y_true": "..."
+}
+```
+
 ## Adding New Behavior
 
 Prefer expressing dataset-specific structure through the YAML configuration.
@@ -322,6 +353,14 @@ multi    → one row, multiple explicitly configured samples
 aligned  → multiple responses aligned with multiple labels
 ```
 
+Also check whether the required sample selection can be expressed using one of the existing sampling strategies:
+
+```text
+random    → random subset of mapped candidates
+balanced  → equal number of samples from two labels
+paired    → one sample per label for the same question
+```
+
 Avoid dataset-specific conditions such as:
 
 ```python
@@ -330,3 +369,6 @@ if name == "my_dataset":
 ```
 
 Extend the generic mapping or sampling strategies only when the required behavior cannot be expressed by the existing configuration.
+
+
+![Dataset Metadata](images/dataset_adding.png)
