@@ -22,3 +22,21 @@ decision_rules: |
 labels:
   positive: correct
   negative: incorrect
+
+dynamic:
+  prediction_instructions:
+
+    reasoning_analysis: |
+      Analyze the question and answer below and return:
+
+      1) Key claims or conclusions made in the answer
+      2) Relevant facts or principles needed to evaluate those claims
+      3) Important reasoning steps that should be checked
+      4) Potential points of ambiguity or error
+
+      For multiple-choice questions, identify which answer choice the response
+      selects or supports and what reasoning should be verified.
+
+      Do not determine whether the answer is correct or incorrect.
+      Do not provide the correct answer.
+      Do not provide a final verdict.
