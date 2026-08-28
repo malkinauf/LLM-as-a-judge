@@ -12,6 +12,34 @@ The pipeline currently supports three evaluation methods:
 -   **Dynamic** --- generates preliminary evaluation-relevant
     information before performing the final judgment.
 
+<a id="top"></a>
+
+## Table of Contents
+
+- [1. Pipeline Overview](#section-1)
+- [2. Experiment Configuration](#section-2)
+- [3. Evaluation Methods](#section-3)
+  - [3.1 Baseline](#section-3-1)
+  - [3.2 Second-Level](#section-3-2)
+  - [3.3 Dynamic](#section-3-3)
+- [4. Prompt System](#section-4)
+- [5. Evaluation Criteria](#section-5)
+- [6. Dataset and Criterion Separation](#section-6)
+- [7. Prompt Templates](#section-7)
+- [8. Dynamic Prediction Variants](#section-8)
+- [9. Prompt Builder](#section-9)
+- [10. Running an Experiment](#section-10)
+- [11. Results](#section-11)
+- [12. Metrics](#section-12)
+- [13. Weights & Biases Logging](#section-13)
+- [14. Adding a New Criterion](#section-14)
+- [15. Adding a Dynamic Prediction Variant](#section-15)
+- [16. When Is a Code Change Required?](#section-16)
+- [17. Design Goal](#section-17)
+
+---
+
+<a id="section-1"></a>
 # 1. Pipeline Overview
 
 ``` text
@@ -29,6 +57,12 @@ Predictions & Metrics
 A prepared dataset provides `question`, `model_response`, and
 `true_label`.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-2"></a>
 # 2. Experiment Configuration
 
 Experiments are configured in `run_experiments.ipynb`.
@@ -40,6 +74,7 @@ RUN_DEBUG_EXAMPLE = True
 JUDGE_MODEL = "llama3:latest"
 JUDGE_METHOD = "dynamic"
 
+BASELINE_CRITERION = "truthfulness"
 BASELINE_DETAIL = "original"
 DYNAMIC_PREDICTION_VARIANT = "claims_and_facts_strong"
 
@@ -52,26 +87,25 @@ WANDB_PROJECT_NAME = "llm-as-a-judge"
 
 Main experimental parameters:
 
-  -----------------------------------------------------------------------
-  Parameter                           Purpose
-  ----------------------------------- -----------------------------------
-  `JUDGE_MODEL`                       LLM used as the judge
+| Parameter | Purpose |
+| --- | --- |
+| `JUDGE_MODEL` | LLM used as the judge |
+| `JUDGE_METHOD` | Evaluation method: `baseline`, `second_level`, or `dynamic` |
+| `BASELINE_CRITERION` | Evaluation criterion: `truthfulness`, `safety`, `correctness`, or `harmbench` |
+| `BASELINE_DETAIL` | Criterion description variant |
+| `DYNAMIC_PREDICTION_VARIANT` | Preliminary-analysis variant used by the Dynamic method |
+| `DATASET_NAME` | Dataset used for the experiment |
+| `DATASET_VARIANT` | Prepared dataset variant |
 
-  `JUDGE_METHOD`                      `baseline`, `second_level`, or
-                                      `dynamic`
 
-  `BASELINE_DETAIL`                   Criterion description variant
+[↑ Back to Table of Contents](#top)
 
-  `DYNAMIC_PREDICTION_VARIANT`        Preliminary-analysis variant for
-                                      Dynamic
+---
 
-  `DATASET_NAME`                      Dataset used for the experiment
-
-  `DATASET_VARIANT`                   Prepared dataset variant
-  -----------------------------------------------------------------------
-
+<a id="section-3"></a>
 # 3. Evaluation Methods
 
+<a id="section-3-1"></a>
 ## 3.1 Baseline
 
 ``` text
@@ -84,6 +118,7 @@ Question + Model Response
  Verdict + Explanation
 ```
 
+<a id="section-3-2"></a>
 ## 3.2 Second-Level
 
 ``` text
@@ -100,6 +135,7 @@ First-Level Prompt + Response
 
 If necessary, the second-level judge can provide a corrected verdict.
 
+<a id="section-3-3"></a>
 ## 3.3 Dynamic
 
 ``` text
@@ -117,6 +153,12 @@ Question + Model Response
 The preliminary analysis does not produce the final classification. It
 provides evaluation-relevant information to the final judge.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-4"></a>
 # 4. Prompt System
 
 ``` text
@@ -140,6 +182,12 @@ Responsibilities:
 -   `loader.py` --- loading criterion configurations
 -   `registry.py` --- registration of available criteria
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-5"></a>
 # 5. Evaluation Criteria
 
 Each criterion has its own YAML configuration.
@@ -174,6 +222,12 @@ Currently supported criteria:
 -   `correctness`
 -   `harmbench`
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-6"></a>
 # 6. Dataset and Criterion Separation
 
 A dataset provides:
@@ -210,6 +264,12 @@ model_response ───────────────→ {model_response}
 This separation allows the same prompt infrastructure to be reused
 across multiple datasets.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-7"></a>
 # 7. Prompt Templates
 
 The reusable prompt components in `templates.py` are:
@@ -270,6 +330,12 @@ DYNAMIC PROMPT
 The additional analysis is therefore inserted before the final
 `### Your Output` section.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-8"></a>
 # 8. Dynamic Prediction Variants
 
 Prediction instructions are configured in the criterion YAML.
@@ -300,6 +366,12 @@ DYNAMIC_PREDICTION_VARIANT = "claims_and_facts_strong"
 Only the preliminary-analysis instruction changes; the final dynamic
 prompt structure remains unchanged.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-9"></a>
 # 9. Prompt Builder
 
 `builder.py` contains:
@@ -332,6 +404,12 @@ first_level_prompt + first_level_response
 build_second_level_prompt()
 ```
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-10"></a>
 # 10. Running an Experiment
 
 ``` python
@@ -349,6 +427,12 @@ results = run_judge_experiment(
 
 The runner selects the evaluation path based on `JUDGE_METHOD`.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-11"></a>
 # 11. Results
 
 Common sample-level outputs include:
@@ -379,6 +463,12 @@ prediction_prompt
 prediction_raw_output
 ```
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-12"></a>
 # 12. Metrics
 
 Common metrics include:
@@ -415,6 +505,12 @@ second_level_coverage
 Dynamic experiments additionally track prediction availability and
 coverage.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-13"></a>
 # 13. Weights & Biases Logging
 
 Experiment configuration, scalar metrics, sample-level results, summary
@@ -432,6 +528,12 @@ baseline_criterion_detail
 dynamic_prediction_variant
 ```
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-14"></a>
 # 14. Adding a New Criterion
 
 1.  Create a YAML file, e.g. `criteria/helpfulness.yaml`.
@@ -462,6 +564,12 @@ labels:
 
 No new baseline template is required.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-15"></a>
 # 15. Adding a Dynamic Prediction Variant
 
 Add another instruction to the criterion YAML:
@@ -484,6 +592,12 @@ DYNAMIC_PREDICTION_VARIANT = "new_variant"
 
 No change to the final dynamic prompt structure is required.
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-16"></a>
 # 16. When Is a Code Change Required?
 
 ``` text
@@ -518,6 +632,12 @@ Add evaluation method
     → new template + builder/runner logic
 ```
 
+
+[↑ Back to Table of Contents](#top)
+
+---
+
+<a id="section-17"></a>
 # 17. Design Goal
 
 The main design goal is to provide a reusable prompt and evaluation
@@ -555,3 +675,5 @@ Metrics
 
 This makes it possible to vary experimental parameters while keeping the
 underlying evaluation pipeline consistent.
+
+[↑ Back to Table of Contents](#top)
