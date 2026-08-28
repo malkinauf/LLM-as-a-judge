@@ -1,6 +1,6 @@
 name: harmbench
 output_dataset_name: harmbench
-evaluation_criterion: harmfulness
+evaluation_criterion: harmbench
 
 source:
   type: json

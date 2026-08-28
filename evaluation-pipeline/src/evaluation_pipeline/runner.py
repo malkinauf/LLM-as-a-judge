@@ -119,6 +119,7 @@ def run_first_level_judge(
     result: dict[str, Any],
     baseline_criterion: str,
     baseline_criterion_detail: str,
+    dynamic_prediction_variant: str,
 ) -> None:
     """
     Run the first-level evaluation for one dataset example.
@@ -128,8 +129,9 @@ def run_first_level_judge(
 
     For the dynamic method, the model is called twice. The first
     call generates a preliminary analysis of the question-response
-    pair. The second call evaluates the response using the standard
-    baseline task augmented with the preliminary analysis as a hint.
+    pair using the selected prediction instruction variant. The
+    second call evaluates the response using the same baseline
+    prompt body augmented with the preliminary analysis as a hint.
 
     Args:
         example: Dataset example being evaluated.
@@ -139,13 +141,16 @@ def run_first_level_judge(
         baseline_criterion: Criterion used by the first-level judge.
         baseline_criterion_detail: Detail level of the first-level
             criterion.
+        dynamic_prediction_variant: Prediction instruction variant
+            used by the dynamic method.
     """
 
     if method == "dynamic":
         # Step 1:
-        # Generate a preliminary analysis of the question-response pair
-        # that will be used as a hint for the final evaluation.
+        # Generate the preliminary analysis.
         prediction_prompt = build_prediction_prompt(
+            criterion=baseline_criterion,
+            prediction_variant=dynamic_prediction_variant,
             question=example["question"],
             model_response=example["model_response"],
         )
@@ -156,18 +161,13 @@ def run_first_level_judge(
         )
 
         # Step 2:
-        # Build exactly the same evaluation task used by baseline.
-        baseline_prompt = build_baseline_prompt(
+        # Build the final dynamic judge prompt from the shared
+        # baseline body + dynamic hint + output section.
+        first_prompt = build_dynamic_prompt(
             criterion=baseline_criterion,
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
-        )
-
-        # Step 3:
-        # Add the preliminary prediction as a hint.
-        first_prompt = build_dynamic_prompt(
-            baseline_prompt=baseline_prompt,
             prediction_response=prediction_response,
         )
 
@@ -175,6 +175,7 @@ def run_first_level_judge(
         result["prediction_raw_output"] = prediction_response
 
     else:
+        # Baseline and second-level use the normal baseline prompt.
         first_prompt = build_baseline_prompt(
             criterion=baseline_criterion,
             criterion_detail=baseline_criterion_detail,
@@ -182,18 +183,22 @@ def run_first_level_judge(
             model_response=example["model_response"],
         )
 
+    # Run the first-level classification.
     first_judge_result = judge_response(
         prompt=first_prompt,
         model=model,
     )
 
     result["first_prompt"] = first_prompt
+
     result["first_raw_output"] = first_judge_result.get(
         "raw_output"
     )
+
     result["first_level_label"] = first_judge_result.get(
         "predicted_label"
     )
+
     result["first_level_explanation"] = first_judge_result.get(
         "explanation"
     )
@@ -304,6 +309,7 @@ def run_judge_experiment(
     baseline_criterion: str,
     baseline_criterion_detail: str,
     dataset_id: str,
+    dynamic_prediction_variant: str,
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a prepared dataset.
@@ -332,6 +338,8 @@ def run_judge_experiment(
         baseline_criterion_detail: Detail level of the first-level
             criterion.
         dataset_id: ID of the dataset to use.
+        dynamic_prediction_variant: Prediction instruction variant
+            used by the dynamic method.
 
     Returns:
         List of result dictionaries, one for each evaluated example.
@@ -375,6 +383,9 @@ def run_judge_experiment(
                 baseline_criterion=baseline_criterion,
                 baseline_criterion_detail=(
                     baseline_criterion_detail
+                ),
+                dynamic_prediction_variant=(
+                    dynamic_prediction_variant
                 ),
             )
 

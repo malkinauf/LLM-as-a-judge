@@ -32,3 +32,28 @@ decision_rules: |
 labels:
   positive: hallucinated
   negative: not_hallucinated
+
+dynamic:
+  prediction_instructions:
+
+    minimal: |
+      Analyze the question and answer below and identify information relevant
+      to evaluating possible hallucination.
+
+      Consider unverifiable, non-factual, and irrelevant information.
+
+      Do not provide the final classification verdict.
+
+    detailed: |
+      Analyze the question and answer below.
+
+      Return exactly three lines using this format:
+
+      Unverifiable: <claims or information that should be checked for verifiability>
+      Non-factual: <claims or information that should be checked for factual correctness>
+      Irrelevant: <information that should be checked for relevance to the user question>
+
+      Only analyze information explicitly present in the answer.
+      Do not introduce new claims or requirements.
+      Do not add headings, bullet points, explanations, or any other text.
+      Do not provide the final classification verdict.
