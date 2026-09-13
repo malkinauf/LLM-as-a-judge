@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 VALID_METHODS = (
     "baseline",
     "second_level",
+    "dynamic",   # neu
 )
 
 VALID_JUDGE_LABELS = {
@@ -46,10 +47,18 @@ def run_judge_experiment(
     results: list[dict[str, Any]] = []
 
     if not run_id:
-        logger.info(
-            "Experiment skipped because run_id is empty."
-        )
+        logger.info("Experiment skipped because run_id is empty.")
         return results
+
+    # ------------------------------------------------------------------
+    # Dynamic method: currently not implemented – you need to supply your
+    # own logic for generating dynamic prompts.
+    # ------------------------------------------------------------------
+    if method == "dynamic":
+        raise NotImplementedError(
+            "Dynamic prompt method is not implemented yet. "
+            "Please implement your dynamic prompt generation logic in runner.py."
+        )
 
     for example in tqdm(
         dataset,
@@ -70,8 +79,7 @@ def run_judge_experiment(
 
         except Exception as e:
             logger.exception(
-                f"First-level judge failed "
-                f"for example {example.get('id')}: {e}"
+                f"First-level judge failed for example {example.get('id')}: {e}"
             )
 
             results.append({
@@ -151,8 +159,7 @@ def run_judge_experiment(
 
             except Exception as e:
                 logger.exception(
-                    f"Second-level judge failed "
-                    f"for example {example.get('id')}: {e}"
+                    f"Second-level judge failed for example {example.get('id')}: {e}"
                 )
 
                 result["predicted_label"] = "runtime_error"

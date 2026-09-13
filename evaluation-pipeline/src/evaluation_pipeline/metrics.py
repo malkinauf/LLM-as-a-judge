@@ -14,7 +14,6 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report,
 )
-from scipy.stats import binomtest
 from scipy.stats import chi2
 
 
@@ -30,11 +29,7 @@ def _valid_prediction_rows(
     results: List[Dict[str, Any]],
     labels: List[str],
 ) -> List[Dict[str, Any]]:
-    return [
-        r
-        for r in results
-        if r.get("predicted_label") in labels
-    ]
+    return [r for r in results if r.get("predicted_label") in labels]
 
 
 def _classification_arrays(
@@ -146,7 +141,6 @@ def compute_output_quality(results: List[Dict[str, Any]], task_labels: List[str]
 
 
 def compute_second_level_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
-    # Operates on list of results (dicts) and mirrors notebook logic.
     df = results
     n_total = len(df)
 
@@ -199,8 +193,98 @@ def compute_second_level_metrics(results: List[Dict[str, Any]]) -> Dict[str, Any
     }
 
 
-def compute_confusion_matrices_by_group(results: List[Dict[str, Any]], labels: List[str], group_key: str) -> Dict[str, Any]:
-    # group_key can be 'method' or any key present in result dict (e.g., provided prompt_version)
+def compute_difference_metrics(
+    baseline_metrics: Dict[str, Any],
+    improved_metrics: Dict[str, Any],
+) -> Dict[str, float]:
+    """Compute metric differences as improved - baseline.
+
+    Positive values indicate improvement, zero means no change, and negative
+    values indicate degradation.
+    """
+    metric_names = ("accuracy", "precision", "recall", "f1")
+
+    differences = {}
+    for name in metric_names:
+        if name in baseline_metrics and name in improved_metrics:
+            differences[f"{name}_difference"] = float(
+                improved_metrics[name] - baseline_metrics[name]
+            )
+
+    return differences
+
+
+def compute_dynamic_prompt_metrics(
+    baseline_results: List[Dict[str, Any]],
+    dynamic_results: List[Dict[str, Any]],
+    labels: List[str],
+) -> Dict[str, Any]:
+    """Compute metrics comparing dynamic prompts against baseline.
+
+    Returns:
+        - difference metrics (dynamic - baseline) for accuracy, precision, recall, f1
+        - agreement rate: fraction of samples where both methods agree
+        - improvement rate: fraction of samples where dynamic is correct and baseline wrong
+        - degradation rate: fraction where baseline is correct and dynamic wrong
+    """
+    if len(baseline_results) != len(dynamic_results):
+        raise ValueError("Both result lists must have the same length and be aligned.")
+
+    baseline_metrics = compute_classification_metrics(baseline_results, labels)
+    dynamic_metrics = compute_classification_metrics(dynamic_results, labels)
+
+    diffs = compute_difference_metrics(baseline_metrics, dynamic_metrics)
+
+    # Agreement, improvement, degradation per sample
+    n = len(baseline_results)
+    agree = 0
+    improve = 0
+    degrade = 0
+    for br, dr in zip(baseline_results, dynamic_results):
+        b_label = br.get("predicted_label")
+        d_label = dr.get("predicted_label")
+        true = br.get("true_label")
+        if b_label not in labels or d_label not in labels:
+            continue
+        b_correct = (b_label == true)
+        d_correct = (d_label == true)
+        if b_correct == d_correct:
+            agree += 1
+        elif d_correct and not b_correct:
+            improve += 1
+        elif b_correct and not d_correct:
+            degrade += 1
+
+    total_valid = n  # or count of valid pairs, but we use n for simplicity
+    return {
+        **diffs,
+        "agreement_rate": agree / total_valid if total_valid else 0,
+        "improvement_rate": improve / total_valid if total_valid else 0,
+        "degradation_rate": degrade / total_valid if total_valid else 0,
+        "agreement_count": agree,
+        "improvement_count": improve,
+        "degradation_count": degrade,
+    }
+
+
+def compute_flash_metric(results: List[Dict[str, Any]]) -> Dict[str, float]:
+    """Compute a simple 'flash' metric: average length of model_response.
+
+    This can be used as a proxy for response speed / verbosity.
+    """
+    lengths = [len(r.get("model_response", "")) for r in results]
+    word_counts = [len(r.get("model_response", "").split()) for r in results]
+    return {
+        "avg_response_length_chars": float(np.mean(lengths)) if lengths else 0,
+        "avg_response_length_words": float(np.mean(word_counts)) if word_counts else 0,
+        "min_response_length": float(np.min(lengths)) if lengths else 0,
+        "max_response_length": float(np.max(lengths)) if lengths else 0,
+    }
+
+
+def compute_confusion_matrices_by_group(
+    results: List[Dict[str, Any]], labels: List[str], group_key: str
+) -> Dict[str, Any]:
     groups = {}
     for r in results:
         k = r.get(group_key, "unknown")
@@ -222,13 +306,18 @@ def compute_confusion_matrices_by_group(results: List[Dict[str, Any]], labels: L
 
 
 def sample_error_cases(results: List[Dict[str, Any]], n: int = 10, seed: int = 42) -> List[Dict[str, Any]]:
-    errors = [r for r in results if r.get("predicted_label") == "parsing_error" or (r.get("predicted_label") not in {r.get("true_label"), "parsing_error"})]
+    errors = [
+        r for r in results
+        if r.get("predicted_label") == "parsing_error"
+        or (r.get("predicted_label") not in {r.get("true_label"), "parsing_error"})
+    ]
     random.Random(seed).shuffle(errors)
     return errors[:n]
 
 
-def stratified_metrics_by_length(results: List[Dict[str, Any]], labels: List[str], bins: Tuple[int, int] = (50, 150)) -> Dict[str, Any]:
-    # bins: (short_max, medium_max). short: <=short_max, medium: <=medium_max, long: > medium_max
+def stratified_metrics_by_length(
+    results: List[Dict[str, Any]], labels: List[str], bins: Tuple[int, int] = (50, 150)
+) -> Dict[str, Any]:
     short_max, medium_max = bins
     buckets = {"short": [], "medium": [], "long": []}
     for r in results:
@@ -252,227 +341,7 @@ def save_json(path: str, data: Any) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def mcnemar_test(results_a: List[Dict[str, Any]], results_b: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Compute McNemar's test for paired binary outcomes.
-
-    Expects `results_a` and `results_b` to be lists of dicts aligned per-sample
-    and containing `true_label` and `predicted_label`.
-
-    Returns contingency counts and two-sided exact p-value.
-    """
-    if len(results_a) != len(results_b):
-        raise ValueError("results lists must have the same length")
-
-    b = 0  # a correct, b wrong
-    c = 0  # a wrong, b correct
-
-    for ra, rb in zip(results_a, results_b):
-        true = ra.get("true_label")
-        pa = ra.get("predicted_label")
-        pb = rb.get("predicted_label")
-
-        a_correct = (pa == true)
-        b_correct = (pb == true)
-
-        if a_correct and (not b_correct):
-            b += 1
-        elif (not a_correct) and b_correct:
-            c += 1
-
-    n = b + c
-    if n == 0:
-        pvalue = 1.0
-    else:
-        # exact binomial test on the smaller of b,c with p=0.5 (two-sided)
-        k = min(b, c)
-        pvalue = binomtest(k, n, p=0.5, alternative='two-sided').pvalue
-
-    return {"b": b, "c": c, "n": n, "p_value": float(pvalue)}
-
-
-def bootstrap_paired_diff(
-    results_a: List[Dict[str, Any]],
-    results_b: List[Dict[str, Any]],
-    labels: List[str],
-    metric: str = "accuracy",
-    n_bootstrap: int = 1000,
-    seed: int = 42,
-) -> Dict[str, Any]:
-    """Compute paired bootstrap CI for difference (a - b) of a given metric.
-
-    Supported metrics: 'accuracy', 'f1'. Accuracy uses all aligned samples,
-    while F1 is computed on samples where both predictions are valid labels.
-    """
-    rng = random.Random(seed)
-
-    if len(results_a) != len(results_b):
-        raise ValueError("results lists must have the same length")
-
-    n = len(results_a)
-    y_true = [r.get("true_label") for r in results_a]
-    valid_mask = [
-        (ra.get("predicted_label") in labels) and (rb.get("predicted_label") in labels)
-        for ra, rb in zip(results_a, results_b)
-    ]
-    paired_valid_samples = sum(valid_mask)
-
-    diffs = []
-    for _ in range(n_bootstrap):
-        idx = [rng.randrange(n) for _ in range(n)]
-        y_true_bs = [y_true[i] for i in idx]
-
-        pa = [results_a[i].get("predicted_label") for i in idx]
-        pb = [results_b[i].get("predicted_label") for i in idx]
-
-        if metric == "accuracy":
-            ma = accuracy_score(y_true_bs, pa)
-            mb = accuracy_score(y_true_bs, pb)
-        elif metric == "f1":
-            valid_idx = [i for i in idx if valid_mask[i]]
-            if not valid_idx:
-                diffs.append(0.0)
-                continue
-
-            y_true_valid = [y_true[i] for i in valid_idx]
-            pa_valid = [results_a[i].get("predicted_label") for i in valid_idx]
-            pb_valid = [results_b[i].get("predicted_label") for i in valid_idx]
-
-            ma = f1_score(y_true_valid, pa_valid, zero_division=0, pos_label=labels[0])
-            mb = f1_score(y_true_valid, pb_valid, zero_division=0, pos_label=labels[0])
-        else:
-            raise ValueError(f"Unsupported metric: {metric}")
-
-        diffs.append(ma - mb)
-
-    diffs_arr = np.array(diffs)
-    lower = float(np.percentile(diffs_arr, 2.5))
-    upper = float(np.percentile(diffs_arr, 97.5))
-    mean = float(diffs_arr.mean())
-
-    return {
-        "metric": metric,
-        "mean_diff": mean,
-        "ci_lower": lower,
-        "ci_upper": upper,
-        "n_bootstrap": n_bootstrap,
-        "paired_valid_samples": paired_valid_samples,
-        "paired_valid_coverage": paired_valid_samples / n if n else 0,
-    }
-
-
-
-def brier_score(results: List[Dict[str, Any]], positive_label: str = "truthful", prob_key: str = "confidence") -> float | None:
-    """Compute Brier score for binary label when probabilities are available.
-
-    results: list of result dicts with keys 'true_label' and `prob_key` giving probability for positive_label.
-    Returns None if probabilities not available.
-    """
-    probs = []
-    ys = []
-    for r in results:
-        p = r.get(prob_key)
-        if p is None:
-            return None
-        probs.append(float(p))
-        ys.append(1 if r.get("true_label") == positive_label else 0)
-
-    probs = np.array(probs)
-    ys = np.array(ys)
-    return float(np.mean((probs - ys) ** 2))
-
-
-def expected_calibration_error(results: List[Dict[str, Any]], n_bins: int = 10, positive_label: str = "truthful", prob_key: str = "confidence") -> float | None:
-    """Compute ECE with equal-width bins. Returns None if probs missing."""
-    probs = []
-    ys = []
-    for r in results:
-        p = r.get(prob_key)
-        if p is None:
-            return None
-        probs.append(float(p))
-        ys.append(1 if r.get("true_label") == positive_label else 0)
-
-    probs = np.array(probs)
-    ys = np.array(ys)
-    bin_edges = np.linspace(0.0, 1.0, n_bins + 1)
-    ece = 0.0
-    for i in range(n_bins):
-        lo, hi = bin_edges[i], bin_edges[i + 1]
-        mask = (probs >= lo) & (probs < hi) if i < n_bins - 1 else (probs >= lo) & (probs <= hi)
-        if not np.any(mask):
-            continue
-        avg_conf = probs[mask].mean()
-        avg_acc = ys[mask].mean()
-        ece += (mask.sum() / len(probs)) * abs(avg_conf - avg_acc)
-
-    return float(ece)
-
-
-def confidence_coverage_curve(results: List[Dict[str, Any]], prob_key: str = "confidence", positive_label: str = "truthful") -> List[Tuple[float, float]]:
-    """Return list of (threshold, coverage) where coverage is fraction of samples with prob>=threshold that are correct.
-    Requires `prob_key` present, otherwise returns empty list.
-    """
-    probs = []
-    correct = []
-    for r in results:
-        p = r.get(prob_key)
-        if p is None:
-            return []
-        probs.append(float(p))
-        correct.append(1 if r.get("predicted_label") == r.get("true_label") else 0)
-
-    probs = np.array(probs)
-    correct = np.array(correct)
-    thresholds = np.linspace(0.0, 1.0, 21)
-    out = []
-    for t in thresholds:
-        mask = probs >= t
-        if mask.sum() == 0:
-            out.append((t, None))
-            continue
-        out.append((t, float(correct[mask].mean())))
-    return out
-
-
-def _accuracy(results: List[Dict[str, Any]], labels: List[str]) -> float:
-    m = compute_classification_metrics(results, labels)
-    if "error" in m:
-        return 0.0
-    return float(m.get("accuracy", 0.0))
-
-
-def bootstrap_paired_ci(results_a: List[Dict[str, Any]], results_b: List[Dict[str, Any]], labels: List[str], metric_fn=_accuracy, n_bootstrap: int = 1000, seed: int = 42) -> Dict[str, Any]:
-    """Paired bootstrap CI for metric difference (a - b). Assumes aligned order and equal length."""
-    if len(results_a) != len(results_b):
-        raise ValueError("results_a and results_b must have same length for paired bootstrap")
-
-    rng = random.Random(seed)
-    n = len(results_a)
-    diffs = []
-    for _ in range(n_bootstrap):
-        idxs = [rng.randrange(n) for _ in range(n)]
-        sample_a = [results_a[i] for i in idxs]
-        sample_b = [results_b[i] for i in idxs]
-        va = metric_fn(sample_a, labels)
-        vb = metric_fn(sample_b, labels)
-        diffs.append(va - vb)
-
-    diffs = np.array(diffs)
-    lower = float(np.percentile(diffs, 2.5))
-    upper = float(np.percentile(diffs, 97.5))
-    mean = float(diffs.mean())
-    return {"mean_diff": mean, "ci_lower": lower, "ci_upper": upper}
-
-
 def mcnemar_test(results_a: List[Dict[str, Any]], results_b: List[Dict[str, Any]], positive_labels: List[str]) -> Dict[str, Any]:
-    """Compute McNemar's test for paired binary predictions between two result lists.
-    Returns test statistic and p-value.
-    Only considers samples where both predictions are in positive_labels set.
-    """
-    if len(results_a) != len(results_b):
-        raise ValueError("results must be same length")
-
-    b = 0  # a correct, b wrong? We'll count discordant pairs: n01 and n10
     n01 = 0
     n10 = 0
     for ra, rb in zip(results_a, results_b):
@@ -497,8 +366,9 @@ def mcnemar_test(results_a: List[Dict[str, Any]], results_b: List[Dict[str, Any]
     return {"n01": n01, "n10": n10, "stat": float(stat), "p_value": float(p)}
 
 
-def compare_methods(results_a: List[Dict[str, Any]], results_b: List[Dict[str, Any]], labels: List[str]) -> Dict[str, Any]:
-    """Compare two methods on the same ordered dataset (paired). Returns summary table and stats."""
+def compare_methods(
+    results_a: List[Dict[str, Any]], results_b: List[Dict[str, Any]], labels: List[str]
+) -> Dict[str, Any]:
     if len(results_a) != len(results_b):
         raise ValueError("results must be same length and aligned")
 
@@ -515,4 +385,81 @@ def compare_methods(results_a: List[Dict[str, Any]], results_b: List[Dict[str, A
         "accuracy_diff_bootstrap": boot,
         "f1_diff_bootstrap": boot_f1,
         "mcnemar": m_test,
+    }
+
+
+def bootstrap_paired_diff(
+    baseline_results: List[Dict[str, Any]],
+    improved_results: List[Dict[str, Any]],
+    labels: List[str],
+    metric: str = "accuracy",
+    n_bootstrap: int = 1000,
+    seed: int = 42,
+) -> Dict[str, Any]:
+    if len(baseline_results) != len(improved_results):
+        raise ValueError("baseline_results and improved_results must have the same length")
+
+    if metric not in {"accuracy", "f1"}:
+        raise ValueError(f"Unsupported metric: {metric}")
+
+    rng = random.Random(seed)
+    n = len(baseline_results)
+
+    if n == 0:
+        return {
+            "metric": metric,
+            "mean_diff": 0.0,
+            "ci_lower": 0.0,
+            "ci_upper": 0.0,
+            "n_bootstrap": n_bootstrap,
+            "paired_valid_samples": 0,
+            "paired_valid_coverage": 0.0,
+        }
+
+    y_true = [r.get("true_label") for r in baseline_results]
+
+    valid_mask = [
+        (
+            baseline_results[i].get("predicted_label") in labels
+            and improved_results[i].get("predicted_label") in labels
+        )
+        for i in range(n)
+    ]
+    paired_valid_samples = sum(valid_mask)
+
+    diffs = []
+
+    for _ in range(n_bootstrap):
+        idx = [rng.randrange(n) for _ in range(n)]
+
+        y_true_bs = [y_true[i] for i in idx]
+        baseline_pred = [baseline_results[i].get("predicted_label") for i in idx]
+        improved_pred = [improved_results[i].get("predicted_label") for i in idx]
+
+        if metric == "accuracy":
+            baseline_metric = accuracy_score(y_true_bs, baseline_pred)
+            improved_metric = accuracy_score(y_true_bs, improved_pred)
+        else:  # f1
+            valid_idx = [i for i in idx if valid_mask[i]]
+            if not valid_idx:
+                diffs.append(0.0)
+                continue
+            y_true_valid = [y_true[i] for i in valid_idx]
+            baseline_valid = [baseline_results[i].get("predicted_label") for i in valid_idx]
+            improved_valid = [improved_results[i].get("predicted_label") for i in valid_idx]
+            baseline_metric = f1_score(y_true_valid, baseline_valid, zero_division=0, pos_label=labels[0])
+            improved_metric = f1_score(y_true_valid, improved_valid, zero_division=0, pos_label=labels[0])
+
+        diffs.append(improved_metric - baseline_metric)
+
+    diffs_arr = np.array(diffs)
+
+    return {
+        "metric": metric,
+        "mean_diff": float(diffs_arr.mean()),
+        "ci_lower": float(np.percentile(diffs_arr, 2.5)),
+        "ci_upper": float(np.percentile(diffs_arr, 97.5)),
+        "n_bootstrap": n_bootstrap,
+        "paired_valid_samples": paired_valid_samples,
+        "paired_valid_coverage": paired_valid_samples / n,
     }
