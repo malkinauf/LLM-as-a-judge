@@ -30,6 +30,7 @@ def judge_response(prompt: str, model: str) -> dict[str, Any]:
         return {
             "predicted_label": parsed_output.get("verdict"),
             "explanation": parsed_output.get("explanation"),
+            "confidence": parsed_output.get("confidence"),
             "corrected_verdict": parsed_output.get("corrected_verdict"),
             "corrected_explanation": parsed_output.get("corrected_explanation"),
             "raw_output": raw_output
@@ -43,5 +44,6 @@ def judge_response(prompt: str, model: str) -> dict[str, Any]:
         return {
             "predicted_label": "parsing_error",
             "explanation": "Could not parse model output as JSON.",
+            "confidence": None,,
             "raw_output": raw_output
         }

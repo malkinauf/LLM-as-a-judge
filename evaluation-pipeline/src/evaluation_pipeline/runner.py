@@ -105,6 +105,9 @@ def run_judge_experiment(
             "first_level_explanation": first_judge_result.get(
                 "explanation"
             ),
+            "first_level_confidence": first_judge_result.get(
+                "confidence"
+            ),
 
             "second_level_prompt": None,
             "second_level_raw_output": None,
