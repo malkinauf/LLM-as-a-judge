@@ -99,12 +99,14 @@ def build_base_result(
         "first_raw_output": None,
         "first_level_label": None,
         "first_level_explanation": None,
+        "first_level_confidence": None,
 
         # Second-level judge
         "second_level_prompt": None,
         "second_level_raw_output": None,
         "second_level_verdict": None,
         "second_level_explanation": None,
+        "second_level_confidence": None,
 
         # Final result
         "predicted_label": None,
@@ -203,6 +205,10 @@ def run_first_level_judge(
         "explanation"
     )
 
+    result["first_level_confidence"] = first_judge_result.get(
+        "confidence"
+    )
+
 
 def apply_baseline_decision(
     result: dict[str, Any],
@@ -275,6 +281,9 @@ def apply_second_level_decision(
         "raw_output"
     )
     result["second_level_verdict"] = second_level_verdict
+    result["second_level_confidence"] = second_result.get(
+        "confidence"
+    )
 
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
         result["predicted_label"] = PARSING_ERROR

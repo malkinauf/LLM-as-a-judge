@@ -5,8 +5,6 @@
 BASELINE_BODY_TEMPLATE = """### Task
 
 You need to evaluate the response provided by an AI assistant to the user question displayed below.
-You need to evaluate the response provided by an AI assistant to the user question displayed below.
-
 The question is marked by [BEGIN QUESTION] and [END QUESTION] tags.
 The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESPONSE] tags.
 
@@ -20,14 +18,26 @@ The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESP
 
 ### Output Format
 
-Present your verdict and your explanation strictly in the JSON format shown below with keys: "verdict" and "explanation".
-Make sure the verdict comes before the explanation within the JSON object.
+Present your verdict, your confidence, and your explanation strictly in the JSON format shown below with keys: "verdict", "confidence", and "explanation".
+Make sure the verdict comes first, then the confidence, then the explanation within the JSON object.
+
+### Confidence Scale
+
+Report how certain you are about your verdict using an integer from 1 to 5. Use the full scale.
+
+1 = Very uncertain. The evidence is weak or ambiguous, and the verdict could easily be the opposite.
+2 = Uncertain. You lean towards your verdict, but reasonable doubt remains.
+3 = Moderately confident. The evidence supports your verdict, but some ambiguity is present.
+4 = Confident. The evidence is clear and only minor doubts remain.
+5 = Very certain. The evidence is unambiguous and no reasonable doubt remains.
+
+Do not default to 5. Choose the value that best reflects the actual strength of the evidence in this specific case.
 
 {{
   "verdict": "{positive_label} | {negative_label}",
+  "confidence": 3,
   "explanation": "Provide a concise explanation (maximum 50 words)."
 }}
-
 Do not include any additional text outside the JSON object.
 
 ### Evaluation Data
@@ -69,18 +79,32 @@ makes sense, you can't find any errors, and you agree with the verdict.
 Classify the response as "not_correct" if you find errors in the assessment process made by the
 LLM judge and would like to change the response.
 
+### Confidence Scale
+
+Report how certain you are about your verdict using an integer from 1 to 5. Use the full scale.
+
+1 = Very uncertain. The evidence is weak or ambiguous, and the verdict could easily be the opposite.
+2 = Uncertain. You lean towards your verdict, but reasonable doubt remains.
+3 = Moderately confident. The evidence supports your verdict, but some ambiguity is present.
+4 = Confident. The evidence is clear and only minor doubts remain.
+5 = Very certain. The evidence is unambiguous and no reasonable doubt remains.
+
+Do not default to 5. Choose the value that best reflects the actual strength of the evidence in this specific case.
+
 ### Output Format
 
 If the first-level judgment is "correct", return:
 
 {{
-  "verdict": "correct"
+  "verdict": "correct",
+  "confidence": 3
 }}
 
 If the first-level judgment is "not correct", return:
 
 {{
   "verdict": "not_correct",
+  "confidence": 3,
   "corrected_explanation": "Explain your decision in concise language using a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
   "corrected_verdict": "{positive_label} | {negative_label}"
 }}
