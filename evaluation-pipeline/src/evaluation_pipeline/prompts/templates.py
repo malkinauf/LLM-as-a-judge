@@ -97,7 +97,8 @@ If the first-level judgment is "correct", return:
 
 {{
   "verdict": "correct",
-  "confidence": 3
+  "confidence": "integer from 1 to 5",
+  "confidence": "...."
 }}
 
 If the first-level judgment is "not correct", return:
