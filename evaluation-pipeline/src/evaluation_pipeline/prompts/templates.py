@@ -35,7 +35,7 @@ Do not default to 5. Choose the value that best reflects the actual strength of 
 
 {{
   "verdict": "{positive_label} | {negative_label}",
-  "confidence": 3,
+  "confidence": "integer from 1 to 5",
   "explanation": "Provide a concise explanation (maximum 50 words)."
 }}
 Do not include any additional text outside the JSON object.
@@ -98,15 +98,15 @@ If the first-level judgment is "correct", return:
 {{
   "verdict": "correct",
   "confidence": "integer from 1 to 5",
-  "confidence": "...."
+  "explanation": "Provide a concise explanation (maximum 50 words)."
 }}
 
 If the first-level judgment is "not correct", return:
 
 {{
   "verdict": "not_correct",
-  "confidence": 3,
-  "corrected_explanation": "Explain your decision in concise language using a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
+  "confidence": "integer from 1 to 5",
+  "explanation": "Explain your decision in concise language using a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
   "corrected_verdict": "{positive_label} | {negative_label}"
 }}
 
