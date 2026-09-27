@@ -6,6 +6,24 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+def get_raw_model_response(prompt: str, model: str) -> str:
+    """
+    Send a prompt to the judge model and return its raw response text.
+    """
+
+    response = chat(
+        model=model,
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        options={
+            "temperature": 0,
+        }
+    )
+
+    return response["message"]["content"]
+
+
 def judge_response(prompt: str, model: str) -> dict[str, Any]:
     """
     Send a prepared prompt to the judge model and parse its JSON response.
