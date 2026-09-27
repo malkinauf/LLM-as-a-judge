@@ -106,7 +106,6 @@ def build_base_result(
         "second_level_raw_output": None,
         "second_level_verdict": None,
         "second_level_explanation": None,
-        "second_level_confidence": None,
 
         # Final result
         "predicted_label": None,
@@ -281,9 +280,6 @@ def apply_second_level_decision(
         "raw_output"
     )
     result["second_level_verdict"] = second_level_verdict
-    result["second_level_confidence"] = second_result.get(
-        "confidence"
-    )
 
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
         result["predicted_label"] = PARSING_ERROR
