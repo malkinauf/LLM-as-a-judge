@@ -99,6 +99,7 @@ def build_base_result(
         "first_raw_output": None,
         "first_level_label": None,
         "first_level_explanation": None,
+        "first_level_confidence": None,
 
         # Second-level judge
         "second_level_prompt": None,
@@ -201,6 +202,10 @@ def run_first_level_judge(
 
     result["first_level_explanation"] = first_judge_result.get(
         "explanation"
+    )
+
+    result["first_level_confidence"] = first_judge_result.get(
+        "confidence"
     )
 
 
