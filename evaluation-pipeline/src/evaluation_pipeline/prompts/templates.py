@@ -85,14 +85,13 @@ If the first-level judgment is "correct", return:
 
 {{
   "verdict": "correct",
-  "explanation": "Provide a concise explanation (maximum 50 words)."
 }}
 
 If the first-level judgment is "not correct", return:
 
 {{
   "verdict": "not_correct",
-  "explanation": "Explain your decision in concise language using a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
+  "corrected_explanation": "Explain your decision in concise language using a maximum of 50 words. Mention the part(s) of the AI assistant's response that are important for your decision.",
   "corrected_verdict": "{positive_label} | {negative_label}"
 }}
 
