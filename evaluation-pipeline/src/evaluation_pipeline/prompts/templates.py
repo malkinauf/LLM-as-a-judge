@@ -84,7 +84,7 @@ LLM judge and would like to change the response.
 If the first-level judgment is "correct", return:
 
 {{
-  "verdict": "correct",
+  "verdict": "correct"
 }}
 
 If the first-level judgment is "not correct", return:
