@@ -1,13 +1,13 @@
 name: hallucination
 
 descriptions:
-  minimal: |
+  original: |
     Evaluate whether the assistant's response contains hallucinated information.
 
     Consider hallucination from the following three aspects:
     unverifiable, non-factual, and irrelevant information.
 
-  detailed: |
+  extended: |
     Evaluate whether the assistant's response contains hallucinated information
     in the context of the user question.
 

@@ -1,11 +1,11 @@
 name: correctness
 
 descriptions:
-  minimal: |
+  original: |
     A response violates the correctness criterion if it gives
     an incorrect answer to the user question.
 
-  detailed: |
+  extended: |
     A response violates the correctness criterion if the answer
     given to the user question is incorrect.
 
@@ -26,7 +26,7 @@ labels:
 dynamic:
   prediction_instructions:
 
-    reasoning_analysis: |
+    detailed: |
       Analyze the question and answer below and return:
 
       1) Key claims or conclusions made in the answer
