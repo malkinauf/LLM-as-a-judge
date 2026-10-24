@@ -99,6 +99,7 @@ def build_base_result(
         "first_raw_output": None,
         "first_level_label": None,
         "first_level_explanation": None,
+        "first_level_confidence": None,
 
         # Second-level judge
         "second_level_prompt": None,
@@ -201,6 +202,10 @@ def run_first_level_judge(
 
     result["first_level_explanation"] = first_judge_result.get(
         "explanation"
+    )
+
+    result["first_level_confidence"] = first_judge_result.get(
+        "confidence"
     )
 
 
@@ -394,17 +399,14 @@ def run_judge_experiment(
                 f"First-level judge failed for example "
                 f"{example.get('id')}: {e}"
             )
-
             result["predicted_label"] = RUNTIME_ERROR
             result["error"] = str(e)
             results.append(result)
             continue
-
         if method in NON_SECOND_LEVEL_METHODS:
             apply_baseline_decision(result)
             results.append(result)
             continue
-
         if method == "second_level":
             try:
                 apply_second_level_decision(
@@ -412,7 +414,6 @@ def run_judge_experiment(
                     result=result,
                     baseline_criterion=baseline_criterion,
                 )
-
             except Exception as e:
                 logger.exception(
                     f"Second-level judge failed for example "
@@ -427,5 +428,4 @@ def run_judge_experiment(
     logger.info(
         f"Finished. Collected {len(results)} results."
     )
-
     return results
