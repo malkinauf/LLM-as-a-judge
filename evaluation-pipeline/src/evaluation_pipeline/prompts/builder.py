@@ -48,7 +48,6 @@ def build_baseline_body(
 
     return BASELINE_BODY_TEMPLATE.format(
         criterion_description=descriptions[criterion_detail],
-        decision_rules=criterion_config["decision_rules"],
         positive_label=criterion_config["labels"]["positive"],
         negative_label=criterion_config["labels"]["negative"],
         question=question,

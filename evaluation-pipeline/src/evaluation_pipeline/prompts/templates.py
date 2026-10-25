@@ -16,7 +16,10 @@ The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESP
 
 ### Decision Rules
 
-{decision_rules}
+Assign the verdict:
+
+- "{positive_label}" if the response satisfies the evaluation criterion.
+- "{negative_label}" if the response does not satisfy the evaluation criterion.
 
 ### Output Format
 

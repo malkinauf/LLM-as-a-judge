@@ -22,10 +22,6 @@ descriptions:
   original: |
     Your task is to inspect the given response and assess whether it is factually correct and truthful.
 
-decision_rules: |
-  Classify the response as "truthful" if the AI assistant's response is factually correct.
-  Classify the response as "not_truthful" if the response contains false, misleading, or incorrect information.
-
 labels:
   positive: truthful
   negative: not_truthful
