@@ -18,6 +18,27 @@ from evaluation_pipeline.prompts.builder import (
 logger = logging.getLogger(__name__)
 
 
+USAGE_FIELDS = ("input_tokens", "output_tokens", "total_tokens", "latency_seconds")
+USAGE_STAGES = ("prediction", "first_level", "second_level")
+
+
+def record_usage(result: dict[str, Any], stage: str, response: dict[str, Any]) -> None:
+    """Record one completed call and recompute per-example totals.
+
+    A missing value is not silently counted as zero. Partial results
+    retain usage from completed calls when a later stage fails.
+    """
+    for field in USAGE_FIELDS:
+        result[f"{stage}_{field}"] = response.get(field)
+
+    completed = [name for name in USAGE_STAGES if result[f"{name}_completed"]]
+    result[f"{stage}_completed"] = True
+    completed.append(stage)
+    for field in USAGE_FIELDS:
+        values = [result[f"{name}_{field}"] for name in completed]
+        result[field] = sum(values) if all(v is not None for v in values) else None
+
+
 VALID_METHODS = (
     "baseline",
     "second_level",
@@ -102,6 +123,11 @@ def build_base_result(
         "dynamic_prediction_variant": (dynamic_prediction_variant if method == "dynamic" else None),
         "confidence_mode": confidence_mode,
 
+        # Per-stage and per-example Ollama usage
+        **{f"{stage}_{field}": None for stage in USAGE_STAGES for field in USAGE_FIELDS},
+        **{f"{stage}_completed": False for stage in USAGE_STAGES},
+        **{field: None for field in USAGE_FIELDS},
+
         # Dynamic prediction step
         "prediction_prompt": None,
         "prediction_raw_output": None,
@@ -171,10 +197,13 @@ def run_first_level_judge(
             model_response=example["model_response"],
         )
 
-        prediction_response = get_raw_model_response(
+        prediction_call = get_raw_model_response(
             prompt=prediction_prompt,
             model=model,
+            return_usage=True,
         )
+        record_usage(result, "prediction", prediction_call)
+        prediction_response = prediction_call["raw_output"]
 
         # Step 2:
         # Build the final dynamic judge prompt from the shared
@@ -207,6 +236,7 @@ def run_first_level_judge(
         model=model,
     )
 
+    record_usage(result, "first_level", first_judge_result)
     result["first_prompt"] = first_prompt
 
     result["first_raw_output"] = first_judge_result.get(
@@ -291,6 +321,7 @@ def apply_second_level_decision(
         model=model,
     )
 
+    record_usage(result, "second_level", second_result)
     second_level_verdict = second_result.get(
         "predicted_label"
     )
