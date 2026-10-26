@@ -415,12 +415,7 @@ def run_judge_experiment(
 
     results: list[dict[str, Any]] = []
 
-    if method == "second_level" and confidence_mode:
-        raise ValueError(
-            "Confidence Scale is currently disabled "
-            "for second_level experiments."
-        )
-
+   
     if not run_id:
         logger.info(
             "Experiment skipped because run_id is empty."
