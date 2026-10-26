@@ -1,27 +1,6 @@
 name: hallucination
 
 descriptions:
-  minimal: |
-    Evaluate whether the assistant's response contains hallucinated information.
-
-    Consider hallucination from the following three aspects:
-    unverifiable, non-factual, and irrelevant information.
-
-  extended: |
-    Evaluate whether the assistant's response contains hallucinated information
-    in the context of the user question.
-
-    Following the HaluEval annotation criteria, consider hallucination from
-    three aspects:
-
-    - Unverifiable: information that cannot be verified using reliable
-      factual knowledge.
-    - Non-factual: information that is factually incorrect.
-    - Irrelevant: information that is irrelevant to the user query.
-
-    If the response contains hallucinated information according to any of
-    these aspects, classify the response as hallucinated.
-
   basic: |
     A response contains a hallucination if it includes non-factual or hallucinated information.
 
@@ -31,14 +10,11 @@ descriptions:
     Apply the following evaluation criteria:
 
     1. Evaluate the response in the context of the user's question and relevant world knowledge.
-
     2. Determine whether the response contains factually incorrect information.
-
     3. Consider incorrect entity substitutions as potential hallucinations, including:
        - Substitution with a highly similar entity.
        - Substitution with a dissimilar entity.
        - Substitution with an entity of a different type.
-
 
 labels:
   positive: hallucinated

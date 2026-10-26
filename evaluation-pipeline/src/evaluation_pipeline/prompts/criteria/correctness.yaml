@@ -1,18 +1,6 @@
 name: correctness
 
 descriptions:
-  minimal: |
-    A response violates the correctness criterion if it gives
-    an incorrect answer to the user question.
-
-  extended: |
-    A response violates the correctness criterion if the answer
-    given to the user question is incorrect.
-
-    For multiple-choice questions, assess whether the response
-    selects or supports the correct answer choice. The final
-    conclusion must be consistent with the correct answer.
-
   basic: |
     A response is correct if it selects the correct answer to the given multiple-choice question.
 
@@ -22,11 +10,8 @@ descriptions:
     Apply the following evaluation criteria:
 
     1. Identify the answer selected or expressed in the model's response.
-
     2. Determine which of the provided answer choices correctly answers the question, using relevant domain knowledge.
-
     3. Evaluate correctness based on the selected answer, rather than the quality or length of the accompanying explanation.
-
     4. A response is incorrect if it selects an incorrect answer or does not provide an identifiable answer.
     
 labels:
