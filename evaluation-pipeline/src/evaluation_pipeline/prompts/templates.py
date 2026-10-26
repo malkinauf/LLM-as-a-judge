@@ -57,8 +57,8 @@ Do not default to 5. Choose the value that best reflects the actual strength of 
 OUTPUT_WITHOUT_CONFIDENCE = """Present your verdict and explanation strictly in the JSON format shown below with keys: "verdict" and "explanation".
 
 {{
-  "verdict": "{positive_label} | {negative_label}",
-  "explanation": "Provide a concise explanation (maximum 50 words)."
+  "verdict": "Your final verdict",
+  "explanation": "Explain your decision here in concise language and use a maximum of 50 words."
 }}
 Do not include any additional text outside the JSON object."""
 
@@ -68,10 +68,12 @@ Make sure the verdict comes first, then the confidence, then the explanation wit
 
 {confidence_scale}
 
+The confidence value in your actual response must be an integer from 1 to 5, not a string.
+
 {{
-  "verdict": "{positive_label} | {negative_label}",
-  "confidence": "integer from 1 to 5",
-  "explanation": "Provide a concise explanation (maximum 50 words)."
+  "verdict": "Your final verdict",
+  "confidence": "Provide an integer from 1 to 5",
+  "explanation": "Explain your decision here in concise language and use a maximum of 50 words."
 }}
 Do not include any additional text outside the JSON object."""
 
