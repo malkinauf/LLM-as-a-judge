@@ -7,7 +7,7 @@ descriptions:
     Consider hallucination from the following three aspects:
     unverifiable, non-factual, and irrelevant information.
 
-  detailed: |
+  extended: |
     Evaluate whether the assistant's response contains hallucinated information
     in the context of the user question.
 
@@ -22,12 +22,23 @@ descriptions:
     If the response contains hallucinated information according to any of
     these aspects, classify the response as hallucinated.
 
-decision_rules: |
-  Assign the verdict:
+  basic: |
+    A response contains a hallucination if it includes non-factual or hallucinated information.
 
-  - "hallucinated" if the response contains unverifiable, non-factual,
-    or irrelevant information.
-  - "not_hallucinated" if the response does not contain such information.
+  detailed: |
+    A response contains a hallucination if it includes non-factual or hallucinated information.
+
+    Apply the following evaluation criteria:
+
+    1. Evaluate the response in the context of the user's question and relevant world knowledge.
+
+    2. Determine whether the response contains factually incorrect information.
+
+    3. Consider incorrect entity substitutions as potential hallucinations, including:
+       - Substitution with a highly similar entity.
+       - Substitution with a dissimilar entity.
+       - Substitution with an entity of a different type.
+
 
 labels:
   positive: hallucinated
@@ -57,3 +68,14 @@ dynamic:
       Do not introduce new claims or requirements.
       Do not add headings, bullet points, explanations, or any other text.
       Do not provide the final classification verdict.
+    
+    paper_based: |
+      Analyze the user's question and the AI assistant's response below. 
+      Return exactly two lines of text.
+
+      The first line identifies the main factual claims made in the response.
+
+      The second line identifies relevant factual knowledge that can help assess whether these claims contain hallucinated or non-factual information, including
+      potential factual inaccuracies or incorrect entity substitutions.
+
+      Do not provide the final hallucination classification verdict.
