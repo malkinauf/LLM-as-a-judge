@@ -49,3 +49,8 @@ notebooks/wandb/
 # CSV metadata
 *.schema.json
 *.table.json
+
+#local secret files
+.env
+.env.*
+!.env.example

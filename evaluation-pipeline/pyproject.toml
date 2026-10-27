@@ -20,7 +20,8 @@ dependencies = [
     "matplotlib",
     "wandb",
     "openpyxl",
-    "PyYAML"
+    "PyYAML",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]
