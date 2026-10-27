@@ -348,3 +348,67 @@ def test_unknown_method_raises():
 def test_empty_run_id_skips_dataset(monkeypatch):
     monkeypatch.setattr(runner, "judge_response", lambda **kwargs: pytest.fail("must not call model"))
     assert runner.run_judge_experiment([EXAMPLE], "", "model", "baseline", "truthfulness", "minimal", "dataset", "minimal") == []
+
+
+# Multi-backend regression tests
+@pytest.mark.parametrize("backend", ["ollama", "openrouter"])
+@pytest.mark.parametrize("method,expected_calls", [
+    ("baseline", ["first"]),
+    ("second_level", ["first", "second"]),
+    ("dynamic", ["prediction", "first"]),
+])
+def test_backend_propagates_to_every_model_call(monkeypatch, backend, method, expected_calls):
+    calls = []
+    monkeypatch.setattr(runner, "build_baseline_prompt", lambda **kwargs: "first")
+    monkeypatch.setattr(runner, "build_prediction_prompt", lambda **kwargs: "prediction")
+    monkeypatch.setattr(runner, "build_dynamic_prompt", lambda **kwargs: "first")
+    monkeypatch.setattr(runner, "build_second_level_prompt", lambda **kwargs: "second")
+
+    def fake_raw_response(**kwargs):
+        calls.append(("prediction", kwargs["backend"]))
+        return {"raw_output": "hint", "input_tokens": 3, "output_tokens": 2,
+                "total_tokens": 5, "latency_seconds": 0.1}
+
+    def fake_judge_response(**kwargs):
+        stage = kwargs["prompt"]
+        calls.append((stage, kwargs["backend"]))
+        return {"predicted_label": "correct" if stage == "second" else "truthful",
+                "raw_output": "{}", "input_tokens": 10, "output_tokens": 4,
+                "total_tokens": 14, "latency_seconds": 0.2}
+
+    monkeypatch.setattr(runner, "get_raw_model_response", fake_raw_response)
+    monkeypatch.setattr(runner, "judge_response", fake_judge_response)
+    result = runner.run_judge_experiment(
+        dataset=[EXAMPLE], run_id="test-run", model="test-model", method=method,
+        baseline_criterion="truthfulness", baseline_criterion_detail="minimal",
+        dataset_id="test-dataset", dynamic_prediction_variant="minimal",
+        backend=backend,
+    )[0]
+    assert calls == [(stage, backend) for stage in expected_calls]
+    assert result["backend"] == backend
+    assert result["predicted_label"] == "truthful"
+    assert result["total_tokens"] == (28 if len(expected_calls) == 2 and method == "second_level" else
+                                      19 if method == "dynamic" else 14)
+
+
+@pytest.mark.parametrize("status", [403, 429])
+def test_runner_preserves_api_error_details(monkeypatch, status):
+    monkeypatch.setattr(runner, "build_baseline_prompt", lambda **kwargs: "first")
+
+    def fake_judge_response(**kwargs):
+        raise runner.ModelAPIError(
+            "OpenRouter request failed", status_code=status,
+            details={"error": {"message": "Request rejected"}},
+        )
+
+    monkeypatch.setattr(runner, "judge_response", fake_judge_response)
+    result = runner.run_judge_experiment(
+        dataset=[EXAMPLE], run_id="test-run", model="test-model", method="baseline",
+        baseline_criterion="truthfulness", baseline_criterion_detail="minimal",
+        dataset_id="test-dataset", dynamic_prediction_variant="minimal",
+        backend="openrouter",
+    )[0]
+    assert result["predicted_label"] == "runtime_error"
+    assert result["error_type"] == "api_error"
+    assert result["http_status"] == status
+    assert result["error_details"]["error"]["message"] == "Request rejected"
