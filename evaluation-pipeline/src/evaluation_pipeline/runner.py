@@ -1,6 +1,5 @@
 import logging
 from typing import Any
-from unittest import result
 
 from tqdm import tqdm
 
@@ -22,23 +21,44 @@ logger = logging.getLogger(__name__)
 
 USAGE_FIELDS = ("input_tokens", "output_tokens", "total_tokens", "latency_seconds")
 USAGE_STAGES = ("prediction", "first_level", "second_level")
+OPENROUTER_METADATA_FIELDS = (
+    "openrouter_generation_id",
+    "openrouter_response_model",
+    "openrouter_provider",
+)
 
 
-def record_usage(result: dict[str, Any], stage: str, response: dict[str, Any]) -> None:
-    """Record one completed call and recompute per-example totals.
+def record_usage(
+    result: dict[str, Any],
+    stage: str,
+    response: dict[str, Any],
+) -> None:
+    """Record usage and API metadata for a completed model call."""
 
-    A missing value is not silently counted as zero. Partial results
-    retain usage from completed calls when a later stage fails.
-    """
     for field in USAGE_FIELDS:
         result[f"{stage}_{field}"] = response.get(field)
 
-    completed = [name for name in USAGE_STAGES if result[f"{name}_completed"]]
+    for field in OPENROUTER_METADATA_FIELDS:
+        result[f"{stage}_{field}"] = response.get(field)
+
+    completed = [
+        name for name in USAGE_STAGES
+        if result[f"{name}_completed"]
+    ]
+
     result[f"{stage}_completed"] = True
     completed.append(stage)
+
     for field in USAGE_FIELDS:
-        values = [result[f"{name}_{field}"] for name in completed]
-        result[field] = sum(values) if all(v is not None for v in values) else None
+        values = [
+            result[f"{name}_{field}"]
+            for name in completed
+        ]
+        result[field] = (
+            sum(values)
+            if all(value is not None for value in values)
+            else None
+        )
 
 def record_exception(result: dict[str, Any], exc: Exception) -> None:
     """Preserve API failure metadata without guessing whether moderation occurred."""
@@ -127,6 +147,7 @@ def build_base_result(
         **{f"{stage}_{field}": None for stage in USAGE_STAGES for field in USAGE_FIELDS},
         **{f"{stage}_completed": False for stage in USAGE_STAGES},
         **{field: None for field in USAGE_FIELDS},
+        **{f"{stage}_{field}": None for stage in USAGE_STAGES for field in OPENROUTER_METADATA_FIELDS},
 
         # Dynamic prediction step
         "prediction_prompt": None,

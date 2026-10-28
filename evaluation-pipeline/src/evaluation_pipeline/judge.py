@@ -111,6 +111,9 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         "output_tokens": output_tokens,
         "total_tokens": total_tokens,
         "latency_seconds": latency,
+        "openrouter_generation_id": data.get("id"),
+        "openrouter_response_model": data.get("model"),
+        "openrouter_provider": data.get("provider"),
     }
 
 def get_raw_model_response(
@@ -162,8 +165,17 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
 
     raw_output = result["raw_output"]
     usage = {key: result[key] for key in (
-        "input_tokens", "output_tokens", "total_tokens", "latency_seconds"
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "latency_seconds",
     )}
+
+    openrouter_metadata = {
+        "openrouter_generation_id": result.get("openrouter_generation_id"),
+        "openrouter_response_model": result.get("openrouter_response_model"),
+        "openrouter_provider": result.get("openrouter_provider"),
+    }
     try:
         parsed_output = json.loads(raw_output)
         if not isinstance(parsed_output, dict):
@@ -178,6 +190,7 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
             "corrected_explanation": parsed_output.get("corrected_explanation"),
             "raw_output": raw_output,
             **usage,
+            **openrouter_metadata,
         }
     except (json.JSONDecodeError, ValueError) as exc:
         logger.warning("Failed to parse model output: %s", exc)
@@ -192,4 +205,5 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
             "corrected_explanation": None,
             "raw_output": raw_output,
             **usage,
+            **openrouter_metadata,
         }
