@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from unittest import result
 
 from tqdm import tqdm
 
@@ -144,6 +145,8 @@ def build_base_result(
         "second_level_raw_output": None,
         "second_level_verdict": None,
         "second_level_explanation": None,
+        "second_level_corrected_verdict": None,
+        "second_level_corrected_explanation": None,
 
         # Final result
         "predicted_label": None,
@@ -341,6 +344,14 @@ def apply_second_level_decision(
         "raw_output"
     )
     result["second_level_verdict"] = second_level_verdict
+
+    result["second_level_corrected_verdict"] = second_result.get(
+        "corrected_verdict"
+    )
+
+    result["second_level_corrected_explanation"] = second_result.get(
+        "corrected_explanation"
+    )
 
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
         result["predicted_label"] = PARSING_ERROR
