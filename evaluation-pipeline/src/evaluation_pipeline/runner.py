@@ -14,7 +14,7 @@ from evaluation_pipeline.prompts.builder import (
     build_prediction_prompt,
     build_second_level_prompt,
 )
-
+from evaluation_pipeline.prompts.registry import CRITERIA 
 
 logger = logging.getLogger(__name__)
 
@@ -53,26 +53,15 @@ VALID_METHODS = (
     "dynamic",
 )
 
-
-VALID_JUDGE_LABELS = {
-    "truthful",
-    "not_truthful",
-    "safe",
-    "not_safe",
-    "attack_success",
-    "attack_failed",
-    "correct",
-    "incorrect",
-    "hallucinated",
-    "not_hallucinated"
-}
-
+def allowed_labels(criterion: str) -> set[str]:
+    """Return the two valid classification labels for a criterion."""
+    config = CRITERIA[criterion]["labels"]
+    return {config["positive"], config["negative"]}
 
 VALID_SECOND_LEVEL_VERDICTS = {
     "correct",
     "not_correct",
 }
-
 
 PARSING_ERROR = "parsing_error"
 RUNTIME_ERROR = "runtime_error"
@@ -164,7 +153,6 @@ def build_base_result(
         "error_details": None,
     }
 
-
 def run_first_level_judge(
     example: dict[str, Any],
     model: str,
@@ -212,6 +200,8 @@ def run_first_level_judge(
             model_response=example["model_response"],
         )
 
+        result["prediction_prompt"] = prediction_prompt
+
         prediction_call = get_raw_model_response(
             prompt=prediction_prompt,
             model=model,
@@ -233,7 +223,6 @@ def run_first_level_judge(
             confidence_mode=confidence_mode,
         )
 
-        result["prediction_prompt"] = prediction_prompt
         result["prediction_raw_output"] = prediction_response
 
     else:
@@ -247,6 +236,7 @@ def run_first_level_judge(
         )
 
     # Run the first-level classification.
+    result["first_prompt"] = first_prompt
     first_judge_result = judge_response(
         prompt=first_prompt,
         model=model,
@@ -254,7 +244,6 @@ def run_first_level_judge(
     )
 
     record_usage(result, "first_level", first_judge_result)
-    result["first_prompt"] = first_prompt
 
     result["first_raw_output"] = first_judge_result.get(
         "raw_output"
@@ -291,7 +280,7 @@ def apply_baseline_decision(
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label in VALID_JUDGE_LABELS:
+    if first_level_label in allowed_labels(result["baseline_criterion"]):
         result["predicted_label"] = first_level_label
     else:
         result["predicted_label"] = PARSING_ERROR
@@ -325,7 +314,7 @@ def apply_second_level_decision(
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label not in VALID_JUDGE_LABELS:
+    if first_level_label not in allowed_labels(baseline_criterion):
         result["predicted_label"] = PARSING_ERROR
         return
 
@@ -334,6 +323,8 @@ def apply_second_level_decision(
         first_level_prompt=result["first_prompt"],
         first_level_response=result["first_raw_output"],
     )
+
+    result["second_level_prompt"] = second_level_prompt
 
     second_result = judge_response(
         prompt=second_level_prompt,
@@ -346,7 +337,6 @@ def apply_second_level_decision(
         "predicted_label"
     )
 
-    result["second_level_prompt"] = second_level_prompt
     result["second_level_raw_output"] = second_result.get(
         "raw_output"
     )
@@ -371,7 +361,7 @@ def apply_second_level_decision(
         "corrected_verdict"
     )
 
-    if corrected_verdict in VALID_JUDGE_LABELS:
+    if corrected_verdict in allowed_labels(baseline_criterion):
         result["predicted_label"] = corrected_verdict
     else:
         result["predicted_label"] = PARSING_ERROR
