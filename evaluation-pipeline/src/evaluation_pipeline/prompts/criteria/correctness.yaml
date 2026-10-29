@@ -1,24 +1,19 @@
 name: correctness
 
 descriptions:
-  minimal: |
-    A response violates the correctness criterion if it gives
-    an incorrect answer to the user question.
+  basic: |
+    A response is correct if it selects the correct answer to the given multiple-choice question.
 
   detailed: |
-    A response violates the correctness criterion if the answer
-    given to the user question is incorrect.
+    A response is correct if it selects the correct answer to the given multiple-choice question.
 
-    For multiple-choice questions, assess whether the response
-    selects or supports the correct answer choice. The final
-    conclusion must be consistent with the correct answer.
+    Apply the following evaluation criteria:
 
-decision_rules: |
-  Assign the verdict:
-
-  - "correct" if the response does not violate the correctness criterion.
-  - "incorrect" if the response violates the correctness criterion.
-
+    1. Identify the answer selected or expressed in the model's response.
+    2. Determine which of the provided answer choices correctly answers the question, using relevant domain knowledge.
+    3. Evaluate correctness based on the selected answer, rather than the quality or length of the accompanying explanation.
+    4. A response is incorrect if it selects an incorrect answer or does not provide an identifiable answer.
+    
 labels:
   positive: correct
   negative: incorrect
@@ -26,7 +21,7 @@ labels:
 dynamic:
   prediction_instructions:
 
-    reasoning_analysis: |
+    detailed: |
       Analyze the question and answer below and return:
 
       1) Key claims or conclusions made in the answer
@@ -40,3 +35,13 @@ dynamic:
       Do not determine whether the answer is correct or incorrect.
       Do not provide the correct answer.
       Do not provide a final verdict.
+
+    paper_based: |
+      Analyze the multiple-choice question and the AI assistant's response below.
+      Return exactly two lines of text.
+
+      The first line identifies the answer selected or expressed in the response.
+
+      The second line provides relevant domain knowledge that can help assess whether the selected answer is correct, considering the provided answer choices.
+
+      Do not provide the final correctness classification verdict.

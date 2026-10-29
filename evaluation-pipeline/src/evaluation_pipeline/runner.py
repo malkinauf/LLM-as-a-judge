@@ -18,6 +18,27 @@ from evaluation_pipeline.prompts.builder import (
 logger = logging.getLogger(__name__)
 
 
+USAGE_FIELDS = ("input_tokens", "output_tokens", "total_tokens", "latency_seconds")
+USAGE_STAGES = ("prediction", "first_level", "second_level")
+
+
+def record_usage(result: dict[str, Any], stage: str, response: dict[str, Any]) -> None:
+    """Record one completed call and recompute per-example totals.
+
+    A missing value is not silently counted as zero. Partial results
+    retain usage from completed calls when a later stage fails.
+    """
+    for field in USAGE_FIELDS:
+        result[f"{stage}_{field}"] = response.get(field)
+
+    completed = [name for name in USAGE_STAGES if result[f"{name}_completed"]]
+    result[f"{stage}_completed"] = True
+    completed.append(stage)
+    for field in USAGE_FIELDS:
+        values = [result[f"{name}_{field}"] for name in completed]
+        result[field] = sum(values) if all(v is not None for v in values) else None
+
+
 VALID_METHODS = (
     "baseline",
     "second_level",
@@ -61,6 +82,10 @@ def build_base_result(
     model: str,
     method: str,
     dataset_id: str,
+    baseline_criterion: str,
+    baseline_criterion_detail: str,
+    dynamic_prediction_variant: str,
+    confidence_mode: bool = False,
 ) -> dict[str, Any]:
     """
     Create the default result record for one evaluated example.
@@ -74,6 +99,10 @@ def build_base_result(
         model: Judge model name.
         method: Evaluation method.
         dataset_id: ID of the dataset to use.
+        baseline_criterion: Criterion used by the first-level judge.
+        baseline_criterion_detail: Detail level of the first-level criterion.
+        dynamic_prediction_variant: Prediction instruction variant used by the dynamic method.
+        confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
 
     Returns:
         Initialized result dictionary.
@@ -89,6 +118,15 @@ def build_base_result(
         "method": method,
         "run_id": run_id,
         "dataset_id": dataset_id,
+        "baseline_criterion": baseline_criterion,
+        "baseline_criterion_detail": baseline_criterion_detail,
+        "dynamic_prediction_variant": (dynamic_prediction_variant if method == "dynamic" else None),
+        "confidence_mode": confidence_mode,
+
+        # Per-stage and per-example Ollama usage
+        **{f"{stage}_{field}": None for stage in USAGE_STAGES for field in USAGE_FIELDS},
+        **{f"{stage}_completed": False for stage in USAGE_STAGES},
+        **{field: None for field in USAGE_FIELDS},
 
         # Dynamic prediction step
         "prediction_prompt": None,
@@ -100,6 +138,7 @@ def build_base_result(
         "first_level_label": None,
         "first_level_explanation": None,
         "first_level_confidence": None,
+        "first_level_confidence_invalid": False,
 
         # Second-level judge
         "second_level_prompt": None,
@@ -121,6 +160,7 @@ def run_first_level_judge(
     baseline_criterion: str,
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
+    confidence_mode: bool = False,
 ) -> None:
     """
     Run the first-level evaluation for one dataset example.
@@ -144,6 +184,7 @@ def run_first_level_judge(
             criterion.
         dynamic_prediction_variant: Prediction instruction variant
             used by the dynamic method.
+        confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
     """
 
     if method == "dynamic":
@@ -156,10 +197,13 @@ def run_first_level_judge(
             model_response=example["model_response"],
         )
 
-        prediction_response = get_raw_model_response(
+        prediction_call = get_raw_model_response(
             prompt=prediction_prompt,
             model=model,
+            return_usage=True,
         )
+        record_usage(result, "prediction", prediction_call)
+        prediction_response = prediction_call["raw_output"]
 
         # Step 2:
         # Build the final dynamic judge prompt from the shared
@@ -170,6 +214,7 @@ def run_first_level_judge(
             question=example["question"],
             model_response=example["model_response"],
             prediction_response=prediction_response,
+            confidence_mode=confidence_mode,
         )
 
         result["prediction_prompt"] = prediction_prompt
@@ -182,6 +227,7 @@ def run_first_level_judge(
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
+            confidence_mode=confidence_mode
         )
 
     # Run the first-level classification.
@@ -190,6 +236,7 @@ def run_first_level_judge(
         model=model,
     )
 
+    record_usage(result, "first_level", first_judge_result)
     result["first_prompt"] = first_prompt
 
     result["first_raw_output"] = first_judge_result.get(
@@ -206,6 +253,9 @@ def run_first_level_judge(
 
     result["first_level_confidence"] = first_judge_result.get(
         "confidence"
+    )
+    result["first_level_confidence_invalid"] = first_judge_result.get(
+        "confidence_invalid", False
     )
 
 
@@ -271,6 +321,7 @@ def apply_second_level_decision(
         model=model,
     )
 
+    record_usage(result, "second_level", second_result)
     second_level_verdict = second_result.get(
         "predicted_label"
     )
@@ -315,6 +366,7 @@ def run_judge_experiment(
     baseline_criterion_detail: str,
     dataset_id: str,
     dynamic_prediction_variant: str,
+    confidence_mode: bool = False,
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a prepared dataset.
@@ -345,6 +397,8 @@ def run_judge_experiment(
         dataset_id: ID of the dataset to use.
         dynamic_prediction_variant: Prediction instruction variant
             used by the dynamic method.
+        confidence_mode: Whether to include the Confidence Scale in
+            the first-level judge prompt.
 
     Returns:
         List of result dictionaries, one for each evaluated example.
@@ -361,6 +415,7 @@ def run_judge_experiment(
 
     results: list[dict[str, Any]] = []
 
+   
     if not run_id:
         logger.info(
             "Experiment skipped because run_id is empty."
@@ -377,6 +432,10 @@ def run_judge_experiment(
             model=model,
             method=method,
             dataset_id=dataset_id,
+            baseline_criterion=baseline_criterion,
+            baseline_criterion_detail=baseline_criterion_detail,
+            dynamic_prediction_variant=dynamic_prediction_variant,
+            confidence_mode=confidence_mode
         )
 
         try:
@@ -392,6 +451,7 @@ def run_judge_experiment(
                 dynamic_prediction_variant=(
                     dynamic_prediction_variant
                 ),
+                confidence_mode=confidence_mode
             )
 
         except Exception as e:

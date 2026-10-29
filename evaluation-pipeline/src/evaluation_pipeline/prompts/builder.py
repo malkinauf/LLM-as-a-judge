@@ -2,6 +2,9 @@ from evaluation_pipeline.prompts.registry import CRITERIA
 
 from evaluation_pipeline.prompts.templates import (
     BASELINE_BODY_TEMPLATE,
+    CONFIDENCE_SCALE_TEMPLATE,
+    OUTPUT_WITHOUT_CONFIDENCE,
+    OUTPUT_WITH_CONFIDENCE,
     OUTPUT_TEMPLATE,
     SECOND_LEVEL_TEMPLATE,
     DYNAMIC_PREDICTION_TEMPLATE,
@@ -9,11 +12,13 @@ from evaluation_pipeline.prompts.templates import (
 )
 
 
+
 def build_baseline_body(
     criterion: str,
     criterion_detail: str,
     question: str,
     model_response: str,
+    confidence_mode: bool = False,
 ) -> str:
     """
     Build the shared baseline prompt body.
@@ -23,6 +28,7 @@ def build_baseline_body(
         criterion_detail: Detail level defined for the selected criterion.
         question: User question to evaluate.
         model_response: Model response to evaluate.
+        confidence_mode: Whether to include the Confidence Scale.
 
     Returns:
         Baseline prompt body without the final output section.
@@ -46,14 +52,31 @@ def build_baseline_body(
             f"Expected one of: {list(descriptions)}"
         )
 
+    positive_label = criterion_config["labels"]["positive"]
+    negative_label = criterion_config["labels"]["negative"]
+
+    output_template = (
+        OUTPUT_WITH_CONFIDENCE
+        if confidence_mode
+        else OUTPUT_WITHOUT_CONFIDENCE
+    )
+
+    output_instructions = output_template.format(
+        positive_label=positive_label,
+        negative_label=negative_label,
+        confidence_scale=CONFIDENCE_SCALE_TEMPLATE,
+    )
+
     return BASELINE_BODY_TEMPLATE.format(
         criterion_description=descriptions[criterion_detail],
-        decision_rules=criterion_config["decision_rules"],
-        positive_label=criterion_config["labels"]["positive"],
-        negative_label=criterion_config["labels"]["negative"],
+        positive_label=positive_label,
+        negative_label=negative_label,
+        output_instructions=output_instructions,
         question=question,
         model_response=model_response,
     )
+
+
 
 
 def build_baseline_prompt(
@@ -61,6 +84,7 @@ def build_baseline_prompt(
     criterion_detail: str,
     question: str,
     model_response: str,
+    confidence_mode: bool = False,
 ) -> str:
     """
     Build the complete baseline judge prompt.
@@ -70,6 +94,7 @@ def build_baseline_prompt(
         criterion_detail: Detail level defined for the selected criterion.
         question: User question to evaluate.
         model_response: Model response to evaluate.
+        confidence_mode: Whether to include the Confidence Scale.
 
     Returns:
         Complete baseline judge prompt.
@@ -80,12 +105,14 @@ def build_baseline_prompt(
         criterion_detail=criterion_detail,
         question=question,
         model_response=model_response,
+        confidence_mode=confidence_mode,
     )
 
     return (
         f"{baseline_body}\n\n"
         f"{OUTPUT_TEMPLATE}"
     )
+
 
 
 def build_second_level_prompt(
@@ -175,12 +202,14 @@ def build_prediction_prompt(
     )
 
 
+
 def build_dynamic_prompt(
     criterion: str,
     criterion_detail: str,
     question: str,
     model_response: str,
     prediction_response: str,
+    confidence_mode: bool = False,
 ) -> str:
     """
     Build the final dynamic judge prompt.
@@ -196,6 +225,7 @@ def build_dynamic_prompt(
         model_response: Model response to evaluate.
         prediction_response: Preliminary analysis generated
             by the prediction step.
+        confidence_mode: Whether to include the Confidence Scale.
 
     Returns:
         Complete dynamic judge prompt.
@@ -206,6 +236,7 @@ def build_dynamic_prompt(
         criterion_detail=criterion_detail,
         question=question,
         model_response=model_response,
+        confidence_mode=confidence_mode,
     )
 
     dynamic_hint = DYNAMIC_HINT_TEMPLATE.format(

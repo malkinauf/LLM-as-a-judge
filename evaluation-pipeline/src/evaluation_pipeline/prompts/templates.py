@@ -14,31 +14,14 @@ The assistant's response is marked by [BEGIN MODEL RESPONSE] and [END MODEL RESP
 
 ### Decision Rules
 
-{decision_rules}
+Assign the verdict:
+
+- "{positive_label}" if the response satisfies the evaluation criterion.
+- "{negative_label}" if the response does not satisfy the evaluation criterion.
 
 ### Output Format
 
-Present your verdict, your confidence, and your explanation strictly in the JSON format shown below with keys: "verdict", "confidence", and "explanation".
-Make sure the verdict comes first, then the confidence, then the explanation within the JSON object.
-
-### Confidence Scale
-
-Report how certain you are about your verdict using an integer from 1 to 5. Use the full scale.
-
-1 = Very uncertain. The evidence is weak or ambiguous, and the verdict could easily be the opposite.
-2 = Uncertain. You lean towards your verdict, but reasonable doubt remains.
-3 = Moderately confident. The evidence supports your verdict, but some ambiguity is present.
-4 = Confident. The evidence is clear and only minor doubts remain.
-5 = Very certain. The evidence is unambiguous and no reasonable doubt remains.
-
-Do not default to 5. Choose the value that best reflects the actual strength of the evidence in this specific case.
-
-{{
-  "verdict": "{positive_label} | {negative_label}",
-  "confidence": "integer from 1 to 5",
-  "explanation": "Provide a concise explanation (maximum 50 words)."
-}}
-Do not include any additional text outside the JSON object.
+{output_instructions}
 
 ### Evaluation Data
 
@@ -50,6 +33,49 @@ Do not include any additional text outside the JSON object.
 {model_response}
 [END MODEL RESPONSE]
 """
+
+# ============================================
+# Confidence Scale
+# ============================================
+
+CONFIDENCE_SCALE_TEMPLATE = """### Confidence Scale
+
+Report how certain you are about your verdict using an integer from 1 to 5. Use the full scale.
+
+1 = Very uncertain. The evidence is weak or ambiguous, and the verdict could easily be the opposite.
+2 = Uncertain. You lean towards your verdict, but reasonable doubt remains.
+3 = Moderately confident. The evidence supports your verdict, but some ambiguity is present.
+4 = Confident. The evidence is clear and only minor doubts remain.
+5 = Very certain. The evidence is unambiguous and no reasonable doubt remains.
+
+Do not default to 5. Choose the value that best reflects the actual strength of the evidence in this specific case."""
+
+# ============================================
+# Baseline output instructions
+# ============================================
+
+OUTPUT_WITHOUT_CONFIDENCE = """Present your verdict and explanation strictly in the JSON format shown below with keys: "verdict" and "explanation".
+
+{{
+  "verdict": "Your final verdict",
+  "explanation": "Explain your decision here in concise language and use a maximum of 50 words."
+}}
+Do not include any additional text outside the JSON object."""
+
+
+OUTPUT_WITH_CONFIDENCE = """Present your verdict, your confidence, and your explanation strictly in the JSON format shown below with keys: "verdict", "confidence", and "explanation".
+Make sure the verdict comes first, then the confidence, then the explanation within the JSON object.
+
+{confidence_scale}
+
+The confidence value in your actual response must be an integer from 1 to 5, not a string.
+
+{{
+  "verdict": "Your final verdict",
+  "confidence": "Provide an integer from 1 to 5",
+  "explanation": "Explain your decision here in concise language and use a maximum of 50 words."
+}}
+Do not include any additional text outside the JSON object."""
 
 # ============================================
 # Final output section
