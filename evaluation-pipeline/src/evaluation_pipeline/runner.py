@@ -99,7 +99,7 @@ def build_base_result(
     model: str,
     method: str,
     dataset_id: str,
-    baseline_criterion: str,
+    evaluation_criterion: str,
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
@@ -117,7 +117,7 @@ def build_base_result(
         model: Judge model name.
         method: Evaluation method.
         dataset_id: ID of the dataset to use.
-        baseline_criterion: Criterion used by the first-level judge.
+        evaluation_criterion: Criterion used by the first-level judge.
         baseline_criterion_detail: Detail level of the first-level criterion.
         dynamic_prediction_variant: Prediction instruction variant used by the dynamic method.
         confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
@@ -138,7 +138,7 @@ def build_base_result(
         "method": method,
         "run_id": run_id,
         "dataset_id": dataset_id,
-        "baseline_criterion": baseline_criterion,
+        "evaluation_criterion": evaluation_criterion,
         "baseline_criterion_detail": baseline_criterion_detail,
         "dynamic_prediction_variant": (dynamic_prediction_variant if method == "dynamic" else None),
         "confidence_mode": confidence_mode,
@@ -182,7 +182,7 @@ def run_first_level_judge(
     model: str,
     method: str,
     result: dict[str, Any],
-    baseline_criterion: str,
+    evaluation_criterion: str,
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
@@ -205,7 +205,7 @@ def run_first_level_judge(
         model: Judge model name.
         method: Evaluation method.
         result: Result dictionary updated in place.
-        baseline_criterion: Criterion used by the first-level judge.
+        evaluation_criterion: Criterion used by the first-level judge.
         baseline_criterion_detail: Detail level of the first-level
             criterion.
         dynamic_prediction_variant: Prediction instruction variant
@@ -218,7 +218,7 @@ def run_first_level_judge(
         # Step 1:
         # Generate the preliminary analysis.
         prediction_prompt = build_prediction_prompt(
-            criterion=baseline_criterion,
+            criterion=evaluation_criterion,
             prediction_variant=dynamic_prediction_variant,
             question=example["question"],
             model_response=example["model_response"],
@@ -239,7 +239,7 @@ def run_first_level_judge(
         # Build the final dynamic judge prompt from the shared
         # baseline body + dynamic hint + output section.
         first_prompt = build_dynamic_prompt(
-            criterion=baseline_criterion,
+            criterion=evaluation_criterion,
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
@@ -252,7 +252,7 @@ def run_first_level_judge(
     else:
         # Baseline and second-level use the normal baseline prompt.
         first_prompt = build_baseline_prompt(
-            criterion=baseline_criterion,
+            criterion=evaluation_criterion,
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
@@ -304,7 +304,7 @@ def apply_baseline_decision(
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label in allowed_labels(result["baseline_criterion"]):
+    if first_level_label in allowed_labels(result["evaluation_criterion"]):
         result["predicted_label"] = first_level_label
     else:
         result["predicted_label"] = PARSING_ERROR
@@ -313,7 +313,7 @@ def apply_baseline_decision(
 def apply_second_level_decision(
     model: str,
     result: dict[str, Any],
-    baseline_criterion: str,
+    evaluation_criterion: str,
     backend: str = "ollama",
 ) -> None:
     """
@@ -332,18 +332,18 @@ def apply_second_level_decision(
     Args:
         model: Judge model name.
         result: Result dictionary updated in place.
-        baseline_criterion: Criterion used by the first-level judge.
+        evaluation_criterion: Criterion used by the first-level judge.
         backend: Model backend to use for the experiment.
     """
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label not in allowed_labels(baseline_criterion):
+    if first_level_label not in allowed_labels(evaluation_criterion):
         result["predicted_label"] = PARSING_ERROR
         return
 
     second_level_prompt = build_second_level_prompt(
-        criterion=baseline_criterion,
+        criterion=evaluation_criterion,
         first_level_prompt=result["first_prompt"],
         first_level_response=result["first_raw_output"],
     )
@@ -393,7 +393,7 @@ def apply_second_level_decision(
         "corrected_verdict"
     )
 
-    if corrected_verdict in allowed_labels(baseline_criterion):
+    if corrected_verdict in allowed_labels(evaluation_criterion):
         result["predicted_label"] = corrected_verdict
     else:
         result["predicted_label"] = PARSING_ERROR
@@ -404,7 +404,7 @@ def run_judge_experiment(
     run_id: str,
     model: str,
     method: str,
-    baseline_criterion: str,
+    evaluation_criterion: str,
     baseline_criterion_detail: str,
     dataset_id: str,
     dynamic_prediction_variant: str,
@@ -434,7 +434,7 @@ def run_judge_experiment(
         run_id: Identifier of the current experiment run.
         model: Judge model name.
         method: Evaluation method to run.
-        baseline_criterion: Criterion used by the first-level judge.
+        evaluation_criterion: Criterion used by the first-level judge.
         baseline_criterion_detail: Detail level of the first-level
             criterion.
         dataset_id: ID of the dataset to use.
@@ -476,7 +476,7 @@ def run_judge_experiment(
             model=model,
             method=method,
             dataset_id=dataset_id,
-            baseline_criterion=baseline_criterion,
+            evaluation_criterion=evaluation_criterion,
             baseline_criterion_detail=baseline_criterion_detail,
             dynamic_prediction_variant=dynamic_prediction_variant,
             confidence_mode=confidence_mode,
@@ -489,7 +489,7 @@ def run_judge_experiment(
                 model=model,
                 method=method,
                 result=result,
-                baseline_criterion=baseline_criterion,
+                evaluation_criterion=evaluation_criterion,
                 baseline_criterion_detail=(
                     baseline_criterion_detail
                 ),
@@ -519,7 +519,7 @@ def run_judge_experiment(
                 apply_second_level_decision(
                     model=model,
                     result=result,
-                    baseline_criterion=baseline_criterion,
+                    evaluation_criterion=evaluation_criterion,
                     backend=backend,
                 )
             except Exception as e:
