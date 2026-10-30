@@ -4,6 +4,7 @@ from typing import Any
 from tqdm import tqdm
 
 from evaluation_pipeline.judge import (
+    ModelAPIError,
     get_raw_model_response,
     judge_response,
 )
@@ -13,30 +14,58 @@ from evaluation_pipeline.prompts.builder import (
     build_prediction_prompt,
     build_second_level_prompt,
 )
-
+from evaluation_pipeline.prompts.registry import CRITERIA 
 
 logger = logging.getLogger(__name__)
 
 
 USAGE_FIELDS = ("input_tokens", "output_tokens", "total_tokens", "latency_seconds")
 USAGE_STAGES = ("prediction", "first_level", "second_level")
+OPENROUTER_METADATA_FIELDS = (
+    "openrouter_generation_id",
+    "openrouter_response_model",
+    "openrouter_provider",
+)
 
 
-def record_usage(result: dict[str, Any], stage: str, response: dict[str, Any]) -> None:
-    """Record one completed call and recompute per-example totals.
+def record_usage(
+    result: dict[str, Any],
+    stage: str,
+    response: dict[str, Any],
+) -> None:
+    """Record usage and API metadata for a completed model call."""
 
-    A missing value is not silently counted as zero. Partial results
-    retain usage from completed calls when a later stage fails.
-    """
     for field in USAGE_FIELDS:
         result[f"{stage}_{field}"] = response.get(field)
 
-    completed = [name for name in USAGE_STAGES if result[f"{name}_completed"]]
+    for field in OPENROUTER_METADATA_FIELDS:
+        result[f"{stage}_{field}"] = response.get(field)
+
+    completed = [
+        name for name in USAGE_STAGES
+        if result[f"{name}_completed"]
+    ]
+
     result[f"{stage}_completed"] = True
     completed.append(stage)
+
     for field in USAGE_FIELDS:
-        values = [result[f"{name}_{field}"] for name in completed]
-        result[field] = sum(values) if all(v is not None for v in values) else None
+        values = [
+            result[f"{name}_{field}"]
+            for name in completed
+        ]
+        result[field] = (
+            sum(values)
+            if all(value is not None for value in values)
+            else None
+        )
+
+def record_exception(result: dict[str, Any], exc: Exception) -> None:
+    """Preserve API failure metadata without guessing whether moderation occurred."""
+    result["error_type"] = "api_error" if isinstance(exc, ModelAPIError) else "runtime_error"
+    if isinstance(exc, ModelAPIError):
+        result["http_status"] = exc.status_code
+        result["error_details"] = exc.details 
 
 
 VALID_METHODS = (
@@ -45,26 +74,15 @@ VALID_METHODS = (
     "dynamic",
 )
 
-
-VALID_JUDGE_LABELS = {
-    "truthful",
-    "not_truthful",
-    "safe",
-    "not_safe",
-    "attack_success",
-    "attack_failed",
-    "correct",
-    "incorrect",
-    "hallucinated",
-    "not_hallucinated"
-}
-
+def allowed_labels(criterion: str) -> set[str]:
+    """Return the two valid classification labels for a criterion."""
+    config = CRITERIA[criterion]["labels"]
+    return {config["positive"], config["negative"]}
 
 VALID_SECOND_LEVEL_VERDICTS = {
     "correct",
     "not_correct",
 }
-
 
 PARSING_ERROR = "parsing_error"
 RUNTIME_ERROR = "runtime_error"
@@ -74,7 +92,6 @@ NON_SECOND_LEVEL_METHODS = {
     "baseline",
     "dynamic",
 }
-
 
 def build_base_result(
     example: dict[str, Any],
@@ -86,6 +103,7 @@ def build_base_result(
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
+    backend: str = "ollama",
 ) -> dict[str, Any]:
     """
     Create the default result record for one evaluated example.
@@ -103,6 +121,7 @@ def build_base_result(
         baseline_criterion_detail: Detail level of the first-level criterion.
         dynamic_prediction_variant: Prediction instruction variant used by the dynamic method.
         confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
+        backend: Model backend to use for the experiment.
 
     Returns:
         Initialized result dictionary.
@@ -115,6 +134,7 @@ def build_base_result(
         "true_label": example["y_true"],
 
         "model": model,
+        "backend": backend,
         "method": method,
         "run_id": run_id,
         "dataset_id": dataset_id,
@@ -123,10 +143,11 @@ def build_base_result(
         "dynamic_prediction_variant": (dynamic_prediction_variant if method == "dynamic" else None),
         "confidence_mode": confidence_mode,
 
-        # Per-stage and per-example Ollama usage
+        # Per-stage and per-example model usage
         **{f"{stage}_{field}": None for stage in USAGE_STAGES for field in USAGE_FIELDS},
         **{f"{stage}_completed": False for stage in USAGE_STAGES},
         **{field: None for field in USAGE_FIELDS},
+        **{f"{stage}_{field}": None for stage in USAGE_STAGES for field in OPENROUTER_METADATA_FIELDS},
 
         # Dynamic prediction step
         "prediction_prompt": None,
@@ -145,12 +166,16 @@ def build_base_result(
         "second_level_raw_output": None,
         "second_level_verdict": None,
         "second_level_explanation": None,
+        "second_level_corrected_verdict": None,
+        "second_level_corrected_explanation": None,
 
         # Final result
         "predicted_label": None,
         "error": None,
+        "error_type": None,
+        "http_status": None,
+        "error_details": None,
     }
-
 
 def run_first_level_judge(
     example: dict[str, Any],
@@ -161,6 +186,7 @@ def run_first_level_judge(
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
+    backend: str = "ollama",
 ) -> None:
     """
     Run the first-level evaluation for one dataset example.
@@ -185,6 +211,7 @@ def run_first_level_judge(
         dynamic_prediction_variant: Prediction instruction variant
             used by the dynamic method.
         confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
+        backend: Model backend to use for the experiment.
     """
 
     if method == "dynamic":
@@ -197,10 +224,13 @@ def run_first_level_judge(
             model_response=example["model_response"],
         )
 
+        result["prediction_prompt"] = prediction_prompt
+
         prediction_call = get_raw_model_response(
             prompt=prediction_prompt,
             model=model,
             return_usage=True,
+            backend=backend,
         )
         record_usage(result, "prediction", prediction_call)
         prediction_response = prediction_call["raw_output"]
@@ -217,7 +247,6 @@ def run_first_level_judge(
             confidence_mode=confidence_mode,
         )
 
-        result["prediction_prompt"] = prediction_prompt
         result["prediction_raw_output"] = prediction_response
 
     else:
@@ -227,17 +256,18 @@ def run_first_level_judge(
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
-            confidence_mode=confidence_mode
+            confidence_mode=confidence_mode,
         )
 
     # Run the first-level classification.
+    result["first_prompt"] = first_prompt
     first_judge_result = judge_response(
         prompt=first_prompt,
         model=model,
+        backend=backend,
     )
 
     record_usage(result, "first_level", first_judge_result)
-    result["first_prompt"] = first_prompt
 
     result["first_raw_output"] = first_judge_result.get(
         "raw_output"
@@ -274,7 +304,7 @@ def apply_baseline_decision(
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label in VALID_JUDGE_LABELS:
+    if first_level_label in allowed_labels(result["baseline_criterion"]):
         result["predicted_label"] = first_level_label
     else:
         result["predicted_label"] = PARSING_ERROR
@@ -284,6 +314,7 @@ def apply_second_level_decision(
     model: str,
     result: dict[str, Any],
     baseline_criterion: str,
+    backend: str = "ollama",
 ) -> None:
     """
     Run the fixed second-level judge and update the final prediction.
@@ -302,11 +333,12 @@ def apply_second_level_decision(
         model: Judge model name.
         result: Result dictionary updated in place.
         baseline_criterion: Criterion used by the first-level judge.
+        backend: Model backend to use for the experiment.
     """
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label not in VALID_JUDGE_LABELS:
+    if first_level_label not in allowed_labels(baseline_criterion):
         result["predicted_label"] = PARSING_ERROR
         return
 
@@ -316,9 +348,12 @@ def apply_second_level_decision(
         first_level_response=result["first_raw_output"],
     )
 
+    result["second_level_prompt"] = second_level_prompt
+
     second_result = judge_response(
         prompt=second_level_prompt,
         model=model,
+        backend=backend,
     )
 
     record_usage(result, "second_level", second_result)
@@ -326,11 +361,18 @@ def apply_second_level_decision(
         "predicted_label"
     )
 
-    result["second_level_prompt"] = second_level_prompt
     result["second_level_raw_output"] = second_result.get(
         "raw_output"
     )
     result["second_level_verdict"] = second_level_verdict
+
+    result["second_level_corrected_verdict"] = second_result.get(
+        "corrected_verdict"
+    )
+
+    result["second_level_corrected_explanation"] = second_result.get(
+        "corrected_explanation"
+    )
 
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
         result["predicted_label"] = PARSING_ERROR
@@ -351,7 +393,7 @@ def apply_second_level_decision(
         "corrected_verdict"
     )
 
-    if corrected_verdict in VALID_JUDGE_LABELS:
+    if corrected_verdict in allowed_labels(baseline_criterion):
         result["predicted_label"] = corrected_verdict
     else:
         result["predicted_label"] = PARSING_ERROR
@@ -367,6 +409,7 @@ def run_judge_experiment(
     dataset_id: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
+    backend: str = "ollama",
 ) -> list[dict[str, Any]]:
     """
     Run a judge experiment over a prepared dataset.
@@ -399,6 +442,7 @@ def run_judge_experiment(
             used by the dynamic method.
         confidence_mode: Whether to include the Confidence Scale in
             the first-level judge prompt.
+        backend: Model backend to use for the experiment.
 
     Returns:
         List of result dictionaries, one for each evaluated example.
@@ -435,7 +479,8 @@ def run_judge_experiment(
             baseline_criterion=baseline_criterion,
             baseline_criterion_detail=baseline_criterion_detail,
             dynamic_prediction_variant=dynamic_prediction_variant,
-            confidence_mode=confidence_mode
+            confidence_mode=confidence_mode,
+            backend=backend,
         )
 
         try:
@@ -451,7 +496,8 @@ def run_judge_experiment(
                 dynamic_prediction_variant=(
                     dynamic_prediction_variant
                 ),
-                confidence_mode=confidence_mode
+                confidence_mode=confidence_mode,
+                backend=backend,
             )
 
         except Exception as e:
@@ -461,6 +507,7 @@ def run_judge_experiment(
             )
             result["predicted_label"] = RUNTIME_ERROR
             result["error"] = str(e)
+            record_exception(result, e)
             results.append(result)
             continue
         if method in NON_SECOND_LEVEL_METHODS:
@@ -473,6 +520,7 @@ def run_judge_experiment(
                     model=model,
                     result=result,
                     baseline_criterion=baseline_criterion,
+                    backend=backend,
                 )
             except Exception as e:
                 logger.exception(
@@ -482,7 +530,7 @@ def run_judge_experiment(
 
                 result["predicted_label"] = RUNTIME_ERROR
                 result["error"] = str(e)
-
+                record_exception(result, e)
             results.append(result)
 
     logger.info(
