@@ -14,6 +14,10 @@ dependencies = [
     "tqdm",
     "jupyter",
     "ipykernel",
+    "anywidget",
+    "ipywidgets",
+    "traitlets",
+    "ollama",
     "ollama",
     "datasets",
     "scikit-learn",
@@ -34,6 +38,12 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+evaluation_pipeline = [
+    "ui/*.js",
+    "ui/*.css",
+]
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]
