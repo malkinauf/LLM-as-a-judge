@@ -10,6 +10,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_TIMEOUT_SECONDS = 120 
 VALID_BACKENDS = {"ollama", "openrouter"}
 
 class ModelAPIError(RuntimeError):
@@ -77,7 +78,7 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
     )
     start = time.perf_counter()
     try:
-        with urlopen(request, timeout=120) as response:
+        with urlopen(request, timeout=OPENROUTER_TIMEOUT_SECONDS) as response:
             data = json.load(response)
     except HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
