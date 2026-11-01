@@ -24,7 +24,6 @@ USAGE_STAGES = ("prediction", "first_level", "second_level")
 OPENROUTER_METADATA_FIELDS = (
     "openrouter_generation_id",
     "openrouter_response_model",
-    "openrouter_provider",
 )
 
 

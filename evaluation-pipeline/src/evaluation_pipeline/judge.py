@@ -114,7 +114,6 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         "latency_seconds": latency,
         "openrouter_generation_id": data.get("id"),
         "openrouter_response_model": data.get("model"),
-        "openrouter_provider": data.get("provider"),
     }
 
 def get_raw_model_response(
@@ -175,7 +174,6 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
     openrouter_metadata = {
         "openrouter_generation_id": result.get("openrouter_generation_id"),
         "openrouter_response_model": result.get("openrouter_response_model"),
-        "openrouter_provider": result.get("openrouter_provider"),
     }
     try:
         parsed_output = json.loads(raw_output)
