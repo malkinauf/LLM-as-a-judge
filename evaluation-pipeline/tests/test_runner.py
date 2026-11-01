@@ -392,7 +392,7 @@ def test_backend_propagates_to_every_model_call(monkeypatch, backend, method, ex
 
 
 @pytest.mark.parametrize("status", [403, 429])
-def test_runner_preserves_api_error_details(monkeypatch, status):
+def test_runner_records_api_error_without_details(monkeypatch, status):
     monkeypatch.setattr(runner, "build_baseline_prompt", lambda **kwargs: "first")
 
     def fake_judge_response(**kwargs):
@@ -411,4 +411,4 @@ def test_runner_preserves_api_error_details(monkeypatch, status):
     assert result["predicted_label"] == "runtime_error"
     assert result["error_type"] == "api_error"
     assert result["http_status"] == status
-    assert result["error_details"]["error"]["message"] == "Request rejected"
+    assert "error_details" not in result

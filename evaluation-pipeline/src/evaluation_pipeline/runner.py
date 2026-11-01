@@ -65,7 +65,6 @@ def record_exception(result: dict[str, Any], exc: Exception) -> None:
     result["error_type"] = "api_error" if isinstance(exc, ModelAPIError) else "runtime_error"
     if isinstance(exc, ModelAPIError):
         result["http_status"] = exc.status_code
-        result["error_details"] = exc.details 
 
 
 VALID_METHODS = (
@@ -174,7 +173,6 @@ def build_base_result(
         "error": None,
         "error_type": None,
         "http_status": None,
-        "error_details": None,
     }
 
 def run_first_level_judge(
