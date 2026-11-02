@@ -17,8 +17,8 @@
                     id: "openai/gpt-4.1-mini"
                 },
                 {
-                    label: "DeepSeek",
-                    id: "deepseek/deepseek-chat"
+                    label: "DeepSeek-v4.1-flash-1017",
+                    id: "deepseek/deepseek-v4.1-flash-1017"
                 },
                 {
                     label: "Gemini",

@@ -66,6 +66,13 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
+    if model == "deepseek/deepseek-v4.1-flash-1017":
+        payload["provider"] = {
+            "only": ["relace/fp4"],
+            "allow_fallbacks": False,
+        }
+        payload["reasoning"] = {"enabled": True}
+
     request = Request(
         OPENROUTER_URL,
         data=json.dumps(payload).encode("utf-8"),
