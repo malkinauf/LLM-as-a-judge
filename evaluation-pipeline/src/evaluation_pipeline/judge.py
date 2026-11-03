@@ -52,6 +52,8 @@ def extract_usage(response: Any) -> dict[str, Any]:
         "latency_seconds": duration / 1e9 if duration is not None else None,
     }
 
+
+
 def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, Any]:
     """Return the same raw_output and usage keys as Ollama calls."""
     api_key = os.environ.get("OPENROUTER_API_KEY")
@@ -63,6 +65,7 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0,
     }
+
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
@@ -71,7 +74,22 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
             "only": ["relace/fp4"],
             "allow_fallbacks": False,
         }
-        payload["reasoning"] = {"enabled": True}
+        payload["reasoning"] = {"enabled": False}
+
+    if model == "google/gemini-2.5-flash":
+        payload["provider"] = {
+            "only": ["google-ai-studio"],
+            "allow_fallbacks": False,
+        }
+        payload["reasoning"] = {"enabled": False}
+
+    if model == "openai/gpt-5.4-mini":
+        payload["max_tokens"] = 1024
+        payload["provider"] = {
+            "only": ["openai"],
+            "allow_fallbacks": False,
+        }
+        payload["reasoning"] = {"enabled": False}
 
     request = Request(
         OPENROUTER_URL,
@@ -82,36 +100,107 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         },
         method="POST",
     )
+
     start = time.perf_counter()
-    try:
-        with urlopen(request, timeout=120) as response:
-            data = json.load(response)
-    except HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
+
+    # Retry only when OpenRouter returns HTTP 429.
+    for attempt in range(5):
         try:
-            details = json.loads(body)
-        except ValueError:
-            details = {"message": body[:1000]}
-        raise ModelAPIError(
-            f"OpenRouter API HTTP {exc.code}", status_code=exc.code, details=details
-        ) from exc
-    except (URLError, TimeoutError) as exc:
-        raise ModelAPIError("OpenRouter connection failed") from exc
+            with urlopen(request, timeout=120) as response:
+                data = json.load(response)
+            break
+
+        except HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+
+            try:
+                details = json.loads(body)
+            except ValueError:
+                details = {"message": body[:1000]}
+
+            error_info = details.get("error", {}) if isinstance(details, dict) else {}
+            error_message = (
+                error_info.get("message", "")
+                if isinstance(error_info, dict)
+                else str(error_info)
+            )
+
+            if exc.code == 429 and attempt < 4:
+                wait = min(10 * (2 ** attempt), 60)
+
+                retry_after = exc.headers.get("Retry-After")
+                if retry_after:
+                    try:
+                        wait = max(wait, float(retry_after))
+                    except ValueError:
+                        pass
+
+                metadata = (
+                    error_info.get("metadata", {})
+                    if isinstance(error_info, dict)
+                    else {}
+                )
+                headers = (
+                    metadata.get("headers", {})
+                    if isinstance(metadata, dict)
+                    else {}
+                )
+                reset_ms = headers.get("X-RateLimit-Reset")
+
+                if reset_ms:
+                    try:
+                        wait = max(
+                            wait,
+                            float(reset_ms) / 1000 - time.time() + 1,
+                        )
+                    except (ValueError, TypeError):
+                        pass
+
+                logger.warning(
+                    "OpenRouter HTTP 429: model=%s, retry %s/4 in %.1fs",
+                    model,
+                    attempt + 1,
+                    wait,
+                )
+                time.sleep(wait)
+                continue
+
+            logger.error(
+                "OpenRouter API error: model=%s, HTTP=%s, message=%s",
+                model,
+                exc.code,
+                error_message,
+            )
+
+            raise ModelAPIError(
+                f"OpenRouter API HTTP {exc.code}",
+                status_code=exc.code,
+                details=details,
+            ) from exc
+
+        except (URLError, TimeoutError) as exc:
+            raise ModelAPIError("OpenRouter connection failed") from exc
 
     latency = time.perf_counter() - start
+
     try:
         raw_output = data["choices"][0]["message"]["content"]
         if not isinstance(raw_output, str):
             raise TypeError("Expected textual content")
     except (KeyError, IndexError, TypeError) as exc:
-        raise ModelAPIError("Unexpected OpenRouter response format", details=data) from exc
+        raise ModelAPIError(
+            "Unexpected OpenRouter response format",
+            details=data,
+        ) from exc
 
     usage = data.get("usage") or {}
     input_tokens = usage.get("prompt_tokens")
     output_tokens = usage.get("completion_tokens")
     total_tokens = usage.get("total_tokens")
+
     if total_tokens is None and input_tokens is not None and output_tokens is not None:
         total_tokens = input_tokens + output_tokens
+
     return {
         "raw_output": raw_output,
         "input_tokens": input_tokens,
@@ -122,6 +211,7 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         "openrouter_response_model": data.get("model"),
         "openrouter_provider": data.get("provider"),
     }
+
 
 def get_raw_model_response(
     prompt: str,

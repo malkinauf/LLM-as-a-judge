@@ -21,8 +21,12 @@
                     id: "deepseek/deepseek-v4.1-flash-1017"
                 },
                 {
-                    label: "Gemini",
+                    label: "gemini-2.5-flash",
                     id: "google/gemini-2.5-flash"
+                },
+                {
+                    label: "GPT-5.4 mini",
+                    id: "openai/gpt-5.4-mini"
                 }
             ]
         };
