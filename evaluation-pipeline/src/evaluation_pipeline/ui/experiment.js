@@ -6,11 +6,10 @@
         // ====================================
 
         const catalog = {
-            ollama: [
-                { label: "Qwen", id: "qwen2.5:7b" },
-                { label: "Llama", id: "llama3.1:8b" },
-                { label: "Mistral", id: "mistral:7b" }
-            ],
+            ollama: (model.get("available_ollama_models") || []).map(id => ({
+                label: id,
+                id
+            })),
             openrouter: [
                 {
                     label: "GPT-4.1 mini",
@@ -330,6 +329,10 @@
 
                 label.append(checkbox, text);
                 modelContainer.appendChild(label);
+            }
+
+            if (activeProvider === "ollama" && catalog.ollama.length === 0) {
+                modelContainer.textContent = "No installed Ollama models found (or Ollama is unavailable).";
             }
 
             modelCount.textContent =
