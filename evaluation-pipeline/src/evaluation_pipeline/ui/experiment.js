@@ -93,26 +93,6 @@
                         <div id="active-models"></div>
                     </div>
 
-                    <!-- Add Model -->
-
-                    <div class="add-model">
-                        <input
-                            id="new-model"
-                            type="text"
-                            placeholder="Enter exact model ID"
-                        />
-
-                        <button
-                            id="add-model-btn"
-                            type="button">
-                            + Add Model
-                        </button>
-                    </div>
-
-                    <div
-                        class="feedback"
-                        id="model-feedback">
-                    </div>
 
                 </section>
 
@@ -253,12 +233,6 @@
         const modelCount =
             el.querySelector("#model-count");
 
-        const feedback =
-            el.querySelector("#model-feedback");
-
-        const modelInput =
-            el.querySelector("#new-model");
-
         // ====================================
         // Save Selection to Python
         // ====================================
@@ -372,8 +346,6 @@
                     // One plan = one provider
                     selected.clear();
 
-                    feedback.textContent = "";
-                    modelInput.value = "";
 
                     updateProviderTabs();
                     renderModels();
@@ -381,41 +353,6 @@
                 });
             });
 
-        // ====================================
-        // Add New Model
-        // ====================================
-
-        el.querySelector("#add-model-btn")
-            .addEventListener("click", () => {
-
-                const id = modelInput.value.trim();
-
-                if (!id) {
-                    feedback.textContent =
-                        "Please enter a model ID.";
-                    return;
-                }
-
-                const exists =
-                    catalog[activeProvider].some(
-                        item => item.id === id
-                    );
-
-                if (!exists) {
-                    catalog[activeProvider].push({
-                        label: id,
-                        id: id
-                    });
-                }
-
-                selected.add(id);
-
-                modelInput.value = "";
-                feedback.textContent = "";
-
-                renderModels();
-                saveSelection();
-            });
 
         // ====================================
         // Prepared Datasets
