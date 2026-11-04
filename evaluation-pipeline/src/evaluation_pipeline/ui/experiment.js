@@ -812,6 +812,7 @@
         });
         renderResults();
         model.on("change:run_active", refreshLaunch);
+        model.on("change:execution_busy", refreshLaunch);
         refreshLaunch();
 
     }
