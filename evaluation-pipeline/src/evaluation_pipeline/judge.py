@@ -2,11 +2,14 @@ import json
 import logging
 import os
 import time
+from typing import Any
+
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from ollama import chat
-from typing import Any
+
+from evaluation_pipeline.experiment_config.model_registry import get_openrouter_model_config
 
 logger = logging.getLogger(__name__)
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -64,6 +67,12 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0,
     }
+    model_config = get_openrouter_model_config(model)
+
+    for field in ("provider", "reasoning", "max_tokens"):
+        if field in model_config:
+            payload[field] = model_config[field]
+
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 

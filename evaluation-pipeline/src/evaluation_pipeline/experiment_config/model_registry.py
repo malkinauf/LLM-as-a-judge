@@ -1,9 +1,9 @@
 
 """Load and validate OpenRouter model configurations."""
 
-from importlib.resources import files
-
 import yaml
+
+from importlib.resources import files
 
 
 def load_model_config() -> dict:

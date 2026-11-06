@@ -1,4 +1,7 @@
+
 import json
+from io import BytesIO
+from urllib.error import HTTPError
 
 import pytest
 
@@ -95,13 +98,12 @@ def test_judge_response_parsing_error(monkeypatch, raw_output):
     monkeypatch.setattr(judge, "chat", fake_chat)
 
     result = judge.judge_response("Test prompt", "test-model")
+
     assert result["predicted_label"] == "parsing_error"
     assert result["raw_output"] == raw_output
 
 
 # OpenRouter tests: no network calls or real API key required.
-from io import BytesIO
-from urllib.error import HTTPError
 
 
 class FakeHTTPResponse:
@@ -123,22 +125,39 @@ def test_openrouter_raw_response_and_usage(monkeypatch):
         requests.append((request, timeout))
         return FakeHTTPResponse({
             "choices": [{"message": {"content": "analysis"}}],
-            "usage": {"prompt_tokens": 11, "completion_tokens": 7, "total_tokens": 18},
+            "usage": {
+                "prompt_tokens": 11,
+                "completion_tokens": 7,
+                "total_tokens": 18,
+            },
         })
 
     monkeypatch.setattr(judge, "urlopen", fake_urlopen)
+
     result = judge.get_raw_model_response(
-        "Example prompt", "openai/gpt-4.1", backend="openrouter", return_usage=True
+        "Example prompt",
+        "openai/gpt-4.1-mini",
+        backend="openrouter",
+        return_usage=True,
     )
+
     assert result["raw_output"] == "analysis"
-    assert (result["input_tokens"], result["output_tokens"], result["total_tokens"]) == (11, 7, 18)
+    assert (
+        result["input_tokens"],
+        result["output_tokens"],
+        result["total_tokens"],
+    ) == (11, 7, 18)
     assert result["latency_seconds"] >= 0
+
     request, timeout = requests[0]
-    assert timeout == 120
+    assert timeout == judge.OPENROUTER_TIMEOUT_SECONDS
     assert request.full_url == judge.OPENROUTER_URL
+
     payload = json.loads(request.data)
-    assert payload["model"] == "openai/gpt-4.1"
-    assert payload["messages"] == [{"role": "user", "content": "Example prompt"}]
+    assert payload["model"] == "openai/gpt-4.1-mini"
+    assert payload["messages"] == [
+        {"role": "user", "content": "Example prompt"}
+    ]
     assert "response_format" not in payload
 
 
@@ -149,25 +168,49 @@ def test_openrouter_judge_parsing_and_confidence(monkeypatch):
     def fake_urlopen(request, timeout):
         requests.append(request)
         return FakeHTTPResponse({
-            "choices": [{"message": {"content": json.dumps({
-                "verdict": "truthful", "confidence": 4, "explanation": "Verified"
-            })}}],
-            "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+            "choices": [
+                {
+                    "message": {
+                        "content": json.dumps({
+                            "verdict": "truthful",
+                            "confidence": 4,
+                            "explanation": "Verified",
+                        })
+                    }
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 10,
+                "completion_tokens": 5,
+            },
         })
 
     monkeypatch.setattr(judge, "urlopen", fake_urlopen)
-    result = judge.judge_response("Judge prompt", "openai/gpt-4.1", backend="openrouter")
+
+    result = judge.judge_response(
+        "Judge prompt",
+        "openai/gpt-4.1-mini",
+        backend="openrouter",
+    )
+
     assert result["predicted_label"] == "truthful"
     assert result["confidence"] == 4
     assert result["confidence_invalid"] is False
     assert result["total_tokens"] == 15
-    assert json.loads(requests[0].data)["response_format"] == {"type": "json_object"}
+    assert json.loads(requests[0].data)["response_format"] == {
+        "type": "json_object"
+    }
 
 
 def test_openrouter_missing_api_key(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+
     with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
-        judge.judge_response("prompt", "model", backend="openrouter")
+        judge.judge_response(
+            "prompt",
+            "openai/gpt-4.1-mini",
+            backend="openrouter",
+        )
 
 
 @pytest.mark.parametrize("status", [403, 429])
@@ -176,21 +219,37 @@ def test_openrouter_http_error_preserves_metadata(monkeypatch, status):
 
     def fake_urlopen(request, timeout):
         raise HTTPError(
-            judge.OPENROUTER_URL, status, "API error", {},
+            judge.OPENROUTER_URL,
+            status,
+            "API error",
+            {},
             BytesIO(b'{"error":{"message":"Request rejected"}}'),
         )
 
     monkeypatch.setattr(judge, "urlopen", fake_urlopen)
+
     with pytest.raises(judge.ModelAPIError) as exc_info:
-        judge.judge_response("prompt", "model", backend="openrouter")
+        judge.judge_response(
+            "prompt",
+            "openai/gpt-4.1-mini",
+            backend="openrouter",
+        )
+
     assert exc_info.value.status_code == status
-    assert exc_info.value.details["error"]["message"] == "Request rejected"
+    assert (
+        exc_info.value.details["error"]["message"]
+        == "Request rejected"
+    )
 
 
 @pytest.mark.parametrize("backend", ["invalid", "openai"])
 def test_invalid_backend_rejected(backend):
     with pytest.raises(ValueError, match="Unknown backend"):
-        judge.get_raw_model_response("prompt", "model", backend=backend)
+        judge.get_raw_model_response(
+            "prompt",
+            "model",
+            backend=backend,
+        )
 
 
 def test_default_backend_uses_ollama(monkeypatch):
@@ -201,5 +260,111 @@ def test_default_backend_uses_ollama(monkeypatch):
         return {"message": {"content": "Ollama reply"}}
 
     monkeypatch.setattr(judge, "chat", fake_chat)
-    assert judge.get_raw_model_response("prompt", "local-model") == "Ollama reply"
+
+    assert (
+        judge.get_raw_model_response("prompt", "local-model")
+        == "Ollama reply"
+    )
     assert calls[0]["model"] == "local-model"
+
+
+# Verify that OpenRouter requests use settings from models.yaml.
+
+
+@pytest.mark.parametrize(
+    "model_id, expected_fields",
+    [
+        (
+            "openai/gpt-4.1-mini",
+            {},
+        ),
+        (
+            "deepseek/deepseek-v4.1-flash-1017",
+            {
+                "provider": {
+                    "only": ["relace/fp4"],
+                    "allow_fallbacks": False,
+                },
+                "reasoning": {
+                    "enabled": False,
+                },
+            },
+        ),
+        (
+            "google/gemini-2.5-flash",
+            {
+                "provider": {
+                    "only": ["google-ai-studio"],
+                    "allow_fallbacks": False,
+                },
+                "reasoning": {
+                    "enabled": False,
+                },
+            },
+        ),
+        (
+            "openai/gpt-5.4-mini",
+            {
+                "provider": {
+                    "only": ["openai"],
+                    "allow_fallbacks": False,
+                },
+                "reasoning": {
+                    "enabled": False,
+                },
+                "max_tokens": 1024,
+            },
+        ),
+    ],
+)
+@pytest.mark.parametrize("json_mode", [False, True])
+def test_openrouter_model_configuration(
+    monkeypatch,
+    model_id,
+    expected_fields,
+    json_mode,
+):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-only-key")
+    captured = {}
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data)
+        return FakeHTTPResponse({
+            "choices": [
+                {
+                    "message": {
+                        "content": '{"verdict": "truthful"}'
+                    }
+                }
+            ],
+            "usage": {},
+        })
+
+    monkeypatch.setattr(judge, "urlopen", fake_urlopen)
+
+    judge._openrouter_call(
+        "Test prompt",
+        model_id,
+        json_mode=json_mode,
+    )
+
+    payload = captured["payload"]
+
+    assert payload["model"] == model_id
+    assert payload["temperature"] == 0
+    assert payload["messages"] == [
+        {"role": "user", "content": "Test prompt"}
+    ]
+
+    for field in ("provider", "reasoning", "max_tokens"):
+        if field in expected_fields:
+            assert payload[field] == expected_fields[field]
+        else:
+            assert field not in payload
+
+    if json_mode:
+        assert payload["response_format"] == {
+            "type": "json_object"
+        }
+    else:
+        assert "response_format" not in payload
