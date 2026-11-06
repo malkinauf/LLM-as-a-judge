@@ -1,16 +1,22 @@
-"""Anywidget model for the experiment dashboard.
+"""AnyWidget model for the experiment dashboard.
 
-Keep execution logic in the notebook during the first refactoring step.
+Defines synchronized state and configuration for the experiment interface.
 """
+
+from importlib.resources import files
+from evaluation_pipeline.experiment_config.model_registry import get_openrouter_models
 
 import anywidget
 import traitlets
-from importlib.resources import files
 
 
 class ExperimentSetup(anywidget.AnyWidget):
 
     available_ollama_models = traitlets.List(traitlets.Unicode(), default_value=[]).tag(sync=True)
+    available_openrouter_models = traitlets.List(
+        traitlets.Dict(),
+        default_value=[]
+    ).tag(sync=True)
 
     selected_backend = traitlets.Unicode(
         default_value="ollama"
@@ -39,6 +45,10 @@ class ExperimentSetup(anywidget.AnyWidget):
     sample_current = traitlets.Int(default_value=0).tag(sync=True)
     sample_total = traitlets.Int(default_value=0).tag(sync=True)
     sample_last_completed_at = traitlets.Float(default_value=0.0).tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.available_openrouter_models = get_openrouter_models()
 
     _esm = files("evaluation_pipeline").joinpath("ui", "experiment.js").read_text(encoding="utf-8")
     _css = files("evaluation_pipeline").joinpath("ui", "experiment.css").read_text(encoding="utf-8")

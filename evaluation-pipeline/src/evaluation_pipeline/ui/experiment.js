@@ -6,29 +6,12 @@
         // ====================================
 
         const catalog = {
-            ollama: (model.get("available_ollama_models") || []).map(id => ({
-                label: id,
-                id
-            })),
-            openrouter: [
-                {
-                    label: "GPT-4.1 mini",
-                    id: "openai/gpt-4.1-mini"
-                },
-                {
-                    label: "DeepSeek-v4.1-flash-1017",
-                    id: "deepseek/deepseek-v4.1-flash-1017"
-                },
-                {
-                    label: "gemini-2.5-flash",
-                    id: "google/gemini-2.5-flash"
-                },
-                {
-                    label: "GPT-5.4 mini",
-                    id: "openai/gpt-5.4-mini"
-                }
-            ]
-        };
+    ollama: (model.get("available_ollama_models") || []).map(id => ({
+        label: id,
+        id
+    })),
+    openrouter: model.get("available_openrouter_models") || []
+};
 
         let activeProvider = model.get("selected_backend");
 
