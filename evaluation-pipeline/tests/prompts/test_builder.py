@@ -303,3 +303,20 @@ def test_dynamic_unknown_criterion_detail(
             **{**prompt_data, "criterion_detail": "unknown"},
             prediction_response="Analysis",
         )
+
+
+def test_prediction_prompt_new_variant(mock_criteria):
+    mock_criteria["test_criterion"]["dynamic"][
+        "prediction_instructions"
+    ]["new_variant"] = "New prediction instructions."
+
+    prompt = builder.build_prediction_prompt(
+        criterion="test_criterion",
+        prediction_variant="new_variant",
+        question="Test question?",
+        model_response="Test model response.",
+    )
+
+    assert "New prediction instructions." in prompt
+    assert "Test question?" in prompt
+    assert "Test model response." in prompt
