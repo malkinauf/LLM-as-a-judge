@@ -13,7 +13,14 @@ descriptions:
     2. Determine which of the provided answer choices correctly answers the question, using relevant domain knowledge.
     3. Evaluate correctness based on the selected answer, rather than the quality or length of the accompanying explanation.
     4. A response is incorrect if it selects an incorrect answer or does not provide an identifiable answer.
-    
+  
+  extra: |
+    A response is correct if it selects the correct answer
+    to the given multiple-choice question.
+
+    Evaluate only whether the selected answer is correct.
+    Ignore the length and style of the explanation.
+
 labels:
   positive: correct
   negative: incorrect

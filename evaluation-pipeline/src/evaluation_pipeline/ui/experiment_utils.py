@@ -1,7 +1,9 @@
+
 """Dataset/model discovery and experiment plan construction for the Dashboard."""
 
 from itertools import product
 from evaluation_pipeline.datasets.config_loader import load_dataset_config
+from evaluation_pipeline.prompts.loader import load_criterion
 
 
 def discover_prepared_datasets():
@@ -26,7 +28,12 @@ def discover_prepared_datasets():
                 load_dataset_config(name)
             except (ValueError, FileNotFoundError):
                 continue
-            datasets.append({"name": name, "variant": variant, "dataset_id": path.stem})
+            datasets.append({
+                "name": name,
+                "variant": variant,
+                "dataset_id": path.stem,
+                "evaluation_criterion": load_dataset_config(name)["evaluation_criterion"],
+            })
             break
     return datasets
 
@@ -42,47 +49,84 @@ def discover_ollama_models():
         return []
 
 
-def build_plan(ui):
+def build_plan_with_skipped(ui):
     models = list(ui.selected_models)
     datasets = list(ui.selected_datasets)
     methods = list(ui.selected_methods)
     backend = ui.selected_backend
+
     if backend not in {"ollama", "openrouter"}:
         raise ValueError(f"Unsupported backend: {backend}")
     if not all((models, datasets, methods)):
         raise ValueError("Select at least one model, dataset and method.")
     if any(m["backend"] != backend for m in models):
         raise ValueError("Selected models must match the active backend.")
+
     available = {d["dataset_id"] for d in ui.available_datasets}
     if any(d["dataset_id"] not in available for d in datasets):
         raise ValueError("Selected dataset is no longer available.")
 
     plan = []
+    skipped = []
+    criterion_cache = {}
+
     for m, d, method in product(models, datasets, methods):
         method_name = method["method"]
+
         if method_name not in {"baseline", "second_level", "dynamic"}:
             raise ValueError(f"Unknown method: {method_name}")
+
         detail = method["baseline_criterion_detail"]
-        if detail not in {"basic", "detailed"}:
-            raise ValueError(f"Unknown criterion detail: {detail}")
+        if not isinstance(detail, str) or not detail:
+            raise ValueError("Baseline criterion detail must be a non-empty string.")
+
         prediction = (
-            method["dynamic_prediction_variant"] if method_name == "dynamic"
+            method["dynamic_prediction_variant"]
+            if method_name == "dynamic"
             else "original"
         )
+
         if method_name == "dynamic" and prediction not in {"original", "paper_based"}:
             raise ValueError(f"Unknown dynamic variant: {prediction}")
+
         dataset_config = load_dataset_config(d["name"])
+        criterion = dataset_config["evaluation_criterion"]
+
+        if criterion not in criterion_cache:
+            criterion_cache[criterion] = load_criterion(criterion)
+
+        descriptions = criterion_cache[criterion].get("descriptions", {})
+
+        if detail not in descriptions:
+            skipped.append({
+                "model": m["model"],
+                "dataset_id": d["dataset_id"],
+                "method": method_name,
+                "baseline_criterion_detail": detail,
+                "reason": (
+                    f"Baseline variant '{detail}' is not defined "
+                    f"for criterion '{criterion}'."
+                ),
+            })
+            continue
+
         plan.append({
             "backend": backend,
             "model": m["model"],
             "dataset_id": d["dataset_id"],
             "dataset_name": d["name"],
             "method": method_name,
-            "evaluation_criterion": dataset_config["evaluation_criterion"],
+            "evaluation_criterion": criterion,
             "baseline_criterion_detail": detail,
             "dynamic_prediction_variant": prediction,
             "confidence_mode": bool(ui.confidence_mode),
             "use_wandb": bool(ui.use_wandb),
         })
-    return plan
 
+    return plan, skipped
+
+
+def build_plan(ui):
+    """Return only runnable combinations; keep the existing caller API."""
+    plan, _skipped = build_plan_with_skipped(ui)
+    return plan

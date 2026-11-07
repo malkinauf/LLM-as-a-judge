@@ -403,6 +403,14 @@
         // Evaluation Methods
         // ====================================
 
+        const promptVariants = model.get("available_prompt_variants") || {};
+
+        const availableBaselineVariants =
+            promptVariants.baseline || ["basic", "detailed"];
+
+        const availableDynamicVariants =
+            promptVariants.dynamic || ["original", "paper_based"];
+
         const initialMethods = model.get("selected_methods") || [];
         const baselineVariants = new Set(
             initialMethods.filter(m => m.method === "baseline").map(m => m.baseline_criterion_detail)
@@ -420,12 +428,12 @@
 
         function saveMethods() {
             const values = [
-                ...["basic", "detailed"].filter(v => baselineVariants.has(v))
+                ...availableBaselineVariants.filter(v => baselineVariants.has(v))
                     .map(v => ({method:"baseline", baseline_criterion_detail:v})),
-                ...(secondEnabled ? ["basic", "detailed"].filter(v => secondVariants.has(v))
+                ...(secondEnabled ? availableBaselineVariants.filter(v => secondVariants.has(v))
                     .map(v => ({method:"second_level", baseline_criterion_detail:v})) : []),
-                ...["basic", "detailed"].filter(v => dynamicBaselineVariants.has(v))
-                    .flatMap(detail => ["original", "paper_based"].filter(v => dynamicVariants.has(v))
+                ...availableBaselineVariants.filter(v => dynamicBaselineVariants.has(v))
+                    .flatMap(detail => availableDynamicVariants.filter(v => dynamicVariants.has(v))
                         .map(v => ({method:"dynamic", baseline_criterion_detail:detail, dynamic_prediction_variant:v})))
             ];
             model.set("selected_methods", values);
@@ -462,9 +470,9 @@
         }
 
         const toggle = (set, value) => set.has(value) ? set.delete(value) : set.add(value);
-        addVariantButtons("baseline-variants", ["basic", "detailed"],
+        addVariantButtons("baseline-variants", availableBaselineVariants,
             v => baselineVariants.has(v), v => toggle(baselineVariants, v));
-        addVariantButtons("dynamic-variants", ["original", "paper_based"],
+        addVariantButtons("dynamic-variants", availableDynamicVariants,
             v => dynamicVariants.has(v), v => {
                 toggle(dynamicVariants, v);
                 if (dynamicVariants.size && !dynamicBaselineVariants.size) {
@@ -475,9 +483,9 @@
                     });
                 }
             });
-        addVariantButtons("dynamic-baseline-variants", ["basic", "detailed"],
+        addVariantButtons("dynamic-baseline-variants", availableBaselineVariants,
             v => dynamicBaselineVariants.has(v), v => toggle(dynamicBaselineVariants, v));
-        addVariantButtons("second-variants", ["basic", "detailed"],
+        addVariantButtons("second-variants", availableBaselineVariants,
             v => secondVariants.has(v), v => toggle(secondVariants, v));
 
         const secondCheck = el.querySelector("#second-enabled");
@@ -526,19 +534,48 @@
         // Live Experiment Overview
         // ====================================
 
+        
+        function isMethodAvailable(dataset, method) {
+            const criterion = dataset.evaluation_criterion;
+
+            const available = (
+                promptVariants.by_criterion || {}
+            )[criterion] || [];
+
+            return available.includes(
+                method.baseline_criterion_detail
+            );
+        }
+
+
         function updateOverview() {
             const models = catalog[activeProvider].filter(item => selected.has(item.id));
             const datasets = availableDatasets.filter(item => selectedDatasetIds.has(item.dataset_id));
             const methods = [
-                ...["basic", "detailed"].filter(v => baselineVariants.has(v))
+                ...availableBaselineVariants.filter(v => baselineVariants.has(v))
                     .map(v => `Baseline (${v})`),
-                ...(secondEnabled ? ["basic", "detailed"].filter(v => secondVariants.has(v))
+                ...(secondEnabled ? availableBaselineVariants.filter(v => secondVariants.has(v))
                     .map(v => `Second-Level (${v} first-level)`) : []),
-                ...["basic", "detailed"].filter(v => dynamicBaselineVariants.has(v))
-                    .flatMap(detail => ["original", "paper_based"].filter(v => dynamicVariants.has(v))
+                ...availableBaselineVariants.filter(v => dynamicBaselineVariants.has(v))
+                    .flatMap(detail => availableDynamicVariants.filter(v => dynamicVariants.has(v))
                         .map(v => `Dynamic (${detail} baseline, ${v.replace("_", "-")})`))
             ];
-            const count = models.length * datasets.length * methods.length;
+            
+            const selectedMethodConfigs = model.get("selected_methods") || [];
+
+            const validCombinations = datasets.flatMap(dataset =>
+                selectedMethodConfigs
+                    .filter(method => isMethodAvailable(dataset, method))
+                    .map(method => ({ dataset, method }))
+            );
+
+            const count = models.length * validCombinations.length;
+
+            const skippedCount =
+                models.length *
+                (datasets.length * selectedMethodConfigs.length -
+                validCombinations.length);
+
             const put = (id, value) => { el.querySelector("#" + id).textContent = String(value); };
 
             put("overview-model-count", models.length);
@@ -560,7 +597,14 @@
             const chosenMethods = model.get("selected_methods") || [];
             const chosenModels = model.get("selected_models") || [];
             const chosenDatasets = model.get("selected_datasets") || [];
-            const totalRuns = chosenModels.length * chosenDatasets.length * chosenMethods.length;
+            
+            const totalRuns = chosenModels.length *
+                chosenDatasets.reduce((total, dataset) =>
+                    total + chosenMethods.filter(
+                        method => isMethodAvailable(dataset, method)
+                    ).length,
+                0);
+
             planCount.textContent = `${totalRuns} run${totalRuns === 1 ? "" : "s"}`;
             if (totalRuns === 0) {
                 const row = document.createElement("tr");
@@ -574,6 +618,7 @@
                 for (const chosenModel of chosenModels) {
                     for (const dataset of chosenDatasets) {
                         for (const method of chosenMethods) {
+                            if (!isMethodAvailable(dataset, method)) continue;
                             number += 1;
                             const row = document.createElement("tr");
                             const label = catalog[activeProvider].find(m => m.id === chosenModel.model)?.label || chosenModel.model;
@@ -596,9 +641,16 @@
             }
 
             const note = el.querySelector("#overview-note");
+            
             note.textContent = count
-                ? `${count} independent run${count === 1 ? "" : "s"} planned. Second-Level includes its own First-Level calls.`
-                : "Choose at least one model, dataset and method to create a plan.";
+                ? `${count} independent run${count === 1 ? "" : "s"} planned.` +
+                (skippedCount > 0
+                    ? ` ${skippedCount} unsupported combination(s) skipped.`
+                    : " Second-Level includes its own First-Level calls.")
+                : skippedCount > 0
+                    ? `No valid runs. ${skippedCount} unsupported combination(s) skipped.`
+                    : "Choose at least one model, dataset and method to create a plan.";
+
         }
 
         // ====================================
@@ -634,9 +686,18 @@
         }
         updateProgress();
         const refreshLaunch = () => {
-            const planned = (model.get("selected_models") || []).length
-                * (model.get("selected_datasets") || []).length
-                * (model.get("selected_methods") || []).length;
+            
+            const chosenModels = model.get("selected_models") || [];
+            const chosenDatasets = model.get("selected_datasets") || [];
+            const chosenMethods = model.get("selected_methods") || [];
+
+            const planned = chosenModels.length *
+                chosenDatasets.reduce((total, dataset) =>
+                    total + chosenMethods.filter(
+                        method => isMethodAvailable(dataset, method)
+                    ).length,
+                0);
+
             launchButton.disabled = !launchConfirm.checked || planned === 0 || model.get("run_active") || model.get("execution_busy");
             stopButton.disabled = !model.get("run_active");
             launchButton.textContent = planned ? `▶ Run Experiments (${planned})` : "▶ Run Experiments";
