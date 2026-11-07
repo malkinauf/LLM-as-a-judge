@@ -41,6 +41,10 @@ openrouter:
       reasoning:
         enabled: false
       max_tokens: 1024
-
+    - id: "liquid/lfm-3-1.7b:free"
+      label: "LFM3-1.7B (Free)"
+      provider:
+        only: ["Liquid"]
+        allow_fallbacks: false
 ollama:
   auto_discover: true

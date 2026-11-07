@@ -93,20 +93,96 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         method="POST",
     )
     start = time.perf_counter()
-    try:
-        with urlopen(request, timeout=OPENROUTER_TIMEOUT_SECONDS) as response:
-            data = json.load(response)
-    except HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
+
+    # Retry only when OpenRouter returns HTTP 429.
+    for attempt in range(5):
         try:
-            details = json.loads(body)
-        except ValueError:
-            details = {"message": body[:1000]}
-        raise ModelAPIError(
-            f"OpenRouter API HTTP {exc.code}", status_code=exc.code, details=details
-        ) from exc
-    except (URLError, TimeoutError) as exc:
-        raise ModelAPIError("OpenRouter connection failed") from exc
+            with urlopen(
+                request, timeout=OPENROUTER_TIMEOUT_SECONDS
+            ) as response:
+                data = json.load(response)
+            break
+
+        except HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+
+            try:
+                details = json.loads(body)
+            except ValueError:
+                details = {"message": body[:1000]}
+
+            error_info = (
+                details.get("error", {})
+                if isinstance(details, dict)
+                else {}
+            )
+
+            error_message = (
+                error_info.get("message", "")
+                if isinstance(error_info, dict)
+                else str(error_info)
+            )
+
+            if exc.code == 429 and attempt < 4:
+                wait = min(10 * (2 ** attempt), 60)
+
+                retry_after = exc.headers.get("Retry-After")
+                if retry_after:
+                    try:
+                        wait = max(wait, float(retry_after))
+                    except ValueError:
+                        pass
+
+                metadata = (
+                    error_info.get("metadata", {})
+                    if isinstance(error_info, dict)
+                    else {}
+                )
+
+                headers = (
+                    metadata.get("headers", {})
+                    if isinstance(metadata, dict)
+                    else {}
+                )
+
+                reset_ms = headers.get("X-RateLimit-Reset")
+
+                if reset_ms:
+                    try:
+                        wait = max(
+                            wait,
+                            float(reset_ms) / 1000 - time.time() + 1,
+                        )
+                    except (ValueError, TypeError):
+                        pass
+
+                logger.warning(
+                    "OpenRouter HTTP 429: model=%s, retry %s/4 in %.1fs",
+                    model,
+                    attempt + 1,
+                    wait,
+                )
+
+                time.sleep(wait)
+                continue
+
+            logger.error(
+                "OpenRouter API error: model=%s, HTTP=%s, message=%s",
+                model,
+                exc.code,
+                error_message,
+            )
+
+            raise ModelAPIError(
+                f"OpenRouter API HTTP {exc.code}",
+                status_code=exc.code,
+                details=details,
+            ) from exc
+
+        except (URLError, TimeoutError) as exc:
+            raise ModelAPIError(
+                "OpenRouter connection failed"
+            ) from exc
 
     latency = time.perf_counter() - start
     try:
@@ -205,6 +281,7 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
         confidence, confidence_invalid = parse_confidence(parsed_output.get("confidence"))
         return {
             "predicted_label": parsed_output.get("verdict"),
+            "parsing_failed": False,
             "explanation": parsed_output.get("explanation"),
             "confidence": confidence,
             "confidence_invalid": confidence_invalid,
@@ -219,7 +296,8 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
         logger.warning("RAW OUTPUT REPR: %r", raw_output)
         logger.warning("RAW OUTPUT END: %r", raw_output[-300:])
         return {
-            "predicted_label": "parsing_error",
+            "predicted_label": None,
+            "parsing_failed": True,
             "explanation": "Could not parse model output as a JSON object.",
             "confidence": None,
             "confidence_invalid": False,

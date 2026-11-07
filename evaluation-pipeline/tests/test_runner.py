@@ -241,11 +241,13 @@ def test_first_level_parsing_error(monkeypatch):
         "build_baseline_prompt",
         lambda **kwargs: "baseline prompt",
     )
+
     monkeypatch.setattr(
         runner,
         "judge_response",
         lambda **kwargs: {
-            "predicted_label": "parsing_error",
+            "predicted_label": None,
+            "parsing_failed": True,
             "explanation": "Invalid JSON.",
             "confidence": None,
             "confidence_invalid": False,
@@ -257,6 +259,8 @@ def test_first_level_parsing_error(monkeypatch):
 
     assert result["predicted_label"] is None
     assert result["error_type"] == "parsing_error"
+    assert result["error_stage"] == "first_level"
+    assert result["first_level_parsing_failed"] is True
     assert result["first_raw_output"] == "invalid"
 
 
@@ -292,37 +296,81 @@ def test_missing_usage_is_not_silently_zero(monkeypatch):
     assert result["total_tokens"] is None
 
 
-@pytest.mark.parametrize("verdict,corrected,expected", [
-    ("correct", None, "truthful"),
-    ("not_correct", "not_truthful", "not_truthful"),
-    ("not_correct", "invalid", "parsing_error"),
-    ("invalid", None, "parsing_error"),
+@pytest.mark.parametrize("verdict,corrected,expected_label,expected_error", [
+    ("correct", None, "truthful", None),
+    ("not_correct", "not_truthful", "not_truthful", None),
+    ("not_correct", "invalid", None, "invalid_label"),
+    ("invalid", None, None, "invalid_label"),
 ])
-def test_second_level_decisions(monkeypatch, verdict, corrected, expected):
-    monkeypatch.setattr(runner, "build_baseline_prompt", lambda **kwargs: "first")
-    monkeypatch.setattr(runner, "build_second_level_prompt", lambda **kwargs: "second")
+def test_second_level_decisions(
+    monkeypatch, verdict, corrected, expected_label, expected_error
+):
+    monkeypatch.setattr(
+        runner, "build_baseline_prompt", lambda **kwargs: "first"
+    )
+    monkeypatch.setattr(
+        runner, "build_second_level_prompt", lambda **kwargs: "second"
+    )
+
     def fake_judge_response(**kwargs):
         if kwargs["prompt"] == "first":
-            return {"predicted_label": "truthful", "raw_output": '{"verdict":"truthful"}'}
-        return {"predicted_label": verdict, "corrected_verdict": corrected,
-                "explanation": "review", "corrected_explanation": "correction", "raw_output": "{}"}
+            return {
+                "predicted_label": "truthful",
+                "parsing_failed": False,
+                "raw_output": '{"verdict":"truthful"}',
+            }
+
+        return {
+            "predicted_label": verdict,
+            "parsing_failed": False,
+            "corrected_verdict": corrected,
+            "explanation": "review",
+            "corrected_explanation": "correction",
+            "raw_output": "{}",
+        }
+
     monkeypatch.setattr(runner, "judge_response", fake_judge_response)
+
     result = run_experiment("second_level")[0]
-    assert result["predicted_label"] == (None if expected == "parsing_error" else expected)
-    assert result["error_type"] == ("parsing_error" if expected == "parsing_error" else None)
-    assert result["second_level_verdict"] == (verdict if verdict in {"correct", "not_correct"} else None)
+
+    assert result["predicted_label"] == expected_label
+    assert result["error_type"] == expected_error
     assert result["second_level_completed"] is True
+    assert result["second_level_parsing_failed"] is False
+    assert result["second_level_verdict"] == (
+        verdict if verdict in {"correct", "not_correct"} else None
+    )
 
 
 def test_second_level_skipped_for_invalid_first_verdict(monkeypatch):
-    monkeypatch.setattr(runner, "build_baseline_prompt", lambda **kwargs: "first")
-    monkeypatch.setattr(runner, "build_second_level_prompt", lambda **kwargs: pytest.fail("second level must not run"))
-    monkeypatch.setattr(runner, "judge_response", lambda **kwargs: {
-        "predicted_label": "parsing_error", "raw_output": "invalid"
-    })
+    monkeypatch.setattr(
+        runner,
+        "build_baseline_prompt",
+        lambda **kwargs: "first",
+    )
+
+    monkeypatch.setattr(
+        runner,
+        "build_second_level_prompt",
+        lambda **kwargs: pytest.fail("Second level must not run"),
+    )
+
+    monkeypatch.setattr(
+        runner,
+        "judge_response",
+        lambda **kwargs: {
+            "predicted_label": "unknown_label",
+            "parsing_failed": False,
+            "raw_output": '{"verdict":"unknown_label"}',
+        },
+    )
+
     result = run_experiment("second_level")[0]
+
     assert result["predicted_label"] is None
-    assert result["error_type"] == "parsing_error"
+    assert result["error_type"] == "invalid_label"
+    assert result["error_stage"] == "first_level"
+    assert result["first_level_parsing_failed"] is False
     assert result["second_level_completed"] is False
 
 
@@ -416,3 +464,28 @@ def test_runner_records_api_error_without_details(monkeypatch, status):
     assert result["error_type"] == "api_error"
     assert result["http_status"] == status
     assert "error_details" not in result
+
+def test_baseline_invalid_label(monkeypatch):
+    monkeypatch.setattr(
+        runner,
+        "build_baseline_prompt",
+        lambda **kwargs: "baseline prompt",
+    )
+
+    monkeypatch.setattr(
+        runner,
+        "judge_response",
+        lambda **kwargs: {
+            "predicted_label": "unknown_label",
+            "parsing_failed": False,
+            "raw_output": '{"verdict":"unknown_label"}',
+        },
+    )
+
+    result = run_experiment("baseline")[0]
+
+    assert result["predicted_label"] is None
+    assert result["error_type"] == "invalid_label"
+    assert result["error_stage"] == "first_level"
+    assert result["first_level_parsing_failed"] is False
+    assert result["first_level_completed"] is True

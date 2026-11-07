@@ -99,7 +99,8 @@ def test_judge_response_parsing_error(monkeypatch, raw_output):
 
     result = judge.judge_response("Test prompt", "test-model")
 
-    assert result["predicted_label"] == "parsing_error"
+    assert result["predicted_label"] is None
+    assert result["parsing_failed"] is True
     assert result["raw_output"] == raw_output
 
 
@@ -213,11 +214,16 @@ def test_openrouter_missing_api_key(monkeypatch):
         )
 
 
+
 @pytest.mark.parametrize("status", [403, 429])
 def test_openrouter_http_error_preserves_metadata(monkeypatch, status):
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-only-key")
 
+    attempts = []
+    waits = []
+
     def fake_urlopen(request, timeout):
+        attempts.append(1)
         raise HTTPError(
             judge.OPENROUTER_URL,
             status,
@@ -227,6 +233,7 @@ def test_openrouter_http_error_preserves_metadata(monkeypatch, status):
         )
 
     monkeypatch.setattr(judge, "urlopen", fake_urlopen)
+    monkeypatch.setattr(judge.time, "sleep", lambda seconds: waits.append(seconds))
 
     with pytest.raises(judge.ModelAPIError) as exc_info:
         judge.judge_response(
@@ -236,10 +243,14 @@ def test_openrouter_http_error_preserves_metadata(monkeypatch, status):
         )
 
     assert exc_info.value.status_code == status
-    assert (
-        exc_info.value.details["error"]["message"]
-        == "Request rejected"
-    )
+    assert exc_info.value.details["error"]["message"] == "Request rejected"
+
+    if status == 429:
+        assert len(attempts) == 5
+        assert waits == [10, 20, 40, 60]
+    else:
+        assert len(attempts) == 1
+        assert waits == []
 
 
 @pytest.mark.parametrize("backend", ["invalid", "openai"])
@@ -368,3 +379,48 @@ def test_openrouter_model_configuration(
         }
     else:
         assert "response_format" not in payload
+
+
+def test_openrouter_retry_then_success(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-only-key")
+
+    attempts = []
+    waits = []
+
+    def fake_urlopen(request, timeout):
+        attempts.append(1)
+
+        if len(attempts) == 1:
+            raise HTTPError(
+                judge.OPENROUTER_URL,
+                429,
+                "Too Many Requests",
+                {},
+                BytesIO(b'{"error":{"message":"Rate limit exceeded"}}'),
+            )
+
+        return FakeHTTPResponse({
+            "choices": [
+                {"message": {"content": '{"verdict": "truthful"}'}}
+            ],
+            "usage": {},
+        })
+
+    monkeypatch.setattr(judge, "urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        judge.time,
+        "sleep",
+        lambda seconds: waits.append(seconds),
+    )
+
+    result = judge.judge_response(
+        "Test prompt",
+        "openai/gpt-4.1-mini",
+        backend="openrouter",
+    )
+
+    assert len(attempts) == 2
+    assert waits == [10]
+    assert result["predicted_label"] == "truthful"
+    assert result["parsing_failed"] is False
+

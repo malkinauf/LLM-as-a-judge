@@ -40,6 +40,7 @@ VALID_SECOND_LEVEL_VERDICTS = {
 PARSING_ERROR = "parsing_error"
 RUNTIME_ERROR = "runtime_error"
 API_ERROR = "api_error"
+INVALID_LABEL = "invalid_label"
 
 
 NON_SECOND_LEVEL_METHODS = {
@@ -141,6 +142,12 @@ def record_parsing_error(
     """
     record_error(result, PARSING_ERROR, message, stage)
 
+def record_invalid_label(
+    result: dict[str, Any], message: str, stage: str
+) -> None:
+    """Record a valid JSON response with an invalid verdict."""
+    record_error(result, INVALID_LABEL, message, stage)
+
 def allowed_labels(criterion: str) -> set[str]:
     """Return the valid classification labels for a criterion.
 
@@ -217,6 +224,7 @@ def build_base_result(
         "first_prompt": None,
         "first_raw_output": None,
         "first_level_label": None,
+        "first_level_parsing_failed": False,
         "first_level_explanation": None,
         "first_level_confidence": None,
         "first_level_confidence_invalid": False,
@@ -225,6 +233,7 @@ def build_base_result(
         "second_level_prompt": None,
         "second_level_raw_output": None,
         "second_level_verdict": None,
+        "second_level_parsing_failed": False,
         "second_level_explanation": None,
         "second_level_corrected_verdict": None,
         "second_level_corrected_explanation": None,
@@ -328,6 +337,10 @@ def run_first_level_judge(
         "raw_output"
     )
 
+    result["first_level_parsing_failed"] = first_judge_result.get(
+        "parsing_failed", False
+    )
+
     label = first_judge_result.get("predicted_label")
 
     result["first_level_label"] = (
@@ -351,20 +364,24 @@ def run_first_level_judge(
 def apply_baseline_decision(
     result: dict[str, Any],
 ) -> None:
-    """Use the first-level verdict as the final prediction.
+    """Use the first-level verdict as the final prediction."""
 
-    Record a parsing error when the verdict is not an allowed label.
-    This function applies to baseline and dynamic prompting.
-
-    Args:
-        result: Example result dictionary to update in place.
-    """
     first_level_label = result["first_level_label"]
 
-    if first_level_label in allowed_labels(result["evaluation_criterion"]):
-        result["predicted_label"] = first_level_label
-    else:
+    if result.get("first_level_parsing_failed", False):
         record_parsing_error(
+            result,
+            f"Could not parse first-level output: {result['first_raw_output']!r}",
+            "first_level",
+        )
+
+    elif first_level_label in allowed_labels(
+        result["evaluation_criterion"]
+    ):
+        result["predicted_label"] = first_level_label
+
+    else:
+        record_invalid_label(
             result,
             f"Invalid first-level verdict: {result['first_raw_output']!r}",
             "first_level",
@@ -380,8 +397,10 @@ def apply_second_level_decision(
 
     A valid first-level verdict is reviewed by a second model call.
     The original verdict is retained when the review says ``correct``;
-    otherwise a valid corrected verdict is required. Invalid verdicts
-    are recorded as parsing errors.
+    otherwise a valid corrected verdict is required.
+
+    Malformed JSON responses are recorded as parsing errors, while
+    missing or unsupported verdict labels are recorded as invalid labels.
 
     Args:
         model: Judge model identifier.
@@ -391,8 +410,16 @@ def apply_second_level_decision(
     """
     first_level_label = result["first_level_label"]
 
-    if first_level_label not in allowed_labels(evaluation_criterion):
+    if result.get("first_level_parsing_failed", False):
         record_parsing_error(
+            result,
+            f"Could not parse first-level output: {result['first_raw_output']!r}",
+            "first_level",
+        )
+        return
+
+    if first_level_label not in allowed_labels(evaluation_criterion):
+        record_invalid_label(
             result,
             f"Invalid first-level verdict: {result['first_raw_output']!r}",
             "first_level",
@@ -415,6 +442,9 @@ def apply_second_level_decision(
     )
 
     record_usage(result, "second_level", second_result)
+    result["second_level_parsing_failed"] = second_result.get(
+        "parsing_failed", False
+    )
     verdict = second_result.get("predicted_label")
 
     second_level_verdict = (
@@ -440,8 +470,16 @@ def apply_second_level_decision(
         "corrected_explanation"
     )
 
-    if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
+    if result.get("second_level_parsing_failed", False):
         record_parsing_error(
+            result,
+            f"Could not parse second-level output: {result['second_level_raw_output']!r}",
+            "second_level",
+        )
+        return
+
+    if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
+        record_invalid_label(
             result,
             f"Invalid second-level verdict: {verdict!r}",
             "second_level",
@@ -462,12 +500,11 @@ def apply_second_level_decision(
     if corrected_verdict in allowed_labels(evaluation_criterion):
         result["predicted_label"] = corrected_verdict
     else:
-        record_parsing_error(
+        record_invalid_label(
             result,
             f"Invalid corrected verdict: {corrected_verdict!r}",
             "second_level",
         )
-
 
 def run_judge_experiment(
     dataset: list[dict[str, Any]],
