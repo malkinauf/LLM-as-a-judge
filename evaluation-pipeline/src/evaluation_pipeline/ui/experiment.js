@@ -166,11 +166,28 @@
                     <p class="section-description">Exact configurations that will run, in execution order. Updates automatically with your selection.</p>
                     <div class="plan-panel">
                         <div class="plan-panel-header"><strong>Execution plan</strong><span id="plan-list-count">0 runs</span></div>
-                        <div class="plan-scroll">
+                        <div class="plan-scroll"> 
                             <table class="plan-table">
-                                <thead><tr><th>#</th><th>Model</th><th>Dataset</th><th>Method</th><th>Baseline</th><th>Prediction</th></tr></thead>
-                                <tbody id="plan-list-body"><tr><td colspan="6">Choose models, datasets and methods to preview runs.</td></tr></tbody>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Model</th>
+                                        <th>Dataset</th>
+                                        <th>Method</th>
+                                        <th>Baseline</th>
+                                        <th>Prediction</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plan-list-body">
+                                    <tr>
+                                        <td colspan="7">
+                                            Choose models, datasets and methods to preview runs.
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
+
                         </div>
                     </div>
                 </section>
@@ -533,20 +550,28 @@
         // ====================================
         // Live Experiment Overview
         // ====================================
-
         
         function isMethodAvailable(dataset, method) {
             const criterion = dataset.evaluation_criterion;
 
-            const available = (
-                promptVariants.by_criterion || {}
-            )[criterion] || [];
+            const baselineVariants =
+                (promptVariants.by_criterion || {})[criterion] || [];
 
-            return available.includes(
-                method.baseline_criterion_detail
-            );
+            if (!baselineVariants.includes(method.baseline_criterion_detail)) {
+                return false;
+            }
+
+            if (method.method === "dynamic") {
+                const dynamicVariants =
+                    (promptVariants.dynamic_by_criterion || {})[criterion] || [];
+
+                return dynamicVariants.includes(
+                    method.dynamic_prediction_variant
+                );
+            }
+
+            return true;
         }
-
 
         function updateOverview() {
             const models = catalog[activeProvider].filter(item => selected.has(item.id));
@@ -606,10 +631,12 @@
                 0);
 
             planCount.textContent = `${totalRuns} run${totalRuns === 1 ? "" : "s"}`;
-            if (totalRuns === 0) {
+            if (chosenModels.length === 0 ||
+                chosenDatasets.length === 0 ||
+                chosenMethods.length === 0) {
                 const row = document.createElement("tr");
                 const cell = document.createElement("td");
-                cell.colSpan = 6;
+                cell.colSpan = 7;
                 cell.textContent = "Choose models, datasets and methods to preview runs.";
                 row.appendChild(cell);
                 planBody.appendChild(row);
@@ -618,17 +645,32 @@
                 for (const chosenModel of chosenModels) {
                     for (const dataset of chosenDatasets) {
                         for (const method of chosenMethods) {
-                            if (!isMethodAvailable(dataset, method)) continue;
                             number += 1;
                             const row = document.createElement("tr");
                             const label = catalog[activeProvider].find(m => m.id === chosenModel.model)?.label || chosenModel.model;
                             const methodName = method.method === "second_level" ? "Second-Level" :
                                 method.method === "dynamic" ? "Dynamic" : "Baseline";
+                            
+                            const isAvailable = isMethodAvailable(dataset, method);
+
+                            if (!isAvailable) {
+                                row.style.opacity = "0.5";
+                                row.title = `Variant '${method.baseline_criterion_detail}' is not available for this dataset.`;
+                            }
+
+
                             const cells = [
-                                number, `${label} (${chosenModel.model})`, dataset.dataset_id,
-                                methodName, method.baseline_criterion_detail || "—",
-                                method.method === "dynamic" ? (method.dynamic_prediction_variant || "—") : "—"
+                                number,
+                                label,
+                                dataset.dataset_id,
+                                methodName,
+                                method.baseline_criterion_detail || "—",
+                                method.method === "dynamic"
+                                    ? (method.dynamic_prediction_variant || "—")
+                                    : "—",
+                                isAvailable ? "Ready" : "Unavailable"
                             ];
+
                             for (const value of cells) {
                                 const cell = document.createElement("td");
                                 cell.textContent = String(value);

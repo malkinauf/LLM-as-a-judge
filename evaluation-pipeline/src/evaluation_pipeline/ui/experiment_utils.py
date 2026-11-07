@@ -86,8 +86,8 @@ def build_plan_with_skipped(ui):
             else "original"
         )
 
-        if method_name == "dynamic" and prediction not in {"original", "paper_based"}:
-            raise ValueError(f"Unknown dynamic variant: {prediction}")
+        if method_name == "dynamic" and not isinstance(prediction, str):
+            raise ValueError("Dynamic prediction variant must be a string.")
 
         dataset_config = load_dataset_config(d["name"])
         criterion = dataset_config["evaluation_criterion"]
@@ -96,6 +96,28 @@ def build_plan_with_skipped(ui):
             criterion_cache[criterion] = load_criterion(criterion)
 
         descriptions = criterion_cache[criterion].get("descriptions", {})
+
+        if method_name == "dynamic":
+            prediction_instructions = (
+                criterion_cache[criterion]
+                .get("dynamic", {})
+                .get("prediction_instructions", {})
+            )
+
+            if prediction not in prediction_instructions:
+                skipped.append({
+                    "model": m["model"],
+                    "dataset_id": d["dataset_id"],
+                    "method": method_name,
+                    "baseline_criterion_detail": detail,
+                    "dynamic_prediction_variant": prediction,
+                    "reason": (
+                        f"Dynamic prediction variant '{prediction}' "
+                        f"is not defined for criterion '{criterion}'."
+                    ),
+                })
+                continue
+
 
         if detail not in descriptions:
             skipped.append({

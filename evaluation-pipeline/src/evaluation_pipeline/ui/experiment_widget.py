@@ -15,29 +15,44 @@ from evaluation_pipeline.prompts.loader import load_criterion
 
 
 def discover_prompt_variants():
-    """Discover prompt variants and their availability by criterion."""
+    """Discover baseline and dynamic prompt variants from YAML."""
     criteria_dir = (
         Path(__file__).resolve().parent.parent
         / "prompts"
         / "criteria"
     )
 
-    variants = set()
+    baseline_variants = set()
+    dynamic_variants = set()
+
     by_criterion = {}
+    dynamic_by_criterion = {}
 
     for path in criteria_dir.glob("*.yaml"):
         criterion = load_criterion(path.stem)
-        available = sorted(criterion.get("descriptions", {}).keys())
 
-        by_criterion[path.stem] = available
-        variants.update(available)
+        baseline = sorted(
+            criterion.get("descriptions", {}).keys()
+        )
+
+        prediction = sorted(
+            criterion.get("dynamic", {})
+            .get("prediction_instructions", {})
+            .keys()
+        )
+
+        by_criterion[path.stem] = baseline
+        dynamic_by_criterion[path.stem] = prediction
+
+        baseline_variants.update(baseline)
+        dynamic_variants.update(prediction)
 
     return {
-        "baseline": sorted(variants),
-        "dynamic": ["original", "paper_based"],
+        "baseline": sorted(baseline_variants),
+        "dynamic": sorted(dynamic_variants),
         "by_criterion": by_criterion,
+        "dynamic_by_criterion": dynamic_by_criterion,
     }
-
 
 
 class ExperimentSetup(anywidget.AnyWidget):
