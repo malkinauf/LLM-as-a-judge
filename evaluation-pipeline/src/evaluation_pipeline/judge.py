@@ -25,8 +25,11 @@ class ModelAPIError(RuntimeError):
         self.details = details
 
 def parse_confidence(value: Any) -> tuple[int | None, bool]:
+    """Normalize confidence to an integer from 1 to 5.
+
+    Return the normalized value and a flag indicating invalid input.
+    Missing confidence is allowed and is not considered invalid.
     """
-    Normalize confidence to an integer from 1 to 5."""
 
     if value is None:
         return None, False
@@ -57,7 +60,11 @@ def extract_usage(response: Any) -> dict[str, Any]:
     }
 
 def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, Any]:
-    """Return the same raw_output and usage keys as Ollama calls."""
+    """Call OpenRouter using model settings from the YAML configuration.
+
+    Return model output, token usage, latency, and OpenRouter metadata.
+    Raise ModelAPIError for HTTP, connection, or response format errors.
+    """
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise ValueError("OPENROUTER_API_KEY is not set")
@@ -132,8 +139,10 @@ def get_raw_model_response(
     return_usage: bool = False,
     backend: str = "ollama",
 ) -> str | dict[str, Any]:
-    """Return model text, optionally including usage metrics."""
+    """Return raw model text from Ollama or OpenRouter.
 
+    Optionally include token usage, latency, and available metadata.
+    """
     if backend not in VALID_BACKENDS:
         raise ValueError(f"Unknown backend: {backend}")
 
@@ -158,7 +167,12 @@ def get_raw_model_response(
 
 
 def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[str, Any]:
-    """Send a prepared prompt to the judge model and parse its JSON response."""
+    """Evaluate a prepared prompt and parse the judge's JSON response.
+
+    Return the predicted label, explanation, confidence information,
+    usage metrics, and available OpenRouter metadata.
+    Invalid JSON is reported as a parsing error.
+    """ 
     if backend not in VALID_BACKENDS:
         raise ValueError(f"Unknown backend: {backend}")
     if backend == "openrouter":

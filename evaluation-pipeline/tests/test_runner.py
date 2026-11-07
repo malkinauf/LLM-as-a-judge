@@ -18,7 +18,7 @@ def run_experiment(method, confidence_mode=False):
         run_id="test-run",
         model="test-model",
         method=method,
-        baseline_criterion="truthfulness",
+        evaluation_criterion="truthfulness",
         baseline_criterion_detail="minimal",
         dataset_id="test-dataset",
         dynamic_prediction_variant="minimal",
@@ -229,7 +229,7 @@ def test_experiment_metadata(monkeypatch):
 
     assert result["run_id"] == "test-run"
     assert result["dataset_id"] == "test-dataset"
-    assert result["baseline_criterion"] == "truthfulness"
+    assert result["evaluation_criterion"] == "truthfulness"
     assert result["baseline_criterion_detail"] == "minimal"
     assert result["dynamic_prediction_variant"] is None
     assert result["confidence_mode"] is False
@@ -255,7 +255,8 @@ def test_first_level_parsing_error(monkeypatch):
 
     result = run_experiment("baseline")[0]
 
-    assert result["predicted_label"] == "parsing_error"
+    assert result["predicted_label"] is None
+    assert result["error_type"] == "parsing_error"
     assert result["first_raw_output"] == "invalid"
 
 
@@ -307,8 +308,9 @@ def test_second_level_decisions(monkeypatch, verdict, corrected, expected):
                 "explanation": "review", "corrected_explanation": "correction", "raw_output": "{}"}
     monkeypatch.setattr(runner, "judge_response", fake_judge_response)
     result = run_experiment("second_level")[0]
-    assert result["predicted_label"] == expected
-    assert result["second_level_verdict"] == verdict
+    assert result["predicted_label"] == (None if expected == "parsing_error" else expected)
+    assert result["error_type"] == ("parsing_error" if expected == "parsing_error" else None)
+    assert result["second_level_verdict"] == (verdict if verdict in {"correct", "not_correct"} else None)
     assert result["second_level_completed"] is True
 
 
@@ -319,7 +321,8 @@ def test_second_level_skipped_for_invalid_first_verdict(monkeypatch):
         "predicted_label": "parsing_error", "raw_output": "invalid"
     })
     result = run_experiment("second_level")[0]
-    assert result["predicted_label"] == "parsing_error"
+    assert result["predicted_label"] is None
+    assert result["error_type"] == "parsing_error"
     assert result["second_level_completed"] is False
 
 
@@ -333,8 +336,9 @@ def test_second_level_failure_preserves_first_usage(monkeypatch):
                 "input_tokens": 9, "output_tokens": 3, "total_tokens": 12, "latency_seconds": 0.2}
     monkeypatch.setattr(runner, "judge_response", fake_judge_response)
     result = run_experiment("second_level")[0]
-    assert result["predicted_label"] == "runtime_error"
-    assert result["error"] == "second call failed"
+    assert result["predicted_label"] is None
+    assert result["error_type"] == "runtime_error"
+    assert result["error_message"] == "second call failed"
     assert result["first_level_completed"] is True
     assert result["second_level_completed"] is False
     assert result["total_tokens"] == 12
@@ -380,7 +384,7 @@ def test_backend_propagates_to_every_model_call(monkeypatch, backend, method, ex
     monkeypatch.setattr(runner, "judge_response", fake_judge_response)
     result = runner.run_judge_experiment(
         dataset=[EXAMPLE], run_id="test-run", model="test-model", method=method,
-        baseline_criterion="truthfulness", baseline_criterion_detail="minimal",
+        evaluation_criterion="truthfulness", baseline_criterion_detail="minimal",
         dataset_id="test-dataset", dynamic_prediction_variant="minimal",
         backend=backend,
     )[0]
@@ -404,11 +408,11 @@ def test_runner_records_api_error_without_details(monkeypatch, status):
     monkeypatch.setattr(runner, "judge_response", fake_judge_response)
     result = runner.run_judge_experiment(
         dataset=[EXAMPLE], run_id="test-run", model="test-model", method="baseline",
-        baseline_criterion="truthfulness", baseline_criterion_detail="minimal",
+        evaluation_criterion="truthfulness", baseline_criterion_detail="minimal",
         dataset_id="test-dataset", dynamic_prediction_variant="minimal",
         backend="openrouter",
     )[0]
-    assert result["predicted_label"] == "runtime_error"
+    assert result["predicted_label"] is None
     assert result["error_type"] == "api_error"
     assert result["http_status"] == status
     assert "error_details" not in result
