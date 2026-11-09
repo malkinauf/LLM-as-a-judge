@@ -26,27 +26,56 @@ OPENROUTER_METADATA_FIELDS = (
     "openrouter_response_model",
 )
 
+VALID_METHODS = (
+    "baseline",
+    "second_level",
+    "dynamic",
+)
+
+VALID_SECOND_LEVEL_VERDICTS = {
+    "correct",
+    "not_correct",
+}
+
+PARSING_ERROR = "parsing_error"
+RUNTIME_ERROR = "runtime_error"
+API_ERROR = "api_error"
+INVALID_LABEL = "invalid_label"
+
+
+NON_SECOND_LEVEL_METHODS = {
+    "baseline",
+    "dynamic",
+}
+
 
 def record_usage(
     result: dict[str, Any],
     stage: str,
     response: dict[str, Any],
 ) -> None:
-    """Record usage and API metadata for a completed model call."""
+    """Record token usage, latency, and API metadata for a completed call.
 
+    Update stage-specific fields and recompute aggregate usage across
+    completed stages. Missing usage values remain unknown.
+
+    Args:
+        result: Example result dictionary to update in place.
+        stage: Completed model-call stage.
+        response: Model response containing usage and metadata fields.
+    """
     for field in USAGE_FIELDS:
         result[f"{stage}_{field}"] = response.get(field)
 
     for field in OPENROUTER_METADATA_FIELDS:
         result[f"{stage}_{field}"] = response.get(field)
 
+    result[f"{stage}_completed"] = True
+
     completed = [
         name for name in USAGE_STAGES
         if result[f"{name}_completed"]
     ]
-
-    result[f"{stage}_completed"] = True
-    completed.append(stage)
 
     for field in USAGE_FIELDS:
         values = [
@@ -59,37 +88,78 @@ def record_usage(
             else None
         )
 
-def record_exception(result: dict[str, Any], exc: Exception) -> None:
-    """Preserve API failure metadata without guessing whether moderation occurred."""
-    result["error_type"] = "api_error" if isinstance(exc, ModelAPIError) else "runtime_error"
-    if isinstance(exc, ModelAPIError):
-        result["http_status"] = exc.status_code
+def record_error(
+    result: dict[str, Any],
+    error_type: str,
+    message: str,
+    stage: str,
+    *,
+    http_status: int | None = None,
+) -> None:
+    """Record an unsuccessful evaluation without assigning a prediction.
 
+    Args:
+        result: Example result dictionary to update in place.
+        error_type: Category of the failure.
+        message: Description of the failure.
+        stage: Stage at which the failure occurred.
+        http_status: HTTP response status, when available.
+    """
+    result["predicted_label"] = None
+    result["error_type"] = error_type
+    result["error_message"] = message
+    result["error_stage"] = stage
+    result["http_status"] = http_status
 
-VALID_METHODS = (
-    "baseline",
-    "second_level",
-    "dynamic",
-)
+def record_exception(
+    result: dict[str, Any], exc: Exception, stage: str
+) -> None:
+    """Record an API or pipeline exception in the example result.
+
+    Args:
+        result: Example result dictionary to update in place.
+        exc: Exception raised during evaluation.
+        stage: Stage at which the exception occurred.
+    """
+    is_api_error = isinstance(exc, ModelAPIError)
+    record_error(
+        result,
+        API_ERROR if is_api_error else RUNTIME_ERROR,
+        str(exc),
+        stage,
+        http_status=exc.status_code if is_api_error else None,
+    )
+
+def record_parsing_error(
+    result: dict[str, Any], message: str, stage: str
+) -> None:
+    """Record an unusable judge output as a parsing error.
+
+    Args:
+        result: Example result dictionary to update in place.
+        message: Description of the invalid output.
+        stage: Stage that produced the invalid output.
+    """
+    record_error(result, PARSING_ERROR, message, stage)
+
+def record_invalid_label(
+    result: dict[str, Any], message: str, stage: str
+) -> None:
+    """Record a valid JSON response with an invalid verdict."""
+    record_error(result, INVALID_LABEL, message, stage)
 
 def allowed_labels(criterion: str) -> set[str]:
-    """Return the two valid classification labels for a criterion."""
+    """Return the valid classification labels for a criterion.
+
+    Args:
+        criterion: Evaluation criterion registered in CRITERIA.
+
+    Returns:
+        Set containing the positive and negative labels.
+    """
     config = CRITERIA[criterion]["labels"]
     return {config["positive"], config["negative"]}
 
-VALID_SECOND_LEVEL_VERDICTS = {
-    "correct",
-    "not_correct",
-}
-
-PARSING_ERROR = "parsing_error"
-RUNTIME_ERROR = "runtime_error"
-
-
-NON_SECOND_LEVEL_METHODS = {
-    "baseline",
-    "dynamic",
-}
 
 def build_base_result(
     example: dict[str, Any],
@@ -97,34 +167,33 @@ def build_base_result(
     model: str,
     method: str,
     dataset_id: str,
-    baseline_criterion: str,
+    evaluation_criterion: str,
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
     backend: str = "ollama",
 ) -> dict[str, Any]:
-    """
-    Create the default result record for one evaluated example.
+    """Initialize the result record for one dataset example.
 
-    The record contains common experiment metadata and fields
-    for baseline, dynamic, and second-level judge outputs.
+    The record contains experiment metadata, stage-specific outputs,
+    usage measurements, and error fields for all evaluation methods.
 
     Args:
-        example: Dataset example being evaluated.
-        run_id: Identifier of the current experiment run.
-        model: Judge model name.
+        example: Dataset example containing its ID, question, response,
+            and ground-truth label.
+        run_id: Identifier of the experiment run.
+        model: Judge model identifier.
         method: Evaluation method.
-        dataset_id: ID of the dataset to use.
-        baseline_criterion: Criterion used by the first-level judge.
-        baseline_criterion_detail: Detail level of the first-level criterion.
-        dynamic_prediction_variant: Prediction instruction variant used by the dynamic method.
-        confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
-        backend: Model backend to use for the experiment.
+        dataset_id: Dataset identifier.
+        evaluation_criterion: Criterion used to assess the response.
+        baseline_criterion_detail: Detail level of the baseline criterion.
+        dynamic_prediction_variant: Prediction variant for dynamic prompting.
+        confidence_mode: Whether the first-level prompt requests confidence.
+        backend: Model backend used for evaluation.
 
     Returns:
-        Initialized result dictionary.
+        Initialized result dictionary with unset outputs and error fields.
     """
-
     return {
         "id": example["id"],
         "question": example["question"],
@@ -136,7 +205,7 @@ def build_base_result(
         "method": method,
         "run_id": run_id,
         "dataset_id": dataset_id,
-        "baseline_criterion": baseline_criterion,
+        "evaluation_criterion": evaluation_criterion,
         "baseline_criterion_detail": baseline_criterion_detail,
         "dynamic_prediction_variant": (dynamic_prediction_variant if method == "dynamic" else None),
         "confidence_mode": confidence_mode,
@@ -155,6 +224,7 @@ def build_base_result(
         "first_prompt": None,
         "first_raw_output": None,
         "first_level_label": None,
+        "first_level_parsing_failed": False,
         "first_level_explanation": None,
         "first_level_confidence": None,
         "first_level_confidence_invalid": False,
@@ -163,13 +233,16 @@ def build_base_result(
         "second_level_prompt": None,
         "second_level_raw_output": None,
         "second_level_verdict": None,
+        "second_level_parsing_failed": False,
         "second_level_explanation": None,
         "second_level_corrected_verdict": None,
         "second_level_corrected_explanation": None,
 
         # Final result
         "predicted_label": None,
-        "error": None,
+        "error_message": None,
+        "error_stage": None,
+        "current_stage": "first_level",
         "error_type": None,
         "http_status": None,
     }
@@ -179,43 +252,36 @@ def run_first_level_judge(
     model: str,
     method: str,
     result: dict[str, Any],
-    baseline_criterion: str,
+    evaluation_criterion: str,
     baseline_criterion_detail: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
     backend: str = "ollama",
 ) -> None:
-    """
-    Run the first-level evaluation for one dataset example.
+    """Execute the first-level evaluation for one example.
 
-    For the baseline and second-level methods, the model receives
-    the standard baseline judge prompt.
-
-    For the dynamic method, the model is called twice. The first
-    call generates a preliminary analysis of the question-response
-    pair using the selected prediction instruction variant. The
-    second call evaluates the response using the same baseline
-    prompt body augmented with the preliminary analysis as a hint.
+    Baseline and second-level methods use the baseline prompt. Dynamic
+    prompting first generates a preliminary analysis, then includes it
+    as a hint in the first-level judge prompt. Outputs and usage are
+    stored in the provided result dictionary.
 
     Args:
-        example: Dataset example being evaluated.
-        model: Judge model name.
+        example: Dataset example to evaluate.
+        model: Judge model identifier.
         method: Evaluation method.
-        result: Result dictionary updated in place.
-        baseline_criterion: Criterion used by the first-level judge.
-        baseline_criterion_detail: Detail level of the first-level
-            criterion.
-        dynamic_prediction_variant: Prediction instruction variant
-            used by the dynamic method.
-        confidence_mode: Whether to include the Confidence Scale in the first-level judge prompt.
-        backend: Model backend to use for the experiment.
+        result: Example result dictionary to update in place.
+        evaluation_criterion: Criterion used to assess the response.
+        baseline_criterion_detail: Detail level of the baseline criterion.
+        dynamic_prediction_variant: Prediction variant for dynamic prompting.
+        confidence_mode: Whether the first-level prompt requests confidence.
+        backend: Model backend used for evaluation.
     """
-
     if method == "dynamic":
+        result["current_stage"] = "prediction"
         # Step 1:
         # Generate the preliminary analysis.
         prediction_prompt = build_prediction_prompt(
-            criterion=baseline_criterion,
+            criterion=evaluation_criterion,
             prediction_variant=dynamic_prediction_variant,
             question=example["question"],
             model_response=example["model_response"],
@@ -231,12 +297,14 @@ def run_first_level_judge(
         )
         record_usage(result, "prediction", prediction_call)
         prediction_response = prediction_call["raw_output"]
+        result["prediction_raw_output"] = prediction_response
 
         # Step 2:
         # Build the final dynamic judge prompt from the shared
         # baseline body + dynamic hint + output section.
+        result["current_stage"] = "first_level"
         first_prompt = build_dynamic_prompt(
-            criterion=baseline_criterion,
+            criterion=evaluation_criterion,
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
@@ -244,12 +312,10 @@ def run_first_level_judge(
             confidence_mode=confidence_mode,
         )
 
-        result["prediction_raw_output"] = prediction_response
-
     else:
         # Baseline and second-level use the normal baseline prompt.
         first_prompt = build_baseline_prompt(
-            criterion=baseline_criterion,
+            criterion=evaluation_criterion,
             criterion_detail=baseline_criterion_detail,
             question=example["question"],
             model_response=example["model_response"],
@@ -258,6 +324,7 @@ def run_first_level_judge(
 
     # Run the first-level classification.
     result["first_prompt"] = first_prompt
+    result["current_stage"] = "first_level"
     first_judge_result = judge_response(
         prompt=first_prompt,
         model=model,
@@ -270,8 +337,16 @@ def run_first_level_judge(
         "raw_output"
     )
 
-    result["first_level_label"] = first_judge_result.get(
-        "predicted_label"
+    result["first_level_parsing_failed"] = first_judge_result.get(
+        "parsing_failed", False
+    )
+
+    label = first_judge_result.get("predicted_label")
+
+    result["first_level_label"] = (
+        label
+        if label in allowed_labels(evaluation_criterion)
+        else None
     )
 
     result["first_level_explanation"] = first_judge_result.get(
@@ -289,58 +364,71 @@ def run_first_level_judge(
 def apply_baseline_decision(
     result: dict[str, Any],
 ) -> None:
-    """
-    Use the first-level judge verdict as the final prediction.
-
-    This function is used by methods that do not perform a
-    second-level review, currently baseline and dynamic.
-
-    Args:
-        result: Result dictionary updated in place.
-    """
+    """Use the first-level verdict as the final prediction."""
 
     first_level_label = result["first_level_label"]
 
-    if first_level_label in allowed_labels(result["baseline_criterion"]):
-        result["predicted_label"] = first_level_label
-    else:
-        result["predicted_label"] = PARSING_ERROR
+    if result.get("first_level_parsing_failed", False):
+        record_parsing_error(
+            result,
+            f"Could not parse first-level output: {result['first_raw_output']!r}",
+            "first_level",
+        )
 
+    elif first_level_label in allowed_labels(
+        result["evaluation_criterion"]
+    ):
+        result["predicted_label"] = first_level_label
+
+    else:
+        record_invalid_label(
+            result,
+            f"Invalid first-level verdict: {result['first_raw_output']!r}",
+            "first_level",
+        )
 
 def apply_second_level_decision(
     model: str,
     result: dict[str, Any],
-    baseline_criterion: str,
+    evaluation_criterion: str,
     backend: str = "ollama",
 ) -> None:
-    """
-    Run the fixed second-level judge and update the final prediction.
+    """Review the first-level verdict and determine the final prediction.
 
-    The second-level judge receives the complete prompt given to
-    the first-level judge and the complete response produced by
-    that judge.
+    A valid first-level verdict is reviewed by a second model call.
+    The original verdict is retained when the review says ``correct``;
+    otherwise a valid corrected verdict is required.
 
-    If the second-level judge classifies the first-level judgment
-    as correct, the original first-level verdict is retained.
-
-    If the first-level judgment is classified as not correct, the
-    corrected verdict returned by the second-level judge is used.
+    Malformed JSON responses are recorded as parsing errors, while
+    missing or unsupported verdict labels are recorded as invalid labels.
 
     Args:
-        model: Judge model name.
-        result: Result dictionary updated in place.
-        baseline_criterion: Criterion used by the first-level judge.
-        backend: Model backend to use for the experiment.
+        model: Judge model identifier.
+        result: Example result dictionary to update in place.
+        evaluation_criterion: Criterion defining valid final labels.
+        backend: Model backend used for evaluation.
     """
-
     first_level_label = result["first_level_label"]
 
-    if first_level_label not in allowed_labels(baseline_criterion):
-        result["predicted_label"] = PARSING_ERROR
+    if result.get("first_level_parsing_failed", False):
+        record_parsing_error(
+            result,
+            f"Could not parse first-level output: {result['first_raw_output']!r}",
+            "first_level",
+        )
         return
 
+    if first_level_label not in allowed_labels(evaluation_criterion):
+        record_invalid_label(
+            result,
+            f"Invalid first-level verdict: {result['first_raw_output']!r}",
+            "first_level",
+        )
+        return
+
+    result["current_stage"] = "second_level"
     second_level_prompt = build_second_level_prompt(
-        criterion=baseline_criterion,
+        criterion=evaluation_criterion,
         first_level_prompt=result["first_prompt"],
         first_level_response=result["first_raw_output"],
     )
@@ -354,8 +442,15 @@ def apply_second_level_decision(
     )
 
     record_usage(result, "second_level", second_result)
-    second_level_verdict = second_result.get(
-        "predicted_label"
+    result["second_level_parsing_failed"] = second_result.get(
+        "parsing_failed", False
+    )
+    verdict = second_result.get("predicted_label")
+
+    second_level_verdict = (
+        verdict
+        if verdict in VALID_SECOND_LEVEL_VERDICTS
+        else None
     )
 
     result["second_level_raw_output"] = second_result.get(
@@ -363,16 +458,32 @@ def apply_second_level_decision(
     )
     result["second_level_verdict"] = second_level_verdict
 
-    result["second_level_corrected_verdict"] = second_result.get(
-        "corrected_verdict"
+    corrected_verdict = second_result.get("corrected_verdict")
+
+    result["second_level_corrected_verdict"] = (
+        corrected_verdict
+        if corrected_verdict in allowed_labels(evaluation_criterion)
+        else None
     )
 
     result["second_level_corrected_explanation"] = second_result.get(
         "corrected_explanation"
     )
 
+    if result.get("second_level_parsing_failed", False):
+        record_parsing_error(
+            result,
+            f"Could not parse second-level output: {result['second_level_raw_output']!r}",
+            "second_level",
+        )
+        return
+
     if second_level_verdict not in VALID_SECOND_LEVEL_VERDICTS:
-        result["predicted_label"] = PARSING_ERROR
+        record_invalid_label(
+            result,
+            f"Invalid second-level verdict: {verdict!r}",
+            "second_level",
+        )
         return
 
     if second_level_verdict == "correct":
@@ -386,68 +497,53 @@ def apply_second_level_decision(
         "corrected_explanation"
     )
 
-    corrected_verdict = second_result.get(
-        "corrected_verdict"
-    )
-
-    if corrected_verdict in allowed_labels(baseline_criterion):
+    if corrected_verdict in allowed_labels(evaluation_criterion):
         result["predicted_label"] = corrected_verdict
     else:
-        result["predicted_label"] = PARSING_ERROR
-
+        record_invalid_label(
+            result,
+            f"Invalid corrected verdict: {corrected_verdict!r}",
+            "second_level",
+        )
 
 def run_judge_experiment(
     dataset: list[dict[str, Any]],
     run_id: str,
     model: str,
     method: str,
-    baseline_criterion: str,
+    evaluation_criterion: str,
     baseline_criterion_detail: str,
     dataset_id: str,
     dynamic_prediction_variant: str,
     confidence_mode: bool = False,
     backend: str = "ollama",
 ) -> list[dict[str, Any]]:
-    """
-    Run a judge experiment over a prepared dataset.
+    """Evaluate a dataset with baseline, dynamic, or second-level prompting.
 
-    Three evaluation methods are supported:
-
-    - baseline:
-      The model evaluates the response once using the configured
-      evaluation criterion.
-
-    - dynamic:
-      The model first generates a preliminary analysis of the
-      question-response pair. This analysis is then supplied as a
-      hint to the final judge prompt.
-
-    - second_level:
-      The first-level evaluation is reviewed by a second call to
-      the same judge model using the fixed second-level prompt.
+    Process examples individually, recording predictions, model usage,
+    and parsing, API, or runtime errors. Dynamic prompting includes a
+    preliminary prediction stage; second-level prompting reviews the
+    first-level judgment with an additional model call.
 
     Args:
-        dataset: Prepared dataset examples to evaluate.
-        run_id: Identifier of the current experiment run.
-        model: Judge model name.
-        method: Evaluation method to run.
-        baseline_criterion: Criterion used by the first-level judge.
-        baseline_criterion_detail: Detail level of the first-level
-            criterion.
-        dataset_id: ID of the dataset to use.
-        dynamic_prediction_variant: Prediction instruction variant
-            used by the dynamic method.
-        confidence_mode: Whether to include the Confidence Scale in
-            the first-level judge prompt.
-        backend: Model backend to use for the experiment.
+        dataset: Prepared examples to evaluate.
+        run_id: Identifier of the experiment run.
+        model: Judge model identifier.
+        method: One of ``baseline``, ``dynamic``, or ``second_level``.
+        evaluation_criterion: Criterion used to assess each response.
+        baseline_criterion_detail: Detail level of the baseline criterion.
+        dataset_id: Dataset identifier.
+        dynamic_prediction_variant: Prediction variant for dynamic prompting.
+        confidence_mode: Whether the first-level prompt requests confidence.
+        backend: Model backend used for evaluation.
 
     Returns:
-        List of result dictionaries, one for each evaluated example.
+        Result dictionaries for processed examples, or an empty list
+        when the run identifier is empty.
 
     Raises:
-        ValueError: If the selected evaluation method is unsupported.
+        ValueError: If the evaluation method is unsupported.
     """
-
     if method not in VALID_METHODS:
         raise ValueError(
             f"Unknown method: {method}. "
@@ -473,7 +569,7 @@ def run_judge_experiment(
             model=model,
             method=method,
             dataset_id=dataset_id,
-            baseline_criterion=baseline_criterion,
+            evaluation_criterion=evaluation_criterion,
             baseline_criterion_detail=baseline_criterion_detail,
             dynamic_prediction_variant=dynamic_prediction_variant,
             confidence_mode=confidence_mode,
@@ -486,7 +582,7 @@ def run_judge_experiment(
                 model=model,
                 method=method,
                 result=result,
-                baseline_criterion=baseline_criterion,
+                evaluation_criterion=evaluation_criterion,
                 baseline_criterion_detail=(
                     baseline_criterion_detail
                 ),
@@ -502,13 +598,15 @@ def run_judge_experiment(
                 f"First-level judge failed for example "
                 f"{example.get('id')}: {e}"
             )
-            result["predicted_label"] = RUNTIME_ERROR
-            result["error"] = str(e)
-            record_exception(result, e)
+            record_exception(result, e, result["current_stage"])
             results.append(result)
             continue
         if method in NON_SECOND_LEVEL_METHODS:
-            apply_baseline_decision(result)
+            try:
+                apply_baseline_decision(result)
+            except Exception as e:
+                logger.exception("Final decision failed for example %s: %s", example.get("id"), e)
+                record_exception(result, e, "first_level")
             results.append(result)
             continue
         if method == "second_level":
@@ -516,7 +614,7 @@ def run_judge_experiment(
                 apply_second_level_decision(
                     model=model,
                     result=result,
-                    baseline_criterion=baseline_criterion,
+                    evaluation_criterion=evaluation_criterion,
                     backend=backend,
                 )
             except Exception as e:
@@ -525,10 +623,11 @@ def run_judge_experiment(
                     f"{example.get('id')}: {e}"
                 )
 
-                result["predicted_label"] = RUNTIME_ERROR
-                result["error"] = str(e)
-                record_exception(result, e)
+                record_exception(result, e, result["current_stage"])
             results.append(result)
+
+    for result in results:
+        result.pop("current_stage", None)
 
     logger.info(
         f"Finished. Collected {len(results)} results."
