@@ -22,10 +22,12 @@ dependencies = [
     "openpyxl",
     "PyYAML",
     "python-dotenv",
+    "anywidget",
+    "ipywidgets",
 ]
 
 [project.optional-dependencies]
-dev = [
+test = [
     "pytest>=7.0",
 ]
 
