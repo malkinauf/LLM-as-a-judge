@@ -15,7 +15,7 @@ from evaluation_pipeline.prompts.loader import load_criterion
 
 
 def discover_prompt_variants():
-    """Discover baseline and dynamic prompt variants from YAML."""
+    """Discover baseline, dynamic and second-level prompt variants."""
     criteria_dir = (
         Path(__file__).resolve().parent.parent
         / "prompts"
@@ -50,6 +50,7 @@ def discover_prompt_variants():
     return {
         "baseline": sorted(baseline_variants),
         "dynamic": sorted(dynamic_variants),
+        "second_level": ["original", "adhd"],
         "by_criterion": by_criterion,
         "dynamic_by_criterion": dynamic_by_criterion,
     }

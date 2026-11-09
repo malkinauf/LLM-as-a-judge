@@ -165,3 +165,15 @@ Use the following preliminary analysis to assist your evaluation:
 
 {prediction_response}
 """
+
+# ============================================
+# Experimental condition: ADHD framing
+# ============================================
+# Keep SECOND_LEVEL_TEMPLATE unchanged for the control condition.
+# Insert the minimal framing at the start of the same second-level prompt.
+SECOND_LEVEL_ADHD_TEMPLATE = "I have ADHD.\n\n" + SECOND_LEVEL_TEMPLATE
+
+SECOND_LEVEL_PROMPT_VARIANTS = {
+    "baseline": SECOND_LEVEL_TEMPLATE,
+    "adhd": SECOND_LEVEL_ADHD_TEMPLATE,
+}

@@ -89,6 +89,16 @@ def build_plan_with_skipped(ui):
         if method_name == "dynamic" and not isinstance(prediction, str):
             raise ValueError("Dynamic prediction variant must be a string.")
 
+        second_level_variant = (
+            method.get("second_level_variant", "original")
+            if method_name == "second_level"
+            else "original"
+        )
+        if second_level_variant not in {"original", "adhd"}:
+            raise ValueError(
+                f"Unknown second-level prompt variant: {second_level_variant}"
+            )
+
         dataset_config = load_dataset_config(d["name"])
         criterion = dataset_config["evaluation_criterion"]
 
@@ -141,6 +151,7 @@ def build_plan_with_skipped(ui):
             "evaluation_criterion": criterion,
             "baseline_criterion_detail": detail,
             "dynamic_prediction_variant": prediction,
+            "second_level_variant": second_level_variant,
             "confidence_mode": bool(ui.confidence_mode),
             "use_wandb": bool(ui.use_wandb),
         })

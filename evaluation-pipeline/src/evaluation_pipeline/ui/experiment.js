@@ -108,7 +108,9 @@
                         <div class="second-config" id="second-config">
                             <div class="second-caption">First-Level Baseline variant</div>
                             <div class="variant-buttons" id="second-variants"></div>
-                            <div class="second-hint">First-Level runs inside Second-Level automatically.</div>
+                            <div class="second-caption">Second-Level prompt variant</div>
+                            <div class="variant-buttons" id="second-prompt-variants"></div>
+                            <div class="second-hint">First-Level runs inside Second-Level automatically. Select Original and/or ADHD to compare.</div>
                         </div>
                         <div class="method-row">
                             <span class="method-name">Dynamic</span>
@@ -176,12 +178,13 @@
                                         <th>Method</th>
                                         <th>Baseline</th>
                                         <th>Prediction</th>
+                                        <th>Second-Level prompt</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="plan-list-body">
                                     <tr>
-                                        <td colspan="7">
+                                        <td colspan="8">
                                             Choose models, datasets and methods to preview runs.
                                         </td>
                                     </tr>
@@ -428,6 +431,9 @@
         const availableDynamicVariants =
             promptVariants.dynamic || ["original", "paper_based"];
 
+        const availableSecondPromptVariants =
+            promptVariants.second_level || ["original", "adhd"];
+
         const initialMethods = model.get("selected_methods") || [];
         const baselineVariants = new Set(
             initialMethods.filter(m => m.method === "baseline").map(m => m.baseline_criterion_detail)
@@ -441,6 +447,10 @@
         const secondVariants = new Set(
             initialMethods.filter(m => m.method === "second_level").map(m => m.baseline_criterion_detail)
         );
+        const secondPromptVariants = new Set(
+            initialMethods.filter(m => m.method === "second_level")
+                .map(m => m.second_level_variant || "original")
+        );
         let secondEnabled = secondVariants.size > 0;
 
         function saveMethods() {
@@ -448,7 +458,8 @@
                 ...availableBaselineVariants.filter(v => baselineVariants.has(v))
                     .map(v => ({method:"baseline", baseline_criterion_detail:v})),
                 ...(secondEnabled ? availableBaselineVariants.filter(v => secondVariants.has(v))
-                    .map(v => ({method:"second_level", baseline_criterion_detail:v})) : []),
+                    .flatMap(detail => availableSecondPromptVariants.filter(v => secondPromptVariants.has(v))
+                        .map(v => ({method:"second_level", baseline_criterion_detail:detail, second_level_variant:v}))) : []),
                 ...availableBaselineVariants.filter(v => dynamicBaselineVariants.has(v))
                     .flatMap(detail => availableDynamicVariants.filter(v => dynamicVariants.has(v))
                         .map(v => ({method:"dynamic", baseline_criterion_detail:detail, dynamic_prediction_variant:v})))
@@ -504,6 +515,8 @@
             v => dynamicBaselineVariants.has(v), v => toggle(dynamicBaselineVariants, v));
         addVariantButtons("second-variants", availableBaselineVariants,
             v => secondVariants.has(v), v => toggle(secondVariants, v));
+        addVariantButtons("second-prompt-variants", availableSecondPromptVariants,
+            v => secondPromptVariants.has(v), v => toggle(secondPromptVariants, v));
 
         const secondCheck = el.querySelector("#second-enabled");
         const secondConfig = el.querySelector("#second-config");
@@ -511,10 +524,17 @@
         function updateSecond() {
             secondConfig.hidden = !secondEnabled;
             if (secondEnabled && secondVariants.size === 0) {
-                secondVariants.add("basic");
-                secondConfig.querySelectorAll("button").forEach(b => {
-                    b.classList.toggle("selected", secondVariants.has(b.dataset.value));
-                    b.setAttribute("aria-pressed", String(secondVariants.has(b.dataset.value)));
+                secondVariants.add(availableBaselineVariants[0] || "basic");
+            }
+            if (secondEnabled && secondPromptVariants.size === 0) {
+                secondPromptVariants.add("original");
+            }
+            for (const [id, values] of [["second-variants", secondVariants],
+                                         ["second-prompt-variants", secondPromptVariants]]) {
+                el.querySelectorAll(`#${id} button`).forEach(b => {
+                    const active = values.has(b.dataset.value);
+                    b.classList.toggle("selected", active);
+                    b.setAttribute("aria-pressed", String(active));
                 });
             }
         }
@@ -525,7 +545,7 @@
         });
         updateSecond();
         el.querySelector("#method-count").textContent =
-            `${baselineVariants.size + dynamicBaselineVariants.size * dynamicVariants.size + (secondEnabled ? secondVariants.size : 0)} selected`;
+            `${baselineVariants.size + dynamicBaselineVariants.size * dynamicVariants.size + (secondEnabled ? secondVariants.size * secondPromptVariants.size : 0)} selected`;
 
         // ====================================
         // Experiment Options
@@ -580,7 +600,8 @@
                 ...availableBaselineVariants.filter(v => baselineVariants.has(v))
                     .map(v => `Baseline (${v})`),
                 ...(secondEnabled ? availableBaselineVariants.filter(v => secondVariants.has(v))
-                    .map(v => `Second-Level (${v} first-level)`) : []),
+                    .flatMap(detail => availableSecondPromptVariants.filter(v => secondPromptVariants.has(v))
+                        .map(v => `Second-Level (${detail} first-level, ${v} prompt)`)) : []),
                 ...availableBaselineVariants.filter(v => dynamicBaselineVariants.has(v))
                     .flatMap(detail => availableDynamicVariants.filter(v => dynamicVariants.has(v))
                         .map(v => `Dynamic (${detail} baseline, ${v.replace("_", "-")})`))
@@ -636,7 +657,7 @@
                 chosenMethods.length === 0) {
                 const row = document.createElement("tr");
                 const cell = document.createElement("td");
-                cell.colSpan = 7;
+                cell.colSpan = 8;
                 cell.textContent = "Choose models, datasets and methods to preview runs.";
                 row.appendChild(cell);
                 planBody.appendChild(row);
@@ -667,6 +688,9 @@
                                 method.baseline_criterion_detail || "—",
                                 method.method === "dynamic"
                                     ? (method.dynamic_prediction_variant || "—")
+                                    : "—",
+                                method.method === "second_level"
+                                    ? (method.second_level_variant || "original")
                                     : "—",
                                 isAvailable ? "Ready" : "Unavailable"
                             ];
@@ -829,7 +853,7 @@
             results.forEach((r, index) => {
                 const option = document.createElement("option");
                 option.value = String(index);
-                option.textContent = `${index+1}. ${r.model} · ${r.dataset_id} · ${r.method} (${r.baseline_detail})`;
+                option.textContent = `${index+1}. ${r.model} · ${r.dataset_id} · ${r.method} (${r.baseline_detail}${r.method === "second_level" ? ", " + (r.second_level_variant || "original") : ""})`;
                 resultPicker.append(option);
             });
             resultPicker.value = previous && Number(previous) < results.length ? previous : String(results.length-1);
@@ -842,7 +866,7 @@
             if (!r) return;
             const headline = document.createElement("div");
             headline.className = "result-headline";
-            headline.textContent = `${r.model} · ${r.dataset_id} · ${r.method} (${r.baseline_detail})`;
+            headline.textContent = `${r.model} · ${r.dataset_id} · ${r.method} (${r.baseline_detail}${r.method === "second_level" ? ", " + (r.second_level_variant || "original") : ""})`;
             resultDetail.append(headline);
             const metrics = document.createElement("div");
             metrics.className = "result-metrics";

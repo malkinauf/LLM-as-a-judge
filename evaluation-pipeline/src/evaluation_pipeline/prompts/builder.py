@@ -6,7 +6,7 @@ from evaluation_pipeline.prompts.templates import (
     OUTPUT_WITHOUT_CONFIDENCE,
     OUTPUT_WITH_CONFIDENCE,
     OUTPUT_TEMPLATE,
-    SECOND_LEVEL_TEMPLATE,
+    SECOND_LEVEL_PROMPT_VARIANTS,
     DYNAMIC_PREDICTION_TEMPLATE,
     DYNAMIC_HINT_TEMPLATE,
 )
@@ -119,14 +119,16 @@ def build_second_level_prompt(
     criterion: str,
     first_level_prompt: str,
     first_level_response: str,
+    second_level_variant: str = "original",
 ) -> str:
     """
-    Build the fixed second-level judge prompt.
+    Build the selected second-level judge prompt.
 
     Args:
         criterion: Criterion used by the first-level judge.
         first_level_prompt: Complete prompt given to the first-level judge.
         first_level_response: Complete response produced by the first-level judge.
+        second_level_variant: "original" (control) or "adhd".
 
     Returns:
         Complete second-level judge prompt.
@@ -143,7 +145,16 @@ def build_second_level_prompt(
 
     criterion_config = CRITERIA[criterion]
 
-    return SECOND_LEVEL_TEMPLATE.format(
+    # The existing template registry names the control condition "baseline".
+    # Accept "original" from the dashboard without modifying the control prompt.
+    variant_key = "baseline" if second_level_variant == "original" else second_level_variant
+    if variant_key not in SECOND_LEVEL_PROMPT_VARIANTS:
+        raise ValueError(
+            f"Unknown second-level variant: {second_level_variant!r}. "
+            f"Expected 'original' or 'adhd'."
+        )
+
+    return SECOND_LEVEL_PROMPT_VARIANTS[variant_key].format(
         first_level_prompt=first_level_prompt,
         first_level_response=first_level_response,
         positive_label=criterion_config["labels"]["positive"],
