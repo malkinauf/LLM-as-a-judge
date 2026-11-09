@@ -70,6 +70,6 @@ python -m pytest tests/ -v
 - [Adding and adapting datasets](docs/adding_datasets.md)
 - [Prompting architecture](docs/prompting_architecture.md)
 - [Prompt examples](docs/prompt_examples.md)
-- [Prompt configuration and extensions](docs/adding_pormpts.md)
+- [Prompt configuration and extensions](docs/adding_prompts.md)
 
 The `docs/` directory contains implementation details and extension guides; this README is intended as a quick entry point.
