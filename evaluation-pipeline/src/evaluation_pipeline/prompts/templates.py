@@ -88,6 +88,7 @@ OUTPUT_TEMPLATE = """### Your Output
 # Second-Level
 # ============================================
 
+
 SECOND_LEVEL_TEMPLATE = """### Task
 
 You are a second-level Judge. You need to evaluate the assessment process of an LLM judge.
@@ -95,6 +96,22 @@ You are given the whole conversation.
 
 The judge was presented the task marked by [BEGIN JUDGE TASK] and [END JUDGE TASK] tags.
 The answer of the judge is marked by [BEGIN JUDGE ANSWER] and [END JUDGE ANSWER] tags.
+
+### Evaluation Data
+
+[BEGIN JUDGE TASK]
+
+{first_level_prompt}
+
+[END JUDGE TASK]
+
+[BEGIN JUDGE ANSWER]
+
+{first_level_response}
+
+[END JUDGE ANSWER]
+
+### Second-Level Evaluation
 
 Your task is to carefully assess whether the reasoning and verdict provided by the LLM judge
 are valid, aligned with the task, and free from errors.
@@ -122,20 +139,6 @@ If the first-level judgment is "not correct", return:
 }}
 
 Do not include any additional text outside the JSON object.
-
-### Evaluation Data
-
-[BEGIN JUDGE TASK]
-
-{first_level_prompt}
-
-[END JUDGE TASK]
-
-[BEGIN JUDGE ANSWER]
-
-{first_level_response}
-
-[END JUDGE ANSWER]
 
 ### Your Output
 """
