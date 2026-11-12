@@ -21,8 +21,8 @@ mapping:
   labels:
     source: scores
     values:
-      true: correct
-      false: incorrect
+      true: "true"
+      false: "false"
 
 sampling:
   strategy: paired

@@ -15,8 +15,8 @@ descriptions:
     4. A response is incorrect if it selects an incorrect answer or does not provide an identifiable answer.
     
 labels:
-  positive: correct
-  negative: incorrect
+  positive: "true"
+  negative: "false"
 
 dynamic:
   prediction_instructions:
