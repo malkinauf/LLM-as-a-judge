@@ -22,10 +22,12 @@ dependencies = [
     "openpyxl",
     "PyYAML",
     "python-dotenv",
+    "anywidget",
+    "ipywidgets",
 ]
 
 [project.optional-dependencies]
-dev = [
+test = [
     "pytest>=7.0",
 ]
 
@@ -34,6 +36,12 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+evaluation_pipeline = [
+    "ui/*.js",
+    "ui/*.css",
+]
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]

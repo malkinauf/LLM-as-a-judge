@@ -2,11 +2,14 @@ import json
 import logging
 import os
 import time
+from typing import Any
+
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from ollama import chat
-from typing import Any
+
+from evaluation_pipeline.experiment_config.model_registry import get_openrouter_model_config
 
 logger = logging.getLogger(__name__)
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -22,8 +25,11 @@ class ModelAPIError(RuntimeError):
         self.details = details
 
 def parse_confidence(value: Any) -> tuple[int | None, bool]:
+    """Normalize confidence to an integer from 1 to 5.
+
+    Return the normalized value and a flag indicating invalid input.
+    Missing confidence is allowed and is not considered invalid.
     """
-    Normalize confidence to an integer from 1 to 5."""
 
     if value is None:
         return None, False
@@ -54,7 +60,11 @@ def extract_usage(response: Any) -> dict[str, Any]:
     }
 
 def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, Any]:
-    """Return the same raw_output and usage keys as Ollama calls."""
+    """Call OpenRouter using model settings from the YAML configuration.
+
+    Return model output, token usage, latency, and OpenRouter metadata.
+    Raise ModelAPIError for HTTP, connection, or response format errors.
+    """
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise ValueError("OPENROUTER_API_KEY is not set")
@@ -64,6 +74,12 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0,
     }
+    model_config = get_openrouter_model_config(model)
+
+    for field in ("provider", "reasoning", "max_tokens"):
+        if field in model_config:
+            payload[field] = model_config[field]
+
     if json_mode:
         payload["response_format"] = {"type": "json_object"}
 
@@ -77,20 +93,96 @@ def _openrouter_call(prompt: str, model: str, *, json_mode: bool) -> dict[str, A
         method="POST",
     )
     start = time.perf_counter()
-    try:
-        with urlopen(request, timeout=OPENROUTER_TIMEOUT_SECONDS) as response:
-            data = json.load(response)
-    except HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
+
+    # Retry only when OpenRouter returns HTTP 429.
+    for attempt in range(5):
         try:
-            details = json.loads(body)
-        except ValueError:
-            details = {"message": body[:1000]}
-        raise ModelAPIError(
-            f"OpenRouter API HTTP {exc.code}", status_code=exc.code, details=details
-        ) from exc
-    except (URLError, TimeoutError) as exc:
-        raise ModelAPIError("OpenRouter connection failed") from exc
+            with urlopen(
+                request, timeout=OPENROUTER_TIMEOUT_SECONDS
+            ) as response:
+                data = json.load(response)
+            break
+
+        except HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+
+            try:
+                details = json.loads(body)
+            except ValueError:
+                details = {"message": body[:1000]}
+
+            error_info = (
+                details.get("error", {})
+                if isinstance(details, dict)
+                else {}
+            )
+
+            error_message = (
+                error_info.get("message", "")
+                if isinstance(error_info, dict)
+                else str(error_info)
+            )
+
+            if exc.code == 429 and attempt < 4:
+                wait = min(10 * (2 ** attempt), 60)
+
+                retry_after = exc.headers.get("Retry-After")
+                if retry_after:
+                    try:
+                        wait = max(wait, float(retry_after))
+                    except ValueError:
+                        pass
+
+                metadata = (
+                    error_info.get("metadata", {})
+                    if isinstance(error_info, dict)
+                    else {}
+                )
+
+                headers = (
+                    metadata.get("headers", {})
+                    if isinstance(metadata, dict)
+                    else {}
+                )
+
+                reset_ms = headers.get("X-RateLimit-Reset")
+
+                if reset_ms:
+                    try:
+                        wait = max(
+                            wait,
+                            float(reset_ms) / 1000 - time.time() + 1,
+                        )
+                    except (ValueError, TypeError):
+                        pass
+
+                logger.warning(
+                    "OpenRouter HTTP 429: model=%s, retry %s/4 in %.1fs",
+                    model,
+                    attempt + 1,
+                    wait,
+                )
+
+                time.sleep(wait)
+                continue
+
+            logger.error(
+                "OpenRouter API error: model=%s, HTTP=%s, message=%s",
+                model,
+                exc.code,
+                error_message,
+            )
+
+            raise ModelAPIError(
+                f"OpenRouter API HTTP {exc.code}",
+                status_code=exc.code,
+                details=details,
+            ) from exc
+
+        except (URLError, TimeoutError) as exc:
+            raise ModelAPIError(
+                "OpenRouter connection failed"
+            ) from exc
 
     latency = time.perf_counter() - start
     try:
@@ -123,8 +215,10 @@ def get_raw_model_response(
     return_usage: bool = False,
     backend: str = "ollama",
 ) -> str | dict[str, Any]:
-    """Return model text, optionally including usage metrics."""
+    """Return raw model text from Ollama or OpenRouter.
 
+    Optionally include token usage, latency, and available metadata.
+    """
     if backend not in VALID_BACKENDS:
         raise ValueError(f"Unknown backend: {backend}")
 
@@ -149,7 +243,12 @@ def get_raw_model_response(
 
 
 def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[str, Any]:
-    """Send a prepared prompt to the judge model and parse its JSON response."""
+    """Evaluate a prepared prompt and parse the judge's JSON response.
+
+    Return the predicted label, explanation, confidence information,
+    usage metrics, and available OpenRouter metadata.
+    Invalid JSON is reported as a parsing error.
+    """ 
     if backend not in VALID_BACKENDS:
         raise ValueError(f"Unknown backend: {backend}")
     if backend == "openrouter":
@@ -182,6 +281,7 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
         confidence, confidence_invalid = parse_confidence(parsed_output.get("confidence"))
         return {
             "predicted_label": parsed_output.get("verdict"),
+            "parsing_failed": False,
             "explanation": parsed_output.get("explanation"),
             "confidence": confidence,
             "confidence_invalid": confidence_invalid,
@@ -196,7 +296,8 @@ def judge_response(prompt: str, model: str, *, backend: str = "ollama") -> dict[
         logger.warning("RAW OUTPUT REPR: %r", raw_output)
         logger.warning("RAW OUTPUT END: %r", raw_output[-300:])
         return {
-            "predicted_label": "parsing_error",
+            "predicted_label": None,
+            "parsing_failed": True,
             "explanation": "Could not parse model output as a JSON object.",
             "confidence": None,
             "confidence_invalid": False,
